@@ -118,12 +118,10 @@ function renderReleaseNotes(rawText) {
   });
   content.replaceChildren(fragment);
 }
-async function openReleaseNotesModal() {
+function openReleaseNotesModal() {
   const modal = $('releaseNotesModal');
   const content = $('releaseNotesContent');
-  const status = $('releaseNotesStatus');
-  const frame = $('releaseNotesFrame');
-  if (!modal || !content || !status) return;
+  if (!modal || !content) return;
   releaseNotesReturnFocus = document.activeElement;
   modal.classList.remove('hidden');
   document.body.classList.add('releaseNotesOpen');
@@ -131,56 +129,12 @@ async function openReleaseNotesModal() {
   setText('releaseNotesTitle', currentLang === 'fr' ? 'Notes de version' : 'Release notes');
   $('releaseNotesCloseBtn')?.setAttribute('aria-label', currentLang === 'fr' ? 'Fermer' : 'Sluiten');
   $('releaseNotesCloseBtn')?.focus();
-  if (releaseNotesLoaded) {
-    scrollReleaseNotesToLatest();
-    return;
-  }
-  content.classList.add('hidden');
-  status.classList.remove('hidden');
-  status.textContent = currentLang === 'fr' ? 'Chargement des notes de version…' : 'Release notes laden…';
-  try {
-    const response = await fetch(new URL('release notes.txt', window.location.href), { cache: 'no-store' });
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    renderReleaseNotes(await response.text());
+  if (!releaseNotesLoaded) {
+    renderReleaseNotes($('releaseNotesSource')?.textContent || '');
     releaseNotesLoaded = true;
-    status.classList.add('hidden');
-    content.classList.remove('hidden');
-    scrollReleaseNotesToLatest();
-  } catch (error) {
-    const embeddedNotes = $('releaseNotesFallback')?.textContent || '';
-    if (embeddedNotes.trim()) {
-      renderReleaseNotes(embeddedNotes);
-      releaseNotesLoaded = true;
-      status.classList.add('hidden');
-      frame?.classList.add('hidden');
-      content.classList.remove('hidden');
-      scrollReleaseNotesToLatest();
-      return;
-    }
-    if (window.location.protocol === 'file:' && frame) {
-      status.classList.add('hidden');
-      frame.classList.remove('hidden');
-      frame.onload = () => {
-        try {
-          const localText = frame.contentDocument?.body?.innerText || '';
-          if (localText.trim()) {
-            renderReleaseNotes(localText);
-            frame.classList.add('hidden');
-            content.classList.remove('hidden');
-            releaseNotesLoaded = true;
-            scrollReleaseNotesToLatest();
-          } else {
-            frame.contentWindow.scrollTo(0, frame.contentDocument.documentElement.scrollHeight);
-          }
-        } catch (_) {}
-      };
-      frame.src = new URL('release notes.txt', window.location.href).href;
-    } else {
-      status.textContent = currentLang === 'fr'
-        ? "Les notes de version n’ont pas pu être chargées."
-        : 'De release notes konden niet worden geladen.';
-    }
   }
+  content.classList.remove('hidden');
+  scrollReleaseNotesToLatest();
 }
 function closeReleaseNotesModal() {
   const modal = $('releaseNotesModal');
@@ -291,9 +245,11 @@ function setText(id, text) { const el = $(id); if (el) el.textContent = text; }
 function setHtml(id, html) { const el = $(id); if (el) el.innerHTML = html; }
 function exportCopyLabel() { return currentLang === 'fr' ? 'Copier' : 'Kopiëren'; }
 function updateStaticLanguage() {
-  document.documentElement.lang = currentLang; document.title = msg('pageTitle');
+  document.documentElement.lang = currentLang; document.title = 'Dashboard VIVIUM Non-Life';
   setText('languageLabel', currentLang === 'fr' ? 'Langue' : 'Taal / Langue'); setText('pageTitle', msg('pageTitle')); setHtml('pageLead', msg('pageLead')); setText('uploadTitle', msg('uploadTitle')); setText('uploadHint', msg('uploadHint')); setText('downloadCsvBtn', msg('downloadCsv')); setText('exportPdfBtn', msg('exportPdf'));
   setText('heroEyebrow', currentLang === 'fr' ? 'Chiffres clés non-vie' : 'Kerncijfers non-life'); setText('heroBenefitAnalysis', currentLang === 'fr' ? 'Analyse automatique' : 'Automatische analyse'); setText('heroBenefitCompare', currentLang === 'fr' ? 'Comparaison directe' : 'Direct vergelijkbaar'); setText('heroBenefitSafe', currentLang === 'fr' ? 'Sécurisé' : 'Veilig'); setText('heroUploadButton', currentLang === 'fr' ? 'Sélectionner le PDF' : 'PDF selecteren'); setText('heroUploadMeta', 'PDF · NL of FR');
+  setText('pdfSelectAll', currentLang === 'fr' ? 'Tout sélectionner' : 'Alles selecteren');
+  setText('pdfSelectNone', currentLang === 'fr' ? 'Tout désélectionner' : 'Niets selecteren');
   setText('pdfOptionsTitle', msg('pdfOptionsTitle')); setText('pdfOptSummary', msg('tabSamenvatting')); setText('pdfOpt360', msg('tab360')); setText('pdfOptProductie', msg('tabProductie')); setText('pdfOptVerval', msg('tabVerval')); setText('pdfOptSchade', msg('tabSchade')); setText('pdfOptDistributions', currentLang === 'fr' ? 'Répartitions' : 'Verdelingen'); setText('pdfOptDetail', msg('tabDetail'));
   setText('tabSamenvatting', msg('tabSamenvatting')); setText('tab360', msg('tab360')); setText('tabProductie', msg('tabProductie')); setText('tabVerval', msg('tabVerval')); setText('tabProgressie', msg('tabProgressie')); setText('tabSchade', msg('tabSchade')); setText('tabPortefeuille', msg('tabPortefeuille')); setText('tabKpis', msg('tabKpis')); setText('tabDetail', msg('tabDetail'));
   setText('kpiCheckSamenvatting', msg('tabSamenvatting')); setText('kpiCheckProductie', msg('tabProductie')); setText('kpiCheckVerval', msg('tabVerval')); setText('kpiCheckProgressie', msg('tabProgressie')); setText('kpiCheckSchade', msg('tabSchade')); setText('kpiCheckPortefeuille', msg('tabPortefeuille')); updateKpiSelectorLabel();
@@ -324,12 +280,14 @@ function updateStaticLanguage() {
     el.dataset.totalPrefix = msg('totaalPrefix');
   });
 }
+const pendingCategoryExpansion = new Map();
 function setLanguage(lang) {
-  const expansionBySection = new Map(
-    Array.from(document.querySelectorAll('.section[id]'))
-      .map(section => [section.id, captureCategoryExpansionState(section)])
-      .filter(([, state]) => state.length)
-  );
+  document.querySelectorAll('.section[id]').forEach(section => {
+    if (!pendingCategoryExpansion.has(section.id)) {
+      const saved = captureCategoryExpansionState(section);
+      if (saved.length) pendingCategoryExpansion.set(section.id, saved);
+    }
+  });
   currentLang = lang === 'fr' ? 'fr' : 'nl';
   const sel = $('languageSelect');
   if (sel) sel.value = currentLang;
@@ -338,7 +296,7 @@ function setLanguage(lang) {
   renderBrokerInfo();
   if (lastData) {
     build(lastData);
-    expansionBySection.forEach((state, sectionId) => restoreCategoryExpansionState($(sectionId), state));
+
     applyDashboardDisplayModes();
     setStatus(msg('success', lastData.length));
   }
@@ -352,8 +310,7 @@ function categoryExpansionBlocks(section) {
   return Array.from(section?.querySelectorAll('.cat:not(.totalNonLife),.portfolioCategoryBlock:not(.portfolioTotalBlock)') || []);
 }
 function categoryExpansionKey(block, index) {
-  const title = block.querySelector('.catTitle')?.textContent?.trim() || '';
-  return `${index}:${title}`;
+  return `${index}:${block.dataset.categoryKey || ''}`;
 }
 function captureCategoryExpansionState(section) {
   return categoryExpansionBlocks(section).map((block, index) => ({
@@ -788,9 +745,13 @@ function setStatus(msg, warn = false) {
 }
 
 // ─── PDF verwerking ───────────────────────────────────────────────────────────
+let pdfImportGeneration = 0;
 $('pdfFile').addEventListener('change', async e => {
   const file = e.target.files[0];
   if (!file) return;
+  const generation = ++pdfImportGeneration;
+  pendingCategoryExpansion.clear();
+  csvResult = '';
   $('fileName').textContent = file.name;
   $('dashboard').classList.add('hidden');
   $('brokerInfo').classList.add('hidden');
@@ -805,7 +766,9 @@ $('pdfFile').addEventListener('change', async e => {
   $('exportPdfWrap')?.classList.add('hidden');
   setStatus(msg('processing'));
   try {
-    csvResult = await pdfToCsv(file);
+    const csv = await pdfToCsv(file, generation);
+    if (generation !== pdfImportGeneration) return;
+    csvResult = csv;
     const data = parseCSV(csvResult);
     lastData = data;
     build(data);
@@ -814,8 +777,9 @@ $('pdfFile').addEventListener('change', async e => {
     $('downloadCsvBtn').classList.remove('hidden');
     $('exportPdfWrap')?.classList.remove('hidden');
     // Na import terug naar helemaal bovenaan. De importblokken zijn dan ingeklapt.
-    window.setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 180);
+    window.setTimeout(() => { if (generation === pdfImportGeneration) window.scrollTo({ top: 0, behavior: 'smooth' }); }, 180);
   } catch (err) {
+    if (generation !== pdfImportGeneration) return;
     console.error(err);
     $('topCompactBar')?.classList.add('hidden');
     $('exportPdfWrap')?.classList.add('hidden');
@@ -964,7 +928,7 @@ function renderBrokerInfo() {
   updateView360BrokerInline();
 }
 
-async function pdfToCsv(file) {
+async function pdfToCsv(file, generation = pdfImportGeneration) {
   const buffer = await file.arrayBuffer();
   const pdf = await pdfjsLib.getDocument(new Uint8Array(buffer)).promise;
   let fullCsvRows = [];
@@ -986,6 +950,7 @@ async function pdfToCsv(file) {
       else pageRows.push({ y, items: [{ x, text }] });
     });
 
+    if (generation !== pdfImportGeneration) { await pdf.destroy(); return ''; }
     extractBrokerInfoFromRows(pageRows);
 
     pageRows.sort((a, b) => b.y - a.y).forEach(row => {
@@ -1023,6 +988,7 @@ async function pdfToCsv(file) {
       }
     });
   }
+  await pdf.destroy();
   if (fullCsvRows.length < 2) throw new Error(currentLang === 'fr' ? 'PDF ne contient pas de couche de texte. Utilisez uniquement les chiffres clés téléchargés depuis Salesforce.' : 'PDF bevat geen tekstlaag. Gebruik enkel de kerncijfers gedownload vanuit salesforce.');
   return fullCsvRows.join("\n");
 }
@@ -1432,6 +1398,11 @@ async function buildPdf360Pages(root) {
   pages.forEach(page => root.appendChild(page));
 }
 
+function selectAllPdfSections(selected) {
+  document.querySelectorAll('#pdfOptionsMenu .pdfSectionCheck').forEach(input => {
+    input.checked = !!selected;
+  });
+}
 function selectedPdfSections() {
   return new Set(Array.from(document.querySelectorAll('.pdfSectionCheck'))
     .filter(input => input.checked)
@@ -1476,12 +1447,12 @@ async function exportSummaryPdf() {
       }
       document.body.appendChild(root);
       await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
-      if (selected.has('view360')) await buildPdf360Pages(root);
       if (selected.has('productie')) await buildPdfTestCategoryPages(root, 'prodGrouped', 'productie');
       if (selected.has('verval')) await buildPdfTestCategoryPages(root, 'vervalGrouped', 'verval');
       if (selected.has('schade')) await buildPdfTestCategoryPages(root, 'schadeGrouped', 'schade');
       if (selected.has('distributions')) buildPdfDistributionPages(root, lastData, dashboardCurrentPeriod);
       if (selected.has('detail')) await buildPdfTestDetailPages(root);
+      if (selected.has('view360')) await buildPdf360Pages(root);
       addPdfTestPageNumbers(root);
       await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
       const { jsPDF } = window.jspdf;
@@ -2679,6 +2650,10 @@ function renderDashboardSection(sectionId, force = false) {
     default:
       return;
   }
+  if (pendingCategoryExpansion.has(sectionId)) {
+    restoreCategoryExpansionState($(sectionId), pendingCategoryExpansion.get(sectionId));
+    pendingCategoryExpansion.delete(sectionId);
+  }
   dashboardRenderedSections.add(sectionId);
   dashboardDirtySections.delete(sectionId);
   applyDashboardDisplayModes();
@@ -3631,7 +3606,7 @@ function miniCardHtml(title, body, extraClass = '') {
   return `<div class="miniCard${cls}"><h3>${title}</h3>${body}</div>`;
 }
 function categoryBlockHtml(cat, periodHtml, bodyHtml) {
-  return `<div class="cat"><div class="catHead exportableBlockHeader"><div class="catTitle">${catTitleHtml(cat)}</div><div class="small">${periodHtml}</div>${productBlockExportActionsHtml()}</div><div class="p-18">${bodyHtml}</div></div>`;
+  return `<div class="cat" data-category-key="${esc(cat)}"><div class="catHead exportableBlockHeader"><div class="catTitle">${catTitleHtml(cat)}</div><div class="small">${periodHtml}</div>${productBlockExportActionsHtml()}</div><div class="p-18">${bodyHtml}</div></div>`;
 }
 function renderProductionGroup(cat, rows, prevP, currP, data) {
   const { ordered, labels, vals, head, prevHead } = groupContext(cat, rows, prevP, currP);
@@ -4003,7 +3978,7 @@ function renderPortfolioBlock(data, key, prevP, currP, isTotal = false, isSub = 
   const hasCompare = prevVal !== 0 || currVal !== 0;
   const title = portfolioCategoryTitleHtml(key, isTotal);
   const leftTitle = currentLang === 'fr' ? 'Année complète + période' : 'Vorig volledig jaar + periode';
-  return `<div class="portfolioCategoryBlock ${isTotal ? 'portfolioTotalBlock' : ''} ${isSub ? 'portfolioSubBlock' : ''}"><div class="portfolioCategoryHead exportableBlockHeader"><div class="catTitle">${title}</div><div class="small">${esc(prevP)} &rarr; ${esc(currP)}</div>${productBlockExportActionsHtml()}</div><div class="portfolioGrid"><div class="portfolioChartCard"><h3>${leftTitle}</h3>${portfolioPeriodComparisonBars(data, key, prevP, currP)}</div><div class="portfolioChartCard"><h3>${msg('portefeuilleComparison')}</h3>${hasCompare ? portfolioAmountSummary(prevP, currP, prevVal, currVal) : `<div class="portfolioNoData">${msg('portefeuilleEmpty')}</div>`}</div></div></div>`;
+  return `<div data-category-key="${esc(key)}" class="portfolioCategoryBlock ${isTotal ? 'portfolioTotalBlock' : ''} ${isSub ? 'portfolioSubBlock' : ''}"><div class="portfolioCategoryHead exportableBlockHeader"><div class="catTitle">${title}</div><div class="small">${esc(prevP)} &rarr; ${esc(currP)}</div>${productBlockExportActionsHtml()}</div><div class="portfolioGrid"><div class="portfolioChartCard"><h3>${leftTitle}</h3>${portfolioPeriodComparisonBars(data, key, prevP, currP)}</div><div class="portfolioChartCard"><h3>${msg('portefeuilleComparison')}</h3>${hasCompare ? portfolioAmountSummary(prevP, currP, prevVal, currVal) : `<div class="portfolioNoData">${msg('portefeuilleEmpty')}</div>`}</div></div></div>`;
 }
 function getPortfolioPieItems(data, period) {
   const keys = ['Auto Vloten','Auto Niet Vloten','Particulieren Brand','Particulieren BA','Particulieren Overige','Ondernemingen Brand','Ondernemingen BA','Ondernemingen Overige','Arbeidsongevallen','Rechtsbijstand'];
@@ -4675,7 +4650,7 @@ function metricBlock(label, valueHtml) {
 }
 function catContainer(cat, headRight, bodyHtml) {
   return [
-    `<div class="cat">`,
+    `<div class="cat" data-category-key="${esc(cat)}">`,
       `<div class="catHead exportableBlockHeader">`,
         `<div class="catTitle">${catTitleHtml(cat)}</div>`,
         `<div class="small">${headRight}</div>`,

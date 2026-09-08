@@ -19,13 +19,11 @@
 <link rel="stylesheet" href="dashboard.css">
 </head>
 <body>
-<button type="button" class="appVersion" id="appVersionBtn" aria-haspopup="dialog" aria-controls="releaseNotesModal">v03.09.26</button>
+<button type="button" class="appVersion" id="appVersionBtn" aria-haspopup="dialog" aria-controls="releaseNotesModal">v08.09.26</button>
 <div class="releaseNotesModal hidden" id="releaseNotesModal" role="dialog" aria-modal="true" aria-labelledby="releaseNotesTitle">
   <div class="releaseNotesDialog">
     <div class="releaseNotesHead"><h2 id="releaseNotesTitle">Release notes</h2><button type="button" class="releaseNotesClose" id="releaseNotesCloseBtn" aria-label="Sluiten">×</button></div>
-    <div class="releaseNotesStatus" id="releaseNotesStatus">Release notes laden…</div>
     <div class="releaseNotesContent hidden" id="releaseNotesContent" tabindex="0"></div>
-    <iframe class="releaseNotesFrame hidden" id="releaseNotesFrame" title="Release notes"></iframe>
   </div>
 </div>
 <div class="wrap">
@@ -43,13 +41,14 @@
           <button id="pdfOptionsBtn" class="pdfOptionsBtn" type="button" title="PDF secties kiezen" aria-label="PDF secties kiezen" aria-expanded="false"><svg style="width:14px;height:14px;display:block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>
           <div id="pdfOptionsMenu" class="pdfOptionsMenu" role="menu" aria-label="PDF secties">
             <div id="pdfOptionsTitle" class="pdfOptionsTitle">PDF secties</div>
+            <div class="pdfSelectionActions"><button type="button" id="pdfSelectAll" onclick="selectAllPdfSections(true)">Alles selecteren</button><button type="button" id="pdfSelectNone" onclick="selectAllPdfSections(false)">Niets selecteren</button></div>
             <label class="pdfOption"><input type="checkbox" class="pdfSectionCheck" value="summary" checked><span id="pdfOptSummary">Samenvatting</span></label>
-            <label class="pdfOption"><input type="checkbox" class="pdfSectionCheck" value="view360" checked><span id="pdfOpt360">360-view</span></label>
             <label class="pdfOption"><input type="checkbox" class="pdfSectionCheck" value="productie" checked><span id="pdfOptProductie">Productie</span></label>
             <label class="pdfOption"><input type="checkbox" class="pdfSectionCheck" value="verval" checked><span id="pdfOptVerval">Verval</span></label>
             <label class="pdfOption"><input type="checkbox" class="pdfSectionCheck" value="schade" checked><span id="pdfOptSchade">Schade</span></label>
             <label class="pdfOption"><input type="checkbox" class="pdfSectionCheck" value="distributions" checked><span id="pdfOptDistributions">Verdelingen</span></label>
-            <label class="pdfOption"><input type="checkbox" class="pdfSectionCheck" value="detail" checked><span id="pdfOptDetail">Detail per categorie</span></label>
+            <label class="pdfOption"><input type="checkbox" class="pdfSectionCheck" value="detail" checked><span id="pdfOptDetail">Detail</span></label>
+            <label class="pdfOption"><input type="checkbox" class="pdfSectionCheck" value="view360" checked><span id="pdfOpt360">360-view</span></label>
           </div>
         </div>
       </div>
@@ -258,7 +257,8 @@
   <div class="footer-disclaimer">ontwikkeld door Hans von der Crone</div>
 </div>
 
-<script type="text/plain" id="releaseNotesFallback">
+<!-- Release notes: voeg nieuwe versies onderaan toe, gevolgd door één wijziging per regel. -->
+<script type="text/plain" id="releaseNotesSource">
 v1.5.26
 lancering 1e versie
 toevoeging van PDF export functionaliteit
@@ -353,6 +353,12 @@ tabbalk aangepast zodat die op één lijn past op laptopschermen VIVIUM resoluti
 in de taartinfo bij schade naast verdeling schadelast ook de S/P's vermeld in hover-over
 door te klikken op versienummer rechtsboven, krijg je nu ook de releasenotes te zien
 startpagina aantrekkelijker gemaakt met extra uitleg
+volgorde hoofd+sub/hoofd/sub categorieën logischer gezet (standaardkeuze staat nu links)
+
+v08.09.26
+Bij export PDF kan je nu alle keuzes in één keer aan- of uitzetten.
+Titel in de browserbalk gewijzigd naar "Dashboard VIVIUM Non-Life".
+Release notes zijn nu ingebouwd in het HTML-bestand en worden niet meer via een extern bestand geladen.
 </script>
 <script src="dashboard.js"></script>
 
