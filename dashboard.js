@@ -1335,6 +1335,8 @@ function buildPdfDistributionPages(root, data, currP) {
 
 function preparePdf360Block(block) {
   const clone = block.cloneNode(true);
+  clone.classList.remove('view360Collapsed');
+  clone.querySelectorAll('.view360CollapseToggle').forEach(button => button.replaceWith(document.createTextNode(button.querySelector('.view360BlockLabel')?.textContent || button.textContent)));
   clone.querySelectorAll('.blockExportActions').forEach(el => el.remove());
   clone.querySelectorAll('canvas[id]').forEach(canvas => {
     const source = document.getElementById(canvas.id);
@@ -1364,7 +1366,11 @@ async function buildPdf360Pages(root) {
   render360View();
   await new Promise(resolve => requestAnimationFrame(resolve));
   const source = $('view360Content');
-  const sourceBlocks = source ? Array.from(source.children).filter(el => !el.classList.contains('hidden')) : [];
+  const sourceBlocks = source ? Array.from(source.children).filter(el => !el.classList.contains('hidden')).flatMap(block =>
+    block.classList.contains('view360GroupedBlock')
+      ? Array.from(block.querySelector(':scope > .view360CollapseBody').children)
+      : [block]
+  ) : [];
   if (!sourceBlocks.length) return;
 
   const measurePage = buildPdf360Page([]);
@@ -2986,14 +2992,14 @@ function schadeKpiMetricItems(items, capped = false) {
 function view360AnalysisConfigs() {
   return [
     {
-      id: 'kmo',
-      title: 'Analyse KMO',
-      cats: ['Ondernemingen', 'Arbeidsongevallen'],
-      textLabel: currentLang === 'fr' ? 'PME' : 'KMO',
-      catsText: currentLang === 'fr' ? 'entreprises + accidents de travail' : 'ondernemingen + arbeidsongevallen',
+      id: 'auto',
+      title: 'Analyse Auto',
+      cats: ['Auto'],
+      textLabel: 'Auto',
+      catsText: '',
       subtitle: currentLang === 'fr'
-        ? 'Entreprises + accidents de travail, avec comparaison des années complètes et de la période courante.'
-        : 'Ondernemingen + Arbeidsongevallen, met vergelijking van volledige jaren en huidige periode.'
+        ? 'Auto, avec comparaison des années complètes et de la période courante.'
+        : 'Auto, met vergelijking van volledige jaren en huidige periode.'
     },
     {
       id: 'particulieren',
@@ -3006,14 +3012,14 @@ function view360AnalysisConfigs() {
         : 'Particulieren, met vergelijking van volledige jaren en huidige periode.'
     },
     {
-      id: 'auto',
-      title: 'Analyse Auto',
-      cats: ['Auto'],
-      textLabel: 'Auto',
-      catsText: '',
+      id: 'kmo',
+      title: 'Analyse KMO',
+      cats: ['Ondernemingen', 'Arbeidsongevallen'],
+      textLabel: currentLang === 'fr' ? 'PME' : 'KMO',
+      catsText: currentLang === 'fr' ? 'entreprises + accidents de travail' : 'ondernemingen + arbeidsongevallen',
       subtitle: currentLang === 'fr'
-        ? 'Auto, avec comparaison des années complètes et de la période courante.'
-        : 'Auto, met vergelijking van volledige jaren en huidige periode.'
+        ? 'Entreprises + accidents de travail, avec comparaison des années complètes et de la période courante.'
+        : 'Ondernemingen + Arbeidsongevallen, met vergelijking van volledige jaren en huidige periode.'
     }
   ];
 }
@@ -3234,6 +3240,92 @@ function view360KmoAnalysisHtml(data, prevP, currP, config) {
     <div class="view360AnalysisCategories">${categoriesHtml}</div>
   </div>`;
 }
+const view360ClosedBlocks = new Set();
+function setupView360Collapse(target) {
+  const originalBlocks = Array.from(target.children);
+  const groups = [
+    { start: 3, end: 7, title: currentLang === 'fr' ? 'Production/Chute' : 'Productie/verval' },
+    { start: 7, end: 9, title: msg('tabPortefeuille') },
+    { start: 9, end: 12, title: msg('tabSchade') }
+  ];
+  groups.forEach(({ start, end, title }) => {
+    const children = originalBlocks.slice(start, end);
+    const group = document.createElement('div');
+    group.className = 'view360Block view360GroupedBlock';
+    group.innerHTML = `<h3>${esc(title)}</h3>`;
+    target.insertBefore(group, children[0]);
+    children.forEach(block => group.appendChild(block));
+  });
+  const keys = ['auto', 'particulieren', 'kmo', 'productieVerval', 'portefeuille', 'schade'];
+  const slot = document.querySelector('#view360 > .card > .titleExportRow > .sectionToolbarSlot');
+  let allButton = $('view360CollapseAll');
+  if (!allButton && slot) {
+    allButton = document.createElement('button');
+    allButton.id = 'view360CollapseAll';
+    allButton.type = 'button';
+    allButton.className = 'drillBtn';
+    slot.appendChild(allButton);
+  }
+  const blocks = Array.from(target.children);
+  const updateAll = () => {
+    const anyClosed = blocks.some(block => block.classList.contains('view360Collapsed'));
+    if (allButton) {
+      allButton.textContent = msg(anyClosed ? 'drillDownActive' : 'drillDown');
+      allButton.classList.toggle('active', anyClosed);
+    }
+  };
+  blocks.forEach((block, index) => {
+    const key = keys[index];
+    const header = block.querySelector(':scope > .view360AnalysisHead, :scope > .portfolioPieHeader, :scope > h3');
+    if (!header) return;
+    const heading = header.matches('h3') ? header : header.querySelector('h2, h3');
+    const title = heading.textContent;
+    block.classList.add('view360Collapsible');
+    const body = document.createElement('div');
+    body.className = 'view360CollapseBody';
+    body.id = 'view360Body-' + key;
+    Array.from(block.children).forEach(child => {
+      if (child !== header && !child.classList.contains('blockExportActions')) body.appendChild(child);
+    });
+    block.appendChild(body);
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'view360CollapseToggle';
+    const iconKey = { auto: 'auto', particulieren: 'particulieren', kmo: 'ondernemingen' }[key];
+    const icon = iconKey
+      ? `<img class="catIcon" src="${CATEGORY_ICONS[iconKey]}" alt="" />`
+      : '<span class="view360HeaderIcon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 20h16M6 16V9h3v7m3 0V4h3v12m3 0v-5h3v5"/></svg></span>';
+    button.innerHTML = `<span class="catTitle">${icon}<span class="view360BlockLabel">${esc(title)}</span></span><span class="small">${esc(dashboardPreviousPeriod)} → ${esc(dashboardCurrentPeriod)}</span><span class="view360CollapseHint"></span>`;
+    button.setAttribute('aria-controls', body.id);
+    const newHeader = document.createElement('h3');
+    newHeader.className = 'view360BlockHead';
+    newHeader.appendChild(button);
+    const subtitle = header.querySelector('p');
+    if (subtitle) body.prepend(subtitle);
+    header.replaceWith(newHeader);
+    const setClosed = closed => {
+      block.classList.toggle('view360Collapsed', closed);
+      button.setAttribute('aria-expanded', String(!closed));
+      button.querySelector('.view360CollapseHint').textContent = currentLang === 'fr'
+        ? (closed ? 'Cliquez pour ouvrir' : 'Cliquez pour fermer')
+        : (closed ? 'Klik om te openen' : 'Klik om te sluiten');
+      if (closed) view360ClosedBlocks.add(key);
+      else view360ClosedBlocks.delete(key);
+    };
+    block._setView360Closed = setClosed;
+    setClosed(view360ClosedBlocks.has(key));
+    button.addEventListener('click', () => {
+      setClosed(!block.classList.contains('view360Collapsed'));
+      updateAll();
+    });
+  });
+  if (allButton) allButton.onclick = () => {
+    const close = !blocks.some(block => block.classList.contains('view360Collapsed'));
+    blocks.forEach(block => block._setView360Closed?.(close));
+    updateAll();
+  };
+  updateAll();
+}
 function render360View() {
   const target = $('view360Content');
   if (!target) return;
@@ -3273,6 +3365,7 @@ function render360View() {
   renderView360PortfolioPies(lastData, currP);
   renderView360SchadePies(lastData, schadePrevFull, currP);
   attachPortfolioBarHover(target);
+  setupView360Collapse(target);
 }
 function updateTopKpisForActiveTab() {
   if (!lastKpiContext || !lastData || !dashboardPreviousPeriod || !dashboardCurrentPeriod) return;

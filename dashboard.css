@@ -1062,6 +1062,33 @@ th{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--mute
 .view360AnalysisToggle button{border:0;border-radius:999px;background:transparent;color:#405775;font-size:12px;font-weight:950;padding:8px 11px;cursor:pointer;white-space:nowrap}
 .view360AnalysisToggle button.active{background:var(--blue);color:#fff;box-shadow:0 6px 14px rgba(0,59,113,.18)}
 .view360GlobalToggle{margin-left:auto}
+.view360Collapsible{padding:0;border:1px solid var(--line);border-radius:18px;overflow:hidden;background:#fff}
+.view360Collapsible>.view360BlockHead{margin:0;color:var(--blue);font-size:18px;font-weight:950}
+.view360CollapseToggle{display:grid;grid-template-columns:minmax(210px,1fr) auto minmax(210px,1fr);align-items:center;gap:16px;width:100%;min-height:67px;padding:16px 112px 16px 18px;border:0;border-bottom:1px solid #ffe0c2;background:linear-gradient(135deg,#fff0df,#f7fbff);color:inherit;font:inherit;text-align:left;cursor:pointer}
+.view360CollapseToggle:hover{filter:saturate(1.04)}
+.view360CollapseToggle>.catTitle{justify-self:start;display:flex;align-items:center;gap:10px}
+.view360CollapseToggle>.small{justify-self:center;text-align:center;white-space:nowrap;font-size:12px;font-weight:400;color:var(--muted)}
+.view360CollapseHint{justify-self:end;width:136px;box-sizing:border-box;text-align:center;font-size:11px;font-weight:950;color:var(--muted);background:#fff;border:1px solid var(--line);border-radius:999px;padding:5px 8px;white-space:nowrap}
+.view360HeaderIcon{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;flex:none;border-radius:50%;background:#f7fbff;color:#3977cd;box-shadow:0 4px 10px rgba(15,23,42,.12)}
+.view360HeaderIcon svg{width:24px;height:24px}
+.view360Collapsible>.view360CollapseBody{padding:18px}
+.view360Collapsible>.view360CollapseBody>p{margin:0 0 14px;color:var(--muted);font-size:12px}
+.view360Collapsed>.blockExportActions{display:none!important}
+.view360Collapsed>.view360CollapseBody{display:none}
+.view360Collapsed>h3,.view360Collapsed>.portfolioPieHeader,.view360Collapsed>.view360AnalysisHead{margin-bottom:0}
+.view360GroupedBlock>.view360CollapseBody{display:grid;gap:18px}
+.view360GroupedBlock.view360Collapsed>.view360CollapseBody{display:none}
+#view360CollapseAll{margin-left:auto;pointer-events:auto}
+#view360>.card>.titleExportRow>.sectionToolbarSlot{pointer-events:none}
+.section.forceExportOpen .view360CollapseBody{display:block!important}
+.section.forceExportOpen .view360CollapseToggle::before{display:none}
+.exportingBlock .view360CollapseHint,.section.forceExportOpen .view360CollapseHint{display:none}
+.pdfExportRoot .view360BlockHead{padding:16px 18px}
+@media(max-width:760px){
+  #view360.active>.card>.titleExportRow>.sectionToolbarSlot{grid-row:3}
+  .view360CollapseToggle{grid-template-columns:1fr;padding-right:100px;gap:8px}
+  .view360CollapseToggle>.small,.view360CollapseHint{justify-self:start;text-align:left}
+}
 .view360AnalysisGrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;align-items:stretch;border:0;border-radius:0;background:transparent;overflow:visible;padding:12px}
 .view360AnalysisMetric{position:relative;background:#fff;padding:18px 14px 14px;min-width:0;border:1px solid #d5e5f4;border-radius:22px;box-shadow:0 10px 22px rgba(0,59,113,.08);overflow:hidden}
 .view360AnalysisMetric:first-child{border-left:1px solid #d5e5f4}
