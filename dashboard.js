@@ -1364,44 +1364,75 @@ function buildPdf360Page(blocks) {
 
 async function buildPdf360Pages(root) {
   render360View();
-  await new Promise(resolve => requestAnimationFrame(resolve));
+  if (document.fonts?.ready) await document.fonts.ready;
   const source = $('view360Content');
-  const sourceBlocks = source ? Array.from(source.children).filter(el => !el.classList.contains('hidden')).flatMap(block =>
-    block.classList.contains('view360GroupedBlock')
-      ? Array.from(block.querySelector(':scope > .view360CollapseBody').children)
-      : [block]
-  ) : [];
-  if (!sourceBlocks.length) return;
+  const groups = source ? Array.from(source.children).filter(el => !el.classList.contains('hidden')) : [];
 
-  const measurePage = buildPdf360Page([]);
-  root.appendChild(measurePage);
-  await new Promise(resolve => requestAnimationFrame(resolve));
-  const frame = measurePage.querySelector('.view360Frame');
-  const styles = getComputedStyle(frame);
-  const gap = parseFloat(styles.rowGap || styles.gap || '0') || 0;
-  const maxHeight = frame.clientHeight;
-  let currentBlocks = [];
-  let currentHeight = 0;
-  const pages = [];
+  // Paginate each main topic separately, using its actual export layout.
+  for (const group of groups) {
+    const prepared = preparePdf360Block(group);
+    const isAnalysis = prepared.classList.contains('view360AnalysisBlock');
+    const containerSelector = isAnalysis ? '.view360AnalysisCategories' : ':scope > .view360CollapseBody';
+    const content = prepared.querySelector(containerSelector);
+    if (!content) throw new Error('360-view: ontbrekende inhoud voor PDF-export.');
+    const units = Array.from(content.children);
+    content.replaceChildren();
+    let page, frame, shell, destination, count;
 
-  sourceBlocks.forEach(block => {
-    const clone = preparePdf360Block(block);
-    frame.appendChild(clone);
-    const h = clone.offsetHeight;
-    clone.remove();
-    const needed = currentBlocks.length ? currentHeight + gap + h : h;
-    if (currentBlocks.length && needed > maxHeight) {
-      pages.push(buildPdf360Page(currentBlocks));
-      currentBlocks = [block];
-      currentHeight = h;
-    } else {
-      currentBlocks.push(block);
-      currentHeight = needed;
+    const startPage = () => {
+      page = buildPdf360Page([]);
+      frame = page.querySelector('.view360Frame');
+      // Flex shrinking would disguise overflow while measuring.
+      frame.style.display = 'block';
+      shell = prepared.cloneNode(true);
+      destination = shell.querySelector(containerSelector);
+      frame.appendChild(shell);
+      root.appendChild(page);
+      count = 0;
+    };
+    const bottomLimit = () => frame.getBoundingClientRect().bottom - 2;
+    const shellBottom = () => shell.getBoundingClientRect().bottom;
+    startPage();
+
+    for (const unit of units) {
+      destination.appendChild(unit);
+      await Promise.all(Array.from(unit.querySelectorAll('img')).map(img =>
+        img.decode ? img.decode().catch(() => {}) : Promise.resolve()
+      ));
+      if (shellBottom() > bottomLimit() && count > 0) {
+        unit.remove();
+        startPage();
+        destination.appendChild(unit);
+      }
+      // Exceptional case: one individual block itself exceeds a whole page.
+      // Fit that block only; never clip or shrink an entire multi-block topic.
+      if (shellBottom() > bottomLimit()) {
+        const naturalHeight = unit.getBoundingClientRect().height;
+        const available = naturalHeight - (shellBottom() - bottomLimit()) - 4;
+        if (available <= 0 || naturalHeight <= 0) {
+          throw new Error('360-view: dit blok past niet binnen de PDF-paginamarges.');
+        }
+        const width = unit.getBoundingClientRect().width;
+        const scale = Math.min(1, available / naturalHeight);
+        const wrapper = document.createElement('div');
+        wrapper.style.cssText = 'position:relative;min-width:0;height:' + (naturalHeight * scale) + 'px';
+        unit.replaceWith(wrapper);
+        wrapper.appendChild(unit);
+        unit.style.width = width + 'px';
+        unit.style.position = 'absolute';
+        unit.style.left = '0';
+        unit.style.top = '0';
+        unit.style.margin = '0';
+        unit.style.transformOrigin = 'top left';
+        unit.style.transform = 'scale(' + scale + ')';
+      }
+      if (shellBottom() > bottomLimit() + 1) {
+        throw new Error('360-view: pagina-overloop gedetecteerd; export gestopt om afkappen te vermijden.');
+      }
+      count++;
     }
-  });
-  if (currentBlocks.length) pages.push(buildPdf360Page(currentBlocks));
-  measurePage.remove();
-  pages.forEach(page => root.appendChild(page));
+    if (!count) page.remove();
+  }
 }
 
 function selectAllPdfSections(selected) {
