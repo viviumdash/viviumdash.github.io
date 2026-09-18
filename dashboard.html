@@ -19,7 +19,7 @@
 <link rel="stylesheet" href="dashboard.css">
 </head>
 <body>
-<button type="button" class="appVersion" id="appVersionBtn" aria-haspopup="dialog" aria-controls="releaseNotesModal">v08.09.26</button>
+<button type="button" class="appVersion" id="appVersionBtn" aria-haspopup="dialog" aria-controls="releaseNotesModal">v18.09.2026</button>
 <div class="releaseNotesModal hidden" id="releaseNotesModal" role="dialog" aria-modal="true" aria-labelledby="releaseNotesTitle">
   <div class="releaseNotesDialog">
     <div class="releaseNotesHead"><h2 id="releaseNotesTitle">Release notes</h2><button type="button" class="releaseNotesClose" id="releaseNotesCloseBtn" aria-label="Sluiten">×</button></div>
@@ -361,6 +361,15 @@ Titel in de browserbalk gewijzigd naar "Dashboard VIVIUM Non-Life".
 Release notes zijn nu ingebouwd in het HTML-bestand en worden niet meer via een extern bestand geladen.
 Volgorde van de 360-view aangepast zodat deze beter aansluit bij de kerncijfers.
 360-view onderverdeeld in in- en uitklapbare topics, zodat je zelf kan bepalen wat zichtbaar is en wat niet.
+
+v18.09.2026
+Bij progressie duidelijk gemaakt in bubbels hoe progressie is opgebouwd; in de horizontale balken hover-ups toegevoegd met details.
+Progressiebalken hebben nu een centraal nulpunt: negatieve waarden links, positieve waarden rechts.
+De nieuwste periode (oranje) staat bovenaan en J-1 eronder. Als vorige jaren gekozen zijn, staan die daaronder verder van recent naar oud.
+Bij vergelijkingen tussen periodes zijn pijltjes toegevoegd aan de delta's en zijn de delta's verticaal tussen de balkjes geplaatst voor een visueel duidelijkere vergelijking.
+Bij portefeuille is de delta tussen J-1 en J oranje gemaakt en verticaal uitgelijnd op de balk van de laatste periode, zodat duidelijker is dat dit de delta maand versus maand betreft.
+Periodes in de KPI's worden vermeld als MM/JJ in plaats van MM JJJJ.
+Blokken bij schade zijn logischer ingedeeld, bijvoorbeeld S/P niet afgetopt en S/P afgetopt naast elkaar in plaats van onder elkaar.
 </script>
 <script src="dashboard.js"></script>
 

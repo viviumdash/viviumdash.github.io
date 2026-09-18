@@ -99,7 +99,7 @@ function renderReleaseNotes(rawText) {
   String(rawText || '').split(/\r?\n/).forEach(rawLine => {
     const line = rawLine.trim();
     if (!line) { list = null; return; }
-    if (/^v\d{1,2}(?:\.\d{1,2}){2}$/i.test(line)) {
+    if (/^v\d{1,2}\.\d{1,2}\.(?:\d{2}|\d{4})$/i.test(line)) {
       const title = document.createElement('h3');
       title.className = 'releaseNotesVersion';
       title.textContent = line;
@@ -2451,15 +2451,25 @@ function renderSpBarChart(data, prevP, currP, field, cellIndex) {
 }
 
 function showProdBarTip(e, el) {
-  const tip = document.getElementById('prodBarTooltip');
-  if (!tip) return;
+  let tip = document.getElementById('prodBarTooltip');
+  if (!tip) {
+    tip = document.createElement('div');
+    tip.id = 'prodBarTooltip';
+    tip.className = 'prodBarTooltip';
+    document.body.appendChild(tip);
+  }
   if (tip.parentElement !== document.body) document.body.appendChild(tip);
   tip.innerHTML = `<strong>${esc(fmtPeriod(el.dataset.period || ''))}</strong><span class="muted">${esc(el.dataset.amount || '')}</span>`;
   tip.style.position = 'fixed';
   tip.style.transform = 'translate(12px,12px)';
   tip.style.display = 'block';
-  tip.style.left = e.clientX + 'px';
-  tip.style.top  = e.clientY + 'px';
+  tip.style.maxWidth = 'calc(100vw - 40px)';
+  tip.style.whiteSpace = 'normal';
+  const rect = el.getBoundingClientRect();
+  const x = Number.isFinite(e.clientX) ? e.clientX : rect.left;
+  const y = Number.isFinite(e.clientY) ? e.clientY : rect.bottom;
+  tip.style.left = Math.max(0, Math.min(x, window.innerWidth - tip.offsetWidth - 24)) + 'px';
+  tip.style.top = Math.max(0, Math.min(y, window.innerHeight - tip.offsetHeight - 24)) + 'px';
 }
 function hideProdBarTip() {
   const tip = document.getElementById('prodBarTooltip');
@@ -3413,8 +3423,12 @@ function kpiSpDeltaText(prev, curr) {
   const diff = ppDelta(prev, curr);
   return `${diff >= 0 ? '+' : ''}${pct.format(diff)}%`;
 }
+function kpiComparisonPeriod(value) {
+  const match = String(value ?? '').trim().match(/^(\d{1,2})[\s/]+(\d{4})$/);
+  return match ? `${match[1].padStart(2, '0')}/${match[2].slice(-2)}` : fmtPeriod(value);
+}
 function kpiSpDeltaLine(prev, curr, prevP) {
-  return `${kpiSpDeltaText(prev, curr)} ${msg('vs')} ${fmtPeriod(prevP)} (${pct.format(n(prev))}%)`;
+  return `${kpiSpDeltaText(prev, curr)} ${msg('vs')} ${kpiComparisonPeriod(prevP)} (${pct.format(n(prev))}%)`;
 }
 function kpiCompareValueText(value, type) {
   if (type === 'pct' || type === 'sp-category' || type === 'pct-combo' || type === 'pct-combo-plain') return `${pct.format(n(value))}%`;
@@ -3438,7 +3452,7 @@ function kpiCompareHtml(x, prevP, currP) {
   if (x.o === undefined || x.v === undefined) return '';
   const type = x.type === 'sp-category' || x.type === 'pct-combo' || x.type === 'pct-combo-plain' ? 'pct' : (x.type === 'detail-combo' ? 'money' : x.type);
   const prev = n(x.o), curr = n(x.v);
-  const history = Array.isArray(x.kpiHistory) ? x.kpiHistory : [];
+  const history = Array.isArray(x.kpiHistory) ? [...x.kpiHistory].sort((a, b) => pkey(b.period) - pkey(a.period)) : [];
   const historyValues = history.map(entry => n(entry.value));
   const footer = bubble => x.spToggleHtml ? `<div class="kpiCompareFooter">${bubble}${x.spToggleHtml}</div>` : bubble;
   const historyHtml = (max, zeroBased = false) => {
@@ -3466,13 +3480,13 @@ function kpiCompareHtml(x, prevP, currP) {
     const prevStyle = prev >= 0 ? `left:50%;width:${prevW}%` : `right:50%;width:${prevW}%`;
     const currStyle = curr >= 0 ? `left:50%;width:${currW}%` : `right:50%;width:${currW}%`;
     const zeroLine = (period, value, widthStyle, clsName) => `<div class="kpiCompareZeroLine"><div class="kpiComparePeriod">${fmtPeriod(period)}</div><div class="kpiCompareZeroTrack"><div class="kpiCompareZeroFill ${clsName}" style="${widthStyle}"></div></div><div class="kpiCompareAmount">${kpiCompareValueText(value, type)}</div></div>`;
-    return `<div class="kpiCompare zero"><div class="kpiCompareZeroRows">${zeroLine(prevP, prev, prevStyle, 'prev')}${zeroLine(currP, curr, currStyle, `curr ${currSide}`)}</div>${footer(`<div class="kpiCompareBubble ${kpiCompareClass(x)}">${kpiCompareBubbleText(x)}</div>`)}${historyHtml(max, true)}</div>`;
+    return `<div class="kpiCompare zero"><div class="kpiCompareZeroRows">${zeroLine(currP, curr, currStyle, `curr ${currSide}`)}${zeroLine(prevP, prev, prevStyle, 'prev')}</div>${footer(`<div class="kpiCompareBubble ${kpiCompareClass(x)}">${kpiCompareBubbleText(x)}</div>`)}${historyHtml(max, true)}</div>`;
   }
   const max = Math.max(1, Math.abs(prev), Math.abs(curr), ...historyValues.map(Math.abs));
   const prevW = Math.min(100, Math.abs(prev) / max * 100);
   const currW = Math.min(100, Math.abs(curr) / max * 100);
   const line = (period, value, width, clsName) => `<div class="kpiCompareLine"><div class="kpiComparePeriod">${fmtPeriod(period)}</div><div class="kpiCompareTrack"><div class="kpiCompareFill ${clsName}" style="width:${width}%"></div></div><div class="kpiCompareAmount">${kpiCompareValueText(value, type)}</div></div>`;
-  return `<div class="kpiCompare">${line(prevP, prev, prevW, 'prev')}${line(currP, curr, currW, 'curr')}${footer(`<div class="kpiCompareBubble ${kpiCompareClass(x)}">${kpiCompareBubbleText(x)}</div>`)}${historyHtml(max)}</div>`;
+  return `<div class="kpiCompare">${line(currP, curr, currW, 'curr')}${line(prevP, prev, prevW, 'prev')}${footer(`<div class="kpiCompareBubble ${kpiCompareClass(x)}">${kpiCompareBubbleText(x)}</div>`)}${historyHtml(max)}</div>`;
 }
 function animateKpiNumbers(root = $('kpis')) {
   if (motionIsReduced() || document.body.classList.contains('pdfExportBusy')) return;
@@ -3551,18 +3565,18 @@ function kpiCardsHtml(items, prevP, currP, options = {}) {
     if (x.type === 'detail-combo') {
       const d = yoy(x.o, x.v);
       const spCapLabel = currentLang === 'fr' ? msg('spAfgetopt') : 'afget.';
-      return `${openCard}<div class="label">${label}</div><div class="value">${fmt(x.v, 'money')}</div><div class="delta ${cls(d, false)}">${d >= 0 ? '+' : ''}${pct.format(d)}% ${msg('vs')} ${fmtPeriod(prevP)} (${fmt(x.o, 'money')})</div><div class="delta neu">S/P ${pct.format(x.sp)}% · ${spCapLabel} ${pct.format(x.spCap)}%</div>${kpiCompareHtml(x, prevP, currP)}</div>`;
+      return `${openCard}<div class="label">${label}</div><div class="value">${fmt(x.v, 'money')}</div><div class="delta ${cls(d, false)}">${d >= 0 ? '+' : ''}${pct.format(d)}% ${msg('vs')} ${kpiComparisonPeriod(prevP)} (${fmt(x.o, 'money')})</div><div class="delta neu">S/P ${pct.format(x.sp)}% · ${spCapLabel} ${pct.format(x.spCap)}%</div>${kpiCompareHtml(x, prevP, currP)}</div>`;
     }
 
     const d = x.type === 'pct' ? ppDelta(x.o, x.v) : yoy(x.o, x.v);
     if (x.type === 'pct') {
-      return `${openCard}<div class="label">${label}</div><div class="value">${fmt(x.v, x.type)}</div><div class="delta ${cls(d, x.invert)}">${d >= 0 ? '+' : ''}${pct.format(d)}% ${msg('vs')} ${fmtPeriod(prevP)} (${pct.format(n(x.o))}%)</div>${compareHtml}</div>`;
+      return `${openCard}<div class="label">${label}</div><div class="value">${fmt(x.v, x.type)}</div><div class="delta ${cls(d, x.invert)}">${d >= 0 ? '+' : ''}${pct.format(d)}% ${msg('vs')} ${kpiComparisonPeriod(prevP)} (${pct.format(n(x.o))}%)</div>${compareHtml}</div>`;
     }
     const amountDelta = x.v - x.o;
     const showPreviousAmount = x.compareAmountMode === 'previous';
     const amountText = showPreviousAmount ? fmt(x.o, x.type) : (x.dynamicCategory ? fmt(amountDelta, x.type) : fmt(x.o, x.type));
     const amountPrefix = (!showPreviousAmount && x.dynamicCategory && amountDelta > 0) ? '+' : '';
-    return `${openCard}<div class="label">${label}</div><div class="value">${fmt(x.v, x.type)}</div><div class="delta ${cls(d, x.invert)}">${d >= 0 ? '+' : ''}${pct.format(d)}% ${msg('vs')} ${prevP} <span style="opacity:.7">(${amountPrefix}${amountText})</span></div>${compareHtml}</div>`;
+    return `${openCard}<div class="label">${label}</div><div class="value">${fmt(x.v, x.type)}</div><div class="delta ${cls(d, x.invert)}">${d >= 0 ? '+' : ''}${pct.format(d)}% ${msg('vs')} ${kpiComparisonPeriod(prevP)} <span style="opacity:.7">(${amountPrefix}${amountText})</span></div>${compareHtml}</div>`;
   }).join('');
 }
 
@@ -3631,7 +3645,7 @@ function barCompareHtml(labels, a, b, la, lb, type, color, parentCategory = '', 
     return `<div class="bars">` + labels.map((l, i) => {
       const threshold = spThresholdForLabel(l, parentCategory);
       const delta = options.showDelta ? (options.absolutePctDelta ? barAbsolutePctDeltaTextHtml(a[i], b[i], !!options.invertDelta) : barDeltaTextHtml(a[i], b[i], !!options.invertDelta)) : '';
-      return `<div class="barrow"><div class="barlabel">${l}</div><div class="bararea">${line(la, a[i], 'prevPeriod', threshold, l)}${line(lb, b[i], 'currPeriod', threshold, l, delta)}</div></div>`;
+      return `<div class="barrow"><div class="barlabel">${l}</div><div class="bararea">${line(lb, b[i], 'currPeriod', threshold, l)}${line(la, a[i], 'prevPeriod', threshold, l, delta)}</div></div>`;
     }).join('') + `</div>`;
   }
 
@@ -3640,8 +3654,8 @@ function barCompareHtml(labels, a, b, la, lb, type, color, parentCategory = '', 
   return `<div class="bars">` + labels.map((l, i) => {
     const delta = options.showDelta ? (options.absolutePctDelta ? barAbsolutePctDeltaTextHtml(a[i], b[i], !!options.invertDelta) : barDeltaTextHtml(a[i], b[i], !!options.invertDelta)) : '';
     return `<div class="barrow"><div class="barlabel">${l}</div><div class="bararea">` +
-    `<div class="barline"><div class="period">${la}</div><div class="track"><div class="fill prevPeriod" style="width:${Math.abs(a[i]) / max * 100}%"></div></div><div class="barDeltaSlot"></div><div class="value">${fmt(a[i], type)}</div></div>` +
-    `<div class="barline"><div class="period">${lb}</div><div class="track"><div class="fill currPeriod" style="width:${Math.abs(b[i]) / max * 100}%"></div></div><div class="barDeltaSlot">${delta}</div><div class="value">${fmt(b[i], type)}</div></div>` +
+    `<div class="barline"><div class="period">${lb}</div><div class="track"><div class="fill currPeriod" style="width:${Math.abs(b[i]) / max * 100}%"></div></div><div class="barDeltaSlot"></div><div class="value">${fmt(b[i], type)}</div></div>` +
+    `<div class="barline"><div class="period">${la}</div><div class="track"><div class="fill prevPeriod" style="width:${Math.abs(a[i]) / max * 100}%"></div></div><div class="barDeltaSlot">${delta}</div><div class="value">${fmt(a[i], type)}</div></div>` +
     `</div></div>`;
   }).join('') + `</div>`;
 }
@@ -3697,10 +3711,10 @@ function barCompareHtmlWithPreviousYears(labels, a, b, la, lb, type, color, pare
       const yearDeltaText = isPct || options?.absolutePctDelta ? `${yearDelta >= 0 ? '+' : ''}${pct.format(yearDelta)} ptn` : `${yearDelta >= 0 ? '+' : ''}${pct.format(yearDelta)}%`;
       const yearDeltaHtml = yearDelta === null ? '' : `<span class="previousYearsDelta ${cls(yearDelta, !!options?.invertDelta)}">${yearDeltaText}</span>`;
       return `<div class="barline previousYearLine"><div class="period">${esc(fmtPeriod(year.period))}</div><div class="track"><div class="fill" style="width:${Math.abs(value) / max * 100}%"></div></div><div class="barDeltaSlot">${yearDeltaHtml}</div><div class="value">${fmt(value, type)}</div></div>`;
-    }).join('');
+    }).reverse().join('');
     return `<div class="barrow"><div class="barlabel">${l}</div><div class="bararea">` +
-    `<div class="barline"><div class="period">${la}</div><div class="track"><div class="fill prevPeriod" style="width:${Math.abs(a[i]) / max * 100}%"></div></div><div class="barDeltaSlot"></div><div class="value">${fmt(a[i], type)}</div></div>` +
-    `<div class="barline"><div class="period">${lb}</div><div class="track"><div class="fill currPeriod" style="width:${Math.abs(b[i]) / max * 100}%"></div></div><div class="barDeltaSlot">${delta}</div><div class="value">${fmt(b[i], type)}</div></div>` +
+    `<div class="barline"><div class="period">${lb}</div><div class="track"><div class="fill currPeriod" style="width:${Math.abs(b[i]) / max * 100}%"></div></div><div class="barDeltaSlot"></div><div class="value">${fmt(b[i], type)}</div></div>` +
+    `<div class="barline"><div class="period">${la}</div><div class="track"><div class="fill prevPeriod" style="width:${Math.abs(a[i]) / max * 100}%"></div></div><div class="barDeltaSlot">${delta}</div><div class="value">${fmt(a[i], type)}</div></div>` +
     yearLines +
     `</div></div>`;
   }).join('') + `</div>`;
@@ -3808,7 +3822,7 @@ function vervalRatioBarsHtml(data, key, currentPeriod) {
     .map(period => vervalRatioForPeriod(data, key, period))
     .filter(x => x.verdiendePremie || x.vervalPremie);
   if (!items.length) return `<div class="portfolioNoData">${msg('portefeuilleEmpty')}</div>`;
-  return `<div class="vervalRatioBars">` + items.map(x => {
+  return `<div class="vervalRatioBars">` + [...items].sort((a, b) => pkey(b.period) - pkey(a.period)).map(x => {
     const width = Math.max(2, Math.min(100, Math.abs(x.ratio)));
     return `<div class="vervalRatioLine"><div class="vervalRatioPeriod">${esc(x.period)}</div><div class="vervalRatioTrack"><div class="vervalRatioFill" style="width:${width}%"></div><div class="vervalRatioValue">${pct.format(x.ratio)}% <span class="ratioAmounts">(${euro.format(x.vervalPremie)} vs ${euro.format(x.verdiendePremie)})</span></div></div></div>`;
   }).join('') + `</div>`;
@@ -3853,22 +3867,97 @@ function renderVervalGroup(cat, rows, prevP, currP, data) {
   return categoryBlockHtml(cat, `${prevP} → ${currP}`, metrics + cards);
 }
 
+function progressionCompositionBars(data, cat, ordered, labels, vals, prevP, currP, counts = false) {
+  const fields = counts ? [cols.prodAantal, cols.vervalAantal] : [cols.prodPremie, cols.vervalPremie, cols.trans];
+  const indexes = counts ? [6, 8] : [5, 7, 13];
+  const resultField = counts ? cols.progAantal : cols.progPremie;
+  const type = counts ? 'num' : 'money';
+  const names = [msg('productie'), msg('verval'), msg('transformatie')];
+  const periods = [prevP, currP].map(period => ({
+    period, series: fields.map(field => vals(field, period)), totals: vals(resultField, period)
+  }));
+  if (previousYearsMode) {
+    const history = fields.map((field, i) => previousYearsSeriesForProduction(data, cat, ordered, currP, field, indexes[i]));
+    const totals = previousYearsSeriesForProduction(data, cat, ordered, currP, resultField, counts ? 12 : 9);
+    (history[0] || []).forEach(year => periods.push({
+      period: year.period,
+      series: history.map(series => series.find(item => item.period === year.period)?.values || ordered.map(() => 0)),
+      totals: totals.find(item => item.period === year.period)?.values || ordered.map(() => 0)
+    }));
+  }
+  const history = periods.slice(2).map(entry => ({ period: entry.period, values: entry.totals }));
+  const maxMagnitude = Math.max(1, ...periods.flatMap(entry => entry.totals.map(value => Math.abs(n(value)))));
+  const holder = document.createElement('div');
+  holder.innerHTML = barCompareHtmlWithPreviousYears(
+    labels, periods[0].totals, periods[1].totals, prevP, currP,
+    type, 'blue', '', { showDelta: true }, history
+  );
+  holder.querySelectorAll('.barrow').forEach((row, i) => {
+    row.querySelectorAll('.barline').forEach((line, periodIndex) => {
+      const shownPeriod = line.querySelector('.period')?.textContent.trim();
+      const entry = periods.find(item => fmtPeriod(item.period) === shownPeriod || item.period === shownPeriod);
+      if (!entry) return;
+      const values = entry.series.map(series => n(series[i]));
+      const sum = values[0] - values[1] + (counts ? 0 : values[2]);
+      const total = n(entry.totals[i]);
+      let formula = names[0] + ' ' + fmt(values[0], type) + ' − ' +
+        names[1] + ' ' + fmt(values[1], type);
+      if (!counts) formula += ' + ' + names[2] + ' ' + fmt(values[2], type);
+      const mismatch = Math.abs(sum - total) > (counts ? 0 : 1);
+      formula += (mismatch ? ' ≠ ' : ' = ') + fmt(total, type);
+      if (mismatch) formula += ' · ' + (currentLang === 'fr'
+        ? 'Le total PDF diffère de la somme des composants.'
+        : 'Het PDF-totaal wijkt af van de som van de onderdelen.');
+      const track = line.querySelector('.track');
+      if (track) {
+        track.className = 'progressTrack';
+        const fill = track.querySelector('.fill');
+        if (fill) {
+          const positive = total >= 0;
+          fill.className = 'progressFill ' + (positive ? 'pos' : 'neg') + ' ' + (entry.period === currP ? 'currPeriod' : 'prevPeriod');
+          fill.style.cssText = (positive ? 'left:50%;' : 'right:50%;') +
+            'width:' + (Math.abs(total) / maxMagnitude * 48) + '%;' +
+            (total === 0 ? 'display:none;' : '') +
+            (entry.period !== currP ? 'background:linear-gradient(90deg,#8fb4dc,#003b71);' : '');
+        }
+        track.dataset.period = entry.period;
+        track.dataset.amount = formula;
+        track.setAttribute('onmouseenter', 'showProdBarTip(event,this)');
+        track.setAttribute('onmousemove', 'showProdBarTip(event,this)');
+        track.setAttribute('onmouseleave', 'hideProdBarTip()');
+        track.setAttribute('onfocus', 'showProdBarTip(event,this)');
+        track.setAttribute('onblur', 'hideProdBarTip()');
+        track.setAttribute('aria-label', formula);
+        track.setAttribute('role', 'img');
+        track.tabIndex = 0;
+      }
+    });
+  });
+  return holder.innerHTML;
+}
 function renderProgressieGroup(cat, rows, prevP, currP, data) {
   const { ordered, labels, vals, head, prevHead } = groupContext(cat, rows, prevP, currP);
-  const dProg = yoy(n(prevHead[cols.progPremie]), n(head[cols.progPremie]));
-  const progHistory = previousYearsSeriesForProduction(data, cat, ordered, currP, cols.progPremie, 9);
-  const progAantalHistory = previousYearsSeriesForProduction(data, cat, ordered, currP, cols.progAantal, 12);
-  const transHistory = previousYearsSeriesForProduction(data, cat, ordered, currP, cols.trans, 13);
-  const metrics = `<div class="split split-2">` +
-    metricHtml(`${msg('progressiepremie')} ${currP}`, `<span class="${cls(n(head[cols.progPremie]))}">${euro.format(n(head[cols.progPremie]))}</span>`, deltaHtml(dProg, n(prevHead[cols.progPremie]), prevP, 'money')) +
-    metricHtml(msg('transformatie'), `<span class="${cls(n(head[cols.trans]))}">${euro.format(n(head[cols.trans]))}</span>`) +
-    `</div>`;
-  const cards = `<div class="miniGrid">` +
-    miniCardHtml(msg('progressiepremie'), barCompareHtmlWithPreviousYears(labels, vals(cols.progPremie, prevP), vals(cols.progPremie, currP), prevP, currP, 'money', 'blue', '', { showDelta: true }, progHistory)) +
-    miniCardHtml(msg('aantalProgressiezaken'), barCompareHtmlWithPreviousYears(labels, vals(cols.progAantal, prevP), vals(cols.progAantal, currP), prevP, currP, 'num', 'blue', '', { showDelta: true }, progAantalHistory)) +
-    miniCardHtml(msg('transformatie'), barCompareHtmlWithPreviousYears(labels, vals(cols.trans, prevP), vals(cols.trans, currP), prevP, currP, 'money', 'blue', '', { showDelta: true }, transHistory)) +
-    `</div>`;
-  return categoryBlockHtml(cat, `${prevP} → ${currP}`, metrics + cards);
+  const equationCards = (counts = false) => {
+    const result = counts ? cols.progAantal : cols.progPremie;
+    const type = counts ? 'num' : 'money';
+    const fields = counts ? [cols.prodAantal, cols.vervalAantal] : [cols.prodPremie, cols.vervalPremie, cols.trans];
+    const names = [msg('productie'), msg('verval'), msg('transformatie')];
+    const sum = n(head[fields[0]]) - n(head[fields[1]]) + (counts ? 0 : n(head[fields[2]]));
+    const mismatch = Math.abs(sum - n(head[result])) > (counts ? 0 : 1);
+    return '<div class="progressEquationCards' + (counts ? ' progressCountCards' : '') + '">' +
+      metricHtml((counts ? msg('aantalProgressiezaken') : msg('progressiepremie')) + ' ' + currP,
+        '<span class="' + cls(n(head[result])) + '">' + fmt(n(head[result]), type) + '</span>',
+        deltaHtml(yoy(n(prevHead[result]), n(head[result])), n(prevHead[result]), prevP, type)) +
+      fields.map((field, i) => '<span class="progressEquationOperator">' + ['=', '−', '+'][i] + '</span>' +
+        metricHtml(names[i], fmt(n(head[field]), type),
+          deltaHtml(yoy(n(prevHead[field]), n(head[field])), n(prevHead[field]), prevP, type, i === 1))).join('') + '</div>' +
+      (mismatch ? '<div class="progressCompositionEquation">' + (currentLang === 'fr' ? 'Le total PDF diffère de la somme des composants.' : 'Het PDF-totaal wijkt af van de som van de onderdelen.') + '</div>' : '');
+  };
+  const cards = '<div class="miniGrid progressCompositionGrid">' +
+    miniCardHtml(msg('progressiepremie'), progressionCompositionBars(data, cat, ordered, labels, vals, prevP, currP)) +
+    miniCardHtml(msg('aantalProgressiezaken'), progressionCompositionBars(data, cat, ordered, labels, vals, prevP, currP, true)) +
+    '</div>';
+  return categoryBlockHtml(cat, prevP + ' → ' + currP, equationCards() + equationCards(true) + cards);
 }
 
 function renderSchadeGrouped(data, prevP, currP) {
@@ -3920,8 +4009,8 @@ function renderSchadeGroup(cat, rows, prevP, currP, data) {
     `</div>`;
   const cards = `<div class="miniGrid">` +
     miniCardHtml(schadelastTitle, barCompareHtmlWithPreviousYears(labelHtml, vals(cols.schadelast, prevP), vals(cols.schadelast, currP), prevP, currP, 'money', 'red', '', { showDelta: true, invertDelta: true }, schadelastHistory)) +
-    miniCardHtml(msg('spNietAfgetopt'), barCompareHtmlWithPreviousYears(labelHtml, vals(cols.sp, prevP), vals(cols.sp, currP), prevP, currP, 'pct', 'purple', cat, { showDelta: true, invertDelta: true, absolutePctDelta: true }, spHistory)) +
     miniCardHtml(afgetopteSchadelastTitle, barCompareHtmlWithPreviousYears(labelHtml, vals(cols.schadeCap, prevP), vals(cols.schadeCap, currP), prevP, currP, 'money', 'red', '', { showDelta: true, invertDelta: true }, schadeCapHistory)) +
+    miniCardHtml(msg('spNietAfgetopt'), barCompareHtmlWithPreviousYears(labelHtml, vals(cols.sp, prevP), vals(cols.sp, currP), prevP, currP, 'pct', 'purple', cat, { showDelta: true, invertDelta: true, absolutePctDelta: true }, spHistory)) +
     miniCardHtml(msg('spAfgetopt'), barCompareHtmlWithPreviousYears(labelHtml, vals(cols.spCap, prevP), vals(cols.spCap, currP), prevP, currP, 'pct', 'purple', cat, { showDelta: true, invertDelta: true, absolutePctDelta: true }, spCapHistory)) +
     miniCardHtml(msg('aantalSchadegevallen'), barCompareHtmlWithPreviousYears(labelHtml, vals(cols.schadeAantal, prevP), vals(cols.schadeAantal, currP), prevP, currP, 'num', 'red', '', { showDelta: true, invertDelta: true }, schadeAantalHistory)) +
     miniCardHtml(msg('verdiendePremie'), barCompareHtmlWithPreviousYears(labelHtml, vals(cols.verdiend, prevP), vals(cols.verdiend, currP), prevP, currP, 'money', 'blue', '', { showDelta: true }, verdiendHistory)) +
@@ -4042,8 +4131,9 @@ function portfolioPeriodComparisonBars(data, key, prevP, currP) {
 
   const periodDelta = yoy(prevVal, currVal);
   const currH = Math.max(2, Math.abs(currVal) / max * 100);
+  const periodDeltaY = Math.round(10 + currH * 1.15);
   if (yearItems.length) {
-    barsWithDeltas.push(`<div class="portfolioCompareDelta ${cls(periodDelta)}">${periodDelta >= 0 ? '+' : ''}${pct.format(periodDelta)}%</div>`);
+    barsWithDeltas.push(`<div class="portfolioCompareDelta periodComparisonDelta ${cls(periodDelta)}" style="--period-delta-y:${periodDeltaY}px">${periodDelta >= 0 ? '+' : ''}${pct.format(periodDelta)}%</div>`);
   }
   barsWithDeltas.push(`<div class="portfolioCompareBarCol">
     <div class="portfolioBarValue">${euro.format(currVal)}<small>${esc(currP)}</small></div>

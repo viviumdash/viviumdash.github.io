@@ -34,12 +34,12 @@ body.topInfoReady.topInfoCollapsed .hero,body.topInfoReady.topInfoCollapsed #imp
 .kpiOverviewGrid{margin:0}
 .kpiOverviewGrid .kpi{height:auto;min-height:142px;overflow:visible}
 .kpiCompareHistory{margin-top:3px;padding-top:7px;border-top:1px solid #e6eef7;display:flex;flex-direction:column;gap:5px}
-.kpiCompareHistoryLine{display:grid;grid-template-columns:54px minmax(68px,1fr) auto;gap:6px;align-items:center}
+.kpiCompareHistoryLine{display:grid;grid-template-columns:43px minmax(68px,1fr) 58px;gap:3px;align-items:center}
 .kpiCompareHistoryLine .kpiCompareTrack,.kpiCompareHistoryLine .kpiCompareZeroTrack{min-width:0}
 .kpiCompareHistoryLine .kpiCompareZeroTrack{height:14px;border:1px solid #d6e4f2;border-radius:999px;background:#eef2f7;overflow:hidden;box-shadow:inset 0 1px 3px rgba(15,23,42,.05)}
 .kpiCompareHistoryLine .kpiCompareZeroTrack::before{top:1px;bottom:1px}
 .kpiCompareHistoryLine .kpiCompareZeroFill{top:3px;height:8px}
-@media(max-width:640px){.kpiCompareHistoryLine{grid-template-columns:54px minmax(54px,1fr) auto}}
+@media(max-width:640px){.kpiCompareHistoryLine{grid-template-columns:43px minmax(54px,1fr) 58px}}
 .kpiOverviewEmpty{border:1px dashed #cbdff2;border-radius:14px;background:#f8fbff;color:var(--muted);font-size:13px;font-weight:850;padding:16px;text-align:center}
 .kpiSelectorWrap{position:relative;display:none;align-items:center}
 .dashboardToolbar.kpiToolbar .viewDropdownWrap,.dashboardToolbar.kpiToolbar .drillBtn{display:none}
@@ -90,8 +90,16 @@ h3{font-size:17px;margin:0 0 12px}
 /* ─── Bars ──────────────────────────────────────────────────────────────── */
 .bars{display:flex;flex-direction:column;gap:14px}
 .barrow{display:block}
-.barlabel{font-weight:400;margin-bottom:8px}.barValueDelta{font-size:inherit;font-weight:950;white-space:nowrap}.barDeltaSlot{text-align:center;font-size:13px;font-weight:950;white-space:nowrap;font-variant-numeric:tabular-nums}.barrow:has(.catMainText.hasSubs){position:relative;padding:0 0 12px;margin:0 0 10px}.barrow:has(.catMainText.hasSubs)::after{content:"";position:absolute;left:0;right:0;bottom:0;height:1px;background:linear-gradient(90deg,rgba(0,59,113,.34),rgba(143,180,220,.22),rgba(143,180,220,0));border-radius:999px}
+.barlabel{font-weight:400;margin-bottom:8px}.barValueDelta{border-radius:999px;padding:2px 6px;font-size:13px;font-weight:950;background:#eef6fb;color:var(--muted);white-space:nowrap;text-align:center}.barValueDelta.pos{background:#dff4f7;color:var(--green)}.barValueDelta.neg{background:#fff0e8;color:var(--red)}.barDeltaSlot{text-align:center;font-size:13px;font-weight:950;white-space:nowrap;font-variant-numeric:tabular-nums}.barrow:has(.catMainText.hasSubs){position:relative;padding:0 0 12px;margin:0 0 10px}.barrow:has(.catMainText.hasSubs)::after{content:"";position:absolute;left:0;right:0;bottom:0;height:1px;background:linear-gradient(90deg,rgba(0,59,113,.34),rgba(143,180,220,.22),rgba(143,180,220,0));border-radius:999px}
 .bararea{display:flex;flex-direction:column;gap:6px}
+/* Delta centred between its comparison rows, without increasing row height. */
+.bararea>.barline>.barDeltaSlot{position:relative;align-self:stretch;overflow:visible}
+.bararea>.barline>.barDeltaSlot>.barValueDelta{position:absolute;left:18px;top:-3px;transform:translateY(-50%)}
+.bararea>.previousYearLine>.barDeltaSlot>.previousYearsDelta{position:absolute;left:18px;top:calc(100% + 5px);transform:translateY(-50%)}
+.bararea>.barline>.barDeltaSlot:has(>span)::before{content:"";position:absolute;left:0;top:-3px;transform:translateY(-50%) scale(-1,-1);width:11px;height:23px;background:currentColor;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 24'%3E%3Cpath d='M10 2C0 2 0 22 10 22M7 18l3 4-4 1' fill='none' stroke='black' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 24'%3E%3Cpath d='M10 2C0 2 0 22 10 22M7 18l3 4-4 1' fill='none' stroke='black' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/contain no-repeat}
+.bararea>.previousYearLine>.barDeltaSlot:has(>span)::before{top:calc(100% + 5px)}
+.bararea>.barline>.barDeltaSlot:has(>span.pos)::before{color:var(--green)}
+.bararea>.barline>.barDeltaSlot:has(>span.neg)::before{color:var(--red)}
 .barline{display:grid;grid-template-columns:82px minmax(130px,1fr) 72px 118px;gap:8px;align-items:center}
 .period{font-size:13px;font-weight:950;color:var(--muted)}
 .track{position:relative;height:20px;background:#eef2f7;border-radius:999px;overflow:hidden;border:1px solid #d6e4f2;box-shadow:inset 0 1px 4px rgba(15,23,42,.06)}
@@ -139,6 +147,18 @@ th{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--mute
 .split{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
 /* 2-koloms variant van split (vervangt inline style="grid-template-columns:repeat(2,1fr)") */
 .split-2{grid-template-columns:repeat(2,1fr)}
+.progressEquationCards{display:grid;grid-template-columns:minmax(180px,1.4fr) 20px minmax(120px,1fr) 20px minmax(120px,1fr) 20px minmax(120px,1fr);gap:8px;align-items:stretch;margin-bottom:12px}
+.progressEquationCards .metric{min-width:0}
+.progressEquationCards .metric:nth-child(3){background:linear-gradient(135deg,#edf5fc,#f8fbff);border-color:#cbdff2}
+.progressEquationCards .metric:nth-child(5){background:linear-gradient(135deg,#fff1e4,#fffaf5);border-color:#f4dcc5}
+.progressEquationCards .metric:nth-child(7){background:linear-gradient(135deg,#eaf7f8,#f7fcfc);border-color:#cbe7e9}
+.progressEquationCards .metric-val{overflow-wrap:anywhere}
+.progressEquationOperator{align-self:center;text-align:center;color:var(--blue);font-size:22px;font-weight:950}
+.progressCompositionGrid{grid-template-columns:repeat(2,minmax(0,1fr))}
+.progressCompositionGrid .miniCard{min-width:0}
+.progressCompositionEquation{font-size:10px;color:var(--muted);margin:4px 0 10px;line-height:1.4;text-align:right}
+@media(max-width:1100px){.progressCompositionGrid{grid-template-columns:1fr}.progressEquationCards{grid-template-columns:minmax(130px,1.4fr) 14px repeat(2,minmax(90px,1fr) 14px) minmax(90px,1fr);gap:4px}}
+@media(max-width:640px){.progressEquationCards{grid-template-columns:20px minmax(0,1fr)}.progressEquationCards>.metric:first-child{grid-column:1/-1}}
 .metric{background:#f8fafc;border:1px solid var(--line);border-radius:16px;padding:14px;text-align:left}
 .metric b{display:block;font-size:12px;text-transform:uppercase;color:var(--muted);letter-spacing:.05em}
 .metric-val{display:block;font-size:20px;font-weight:950;margin-top:6px}
@@ -373,6 +393,8 @@ th{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--mute
 .portfolioBarValue small{display:block;font-size:10.5px;color:var(--muted);font-weight:850;margin-top:2px}
 .portfolioBarLabel{font-size:12px;font-weight:950;color:var(--muted);text-align:center;line-height:1.18;min-height:29px}
 .portfolioCompareDelta{align-self:center;margin-bottom:115px;flex:0 0 auto;padding:9px 12px;border-radius:999px;background:#fff;border:1px solid var(--line);box-shadow:0 8px 18px rgba(15,23,42,.10);font-size:13px;font-weight:950;white-space:nowrap;position:relative;z-index:1}
+.portfolioCompareDelta.periodComparisonDelta{align-self:flex-end;margin-bottom:var(--period-delta-y,70px);background:linear-gradient(135deg,#fff1e4,#fff8f1);border-color:#f5b879;color:var(--orange);box-shadow:0 8px 18px rgba(245,130,32,.18)}
+.portfolioCompareDelta.periodComparisonDelta.pos,.portfolioCompareDelta.periodComparisonDelta.neg{color:var(--orange)}
 .portfolioAmounts{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}
 .portfolioAmountItem{border:1px solid var(--line);border-radius:14px;padding:13px;background:#fff}
 .portfolioAmountItem b{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);line-height:1.25}
@@ -1042,7 +1064,7 @@ th{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--mute
 .view360HistoryDelta{font-size:10.5px;font-weight:950;border-radius:999px;padding:2px 6px;justify-self:start;background:#eef6fb;color:var(--muted)}
 .view360HistoryDelta.pos{background:#dff4f7;color:var(--green)}
 .view360HistoryDelta.neg{background:#fff0e8;color:var(--red)}
-.previousYearsDelta{border-radius:999px;padding:2px 6px;font-size:10.5px;font-weight:950;background:#eef6fb;color:var(--muted);white-space:nowrap;text-align:center}
+.previousYearsDelta{border-radius:999px;padding:2px 6px;font-size:13px;font-weight:950;background:#eef6fb;color:var(--muted);white-space:nowrap;text-align:center}
 .previousYearsDelta.pos{background:#dff4f7;color:var(--green)}
 .previousYearsDelta.neg{background:#fff0e8;color:var(--red)}
 .barline.previousYearLine{margin-top:4px}
@@ -1210,7 +1232,7 @@ th{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--mute
 .kpi-subvalue,.dynamicCategoryKpi .kpi-subvalue{font-size:20px!important;line-height:1.15!important;margin-top:2px!important}
 .kpi .delta,.dynamicCategoryKpi .delta{font-size:13px!important;font-weight:950!important;line-height:1.28!important;margin-top:5px!important;text-align:left!important}
 .kpiCompare{margin-top:auto;padding-top:10px;display:flex;flex-direction:column;gap:6px}
-.kpiCompareLine{display:grid;grid-template-columns:54px minmax(68px,1fr) auto;gap:6px;align-items:center}
+.kpiCompareLine{display:grid;grid-template-columns:43px minmax(68px,1fr) 58px;gap:3px;align-items:center}
 .kpiComparePeriod{font-size:10.5px;font-weight:950;color:var(--muted);white-space:nowrap}
 .kpiCompareTrack{height:14px;border:1px solid #d6e4f2;border-radius:999px;background:#eef2f7;position:relative;overflow:hidden;box-shadow:inset 0 1px 3px rgba(15,23,42,.05)}
 .kpiCompareFill{position:absolute;left:3px;top:3px;height:8px;border-radius:999px;min-width:2px;max-width:calc(100% - 6px)}
@@ -1222,7 +1244,7 @@ th{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--mute
 .kpiCompareBubble.neg{background:#fff4e8;color:var(--red);border-color:#ffd2b0}
 .kpiCompare.zero{position:relative;gap:8px}
 .kpiCompareZeroRows{display:flex;flex-direction:column;gap:5px}
-.kpiCompareZeroLine{display:grid;grid-template-columns:54px minmax(68px,1fr) auto;gap:6px;align-items:center}
+.kpiCompareZeroLine{display:grid;grid-template-columns:43px minmax(68px,1fr) 58px;gap:3px;align-items:center}
 .kpiCompareZeroTrack{height:34px;position:relative;border-bottom:1px solid #d6e4f2}
 .kpiCompareZeroLine .kpiCompareZeroTrack{height:14px;border:1px solid #d6e4f2;border-radius:999px;background:#eef2f7;overflow:hidden;box-shadow:inset 0 1px 3px rgba(15,23,42,.05)}
 .kpiCompareZeroLine .kpiCompareZeroTrack::before{top:1px;bottom:1px}
