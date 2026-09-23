@@ -1615,5 +1615,25 @@ body:not(.topInfoReady) .hero .lead{color:#4d4d4d;font-family:'Open Sans',Arial,
 .barDeltaSlot>.neg{background:#fff4e8;color:#ff934c;border-color:#ffd2b0}
 @media(max-width:640px){.barline{grid-template-columns:62px minmax(72px,1fr) 78px 88px;gap:4px}.barDeltaSlot>.barValueDelta,.barDeltaSlot>.previousYearsDelta{font-size:9px;padding:2px 4px}.bararea>.barline>.barDeltaSlot>.barValueDelta,.bararea>.previousYearLine>.barDeltaSlot>.previousYearsDelta{left:13px}}
 .pdfExportRoot .pdfTestCategoryPage .barline{grid-template-columns:58px minmax(86px,1fr) 66px 86px!important}
+/* Vaste categoriekleuren voor tab- en sectie-iconen. */
+#tabProductie:before,#prodTitle:before{background-color:#009b77}
+#tabVerval:before,#vervalTitle:before{background-color:#ff934c}
+#tabProgressie:before,#progTitle:before{background-color:#6f5bb8}
+#tabSchade:before,#schadeTitle:before{background-color:#c0392b}
+#tabPortefeuille:before,#portefeuilleTitle:before{background-color:#0d1473}
+#tab360:before,#view360Title:before{background-color:#4f9ed7}
+#tabKpis:before,#kpiOverviewTitle:before{background:linear-gradient(90deg,#009b77 0 33.33%,#ff934c 33.33% 66.67%,#6f5bb8 66.67% 100%)}
+#tabKpis.active:before,#tabKpis:hover:before{background:#fff!important}
+/* Samenvattingskaarten volgen dezelfde kleuren als hun tabs. */
+.insightSummaryExport .insightItem:nth-child(1) .insightItemIcon{color:#009b77;background:rgba(0,155,119,.12)}
+.insightSummaryExport .insightItem:nth-child(2) .insightItemIcon{color:#ff934c;background:rgba(255,147,76,.16)}
+.insightSummaryExport .insightItem:nth-child(3) .insightItemIcon,.insightSummaryExport .insightItem:nth-child(4) .insightItemIcon{color:#c0392b;background:rgba(192,57,43,.12)}
+/* De flex-rij centreert iconen naast de tekst; geen extra verticale offset. */
+.tab:before{transform:none;vertical-align:middle}
+.titleExportRow h2,.portfolioPieHeader h2,.detailSectionTitle{display:inline-flex;align-items:center}
+.titleExportRow h2:before,.portfolioPieHeader h2:before,.detailSectionTitle:before{transform:none;vertical-align:middle;flex:0 0 20px}
+/* De periodetekst deelt weer de echte tekstbaseline van de tabtitel. */
+.sectionTitleWrap h2{display:inline-block}
+.sectionTitleWrap h2:before{vertical-align:middle;transform:none}
 @media(max-width:980px){body:not(.topInfoReady) .hero{grid-template-columns:1fr;min-height:0}body:not(.topInfoReady) .hero .panel{border-right:0;border-bottom:1px solid rgba(214,228,242,.72)}body:not(.topInfoReady) .upload-zone{min-height:390px}}
 @media(max-width:640px){body:not(.topInfoReady) .hero .panel{padding:34px 24px}body:not(.topInfoReady) .upload{padding:24px}body:not(.topInfoReady) .hero #pageTitle{font-size:24px!important}.heroBenefits{grid-template-columns:1fr}.heroBenefit{white-space:normal}body:not(.topInfoReady) .upload-zone{min-height:350px;padding:24px}.heroUploadButton{min-width:0;width:100%}}

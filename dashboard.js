@@ -640,11 +640,12 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!section || !['productie','verval','progressie','schade','detail'].includes(section.id)) return;
     toggleDashboardBlockVisibility(cat, '.p-18');
   });
-$('kpis')?.addEventListener('click', e => {
+  $('kpis')?.addEventListener('click', e => {
     const spToggle = e.target.closest('.kpiSpToggle');
     if (spToggle) {
       e.preventDefault();
       e.stopPropagation();
+      hideSpToggleTip();
       const key = spToggle.dataset.kpiKey || '';
       showCappedSpKpis = !showCappedSpKpis;
       cappedSpKpiKeys = new Set();
@@ -662,6 +663,20 @@ $('kpis')?.addEventListener('click', e => {
     if (!card) return;
     e.preventDefault();
     jumpToKpiCategory(card.dataset.kpiCat);
+  });
+  $('kpis')?.addEventListener('mouseover', e => {
+    const button = e.target.closest('.kpiSpToggle');
+    if (button) showSpToggleTip(button);
+  });
+  $('kpis')?.addEventListener('mouseout', e => {
+    if (e.target.closest('.kpiSpToggle')) hideSpToggleTip();
+  });
+  $('kpis')?.addEventListener('focusin', e => {
+    const button = e.target.closest('.kpiSpToggle');
+    if (button) showSpToggleTip(button);
+  });
+  $('kpis')?.addEventListener('focusout', e => {
+    if (e.target.closest('.kpiSpToggle')) hideSpToggleTip();
   });
 });
 
@@ -2474,6 +2489,34 @@ function hideProdBarTip() {
   const tip = document.getElementById('prodBarTooltip');
   if (tip) tip.style.display = 'none';
 }
+function spToggleHelpText() {
+  return currentLang === 'fr'
+    ? 'Cliquez ici pour basculer\nentre S/P et S/P écrêté'
+    : 'Klik hier om te switchen\ntussen S/P en S/P afgetopt';
+}
+function showSpToggleTip(button) {
+  let tip = $('kpiSpToggleTooltip');
+  if (!tip) {
+    tip = document.createElement('div');
+    tip.id = 'kpiSpToggleTooltip';
+    tip.className = 'prodBarTooltip';
+    tip.setAttribute('role', 'tooltip');
+    document.body.appendChild(tip);
+  }
+  tip.textContent = spToggleHelpText();
+  tip.style.transform = 'none';
+  tip.style.maxWidth = 'min(340px, calc(100vw - 24px))';
+  tip.style.whiteSpace = 'pre-line';
+  tip.style.display = 'block';
+  const rect = button.getBoundingClientRect();
+  tip.style.left = Math.max(12, Math.min(rect.left, window.innerWidth - tip.offsetWidth - 12)) + 'px';
+  const above = rect.top - tip.offsetHeight - 8;
+  tip.style.top = (above >= 12 ? above : rect.bottom + 8) + 'px';
+}
+function hideSpToggleTip() {
+  const tip = $('kpiSpToggleTooltip');
+  if (tip) tip.style.display = 'none';
+}
 
 const ICON_SUMMARY_PROD = `<svg class="insightIconSvg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>`;
 const ICON_SUMMARY_VERVAL = `<svg class="insightIconSvg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="22 17 13.5 8.5 8.5 13.5 2 7"/><polyline points="16 17 22 17 22 11"/></svg>`;
@@ -3541,7 +3584,7 @@ function kpiCardsHtml(items, prevP, currP, options = {}) {
       const previous = capped ? x.o2 : x.o;
       const toggleLabel = capped ? msg('spAfgetopt') : 'S/P';
       const toggleClass = capped ? ' is-active' : '';
-      const toggleHtml = allowSpToggle ? `<button type="button" class="kpiSpToggle${toggleClass}" data-kpi-key="${esc(key)}" title="${esc(capped ? 'Toon S/P' : 'Toon afgetopte S/P')}">${esc(toggleLabel)}</button>` : '';
+      const toggleHtml = allowSpToggle ? `<button type="button" class="kpiSpToggle${toggleClass}" data-kpi-key="${esc(key)}" aria-label="${esc(`${toggleLabel}. ${spToggleHelpText().replace(/\n/g, ' ')}`)}">${esc(toggleLabel)}</button>` : '';
       const view = { ...x, v: value, o: previous, spToggleHtml: toggleHtml };
       const d = ppDelta(previous, value);
       const metric = capped ? msg('spAfgetopt') : 'S/P';
