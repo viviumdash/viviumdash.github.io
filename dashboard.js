@@ -208,7 +208,7 @@ const I18N = {
     prodNote: 'De gegevens hieronder tonen per hoofdcategorie eerst de hoofdrij en daaronder alle subcategorieën uit de CSV.', portefeuilleNote: 'De grafieken hieronder tonen de verdiende premie op TOTAAL NON LIFE-niveau: eerst de drie meest recente volledige jaren, daarnaast de laatste periode vorig jaar tegenover de laatste periode dit jaar.', portefeuilleSub: (a,b) => 'Verdiende premie TOTAAL NON LIFE. Volledige jaren apart; laatste periode: ' + a + ' versus ' + b + '.', portefeuilleYears: 'Voorbije 3 jaar', portefeuilleComparison: 'Laatste periode J vs J-1', portefeuilleEmpty: 'Geen portefeuillegegevens gevonden.', vorigJaar: 'Vorig jaar', huidigJaar: 'Dit jaar', vervalNote: 'De gegevens hieronder tonen per hoofdcategorie eerst de hoofdrij en daaronder alle subcategorieën uit de CSV, inclusief verval door klant en maatschappij.', progNote: 'Progressie wordt getoond als productie - verval + transformatie, per hoofdcategorie en subcategorie zoals aangeleverd in de CSV.', schadeNote: 'Interpretatie schade: een daling van schadegevallen, schadelast of S/P is positief en wordt groen weergegeven, een stijging is negatief.',
     comparison: (a,b) => 'Vergelijking ' + a + ' versus ' + b + '.', schadeComparison: (a,b) => 'Vergelijking ' + a + ' versus ' + b + '. Voor schade zijn lagere waarden beter: dalende schadelast en dalende S/P worden positief getoond.',
     noProd: 'Geen productiegegevens gevonden.', noVerval: 'Geen vervalgegevens gevonden.', noProg: 'Geen progressiegegevens gevonden.', noSchade: 'Geen schadegegevens gevonden.',
-    productie: 'Productie', verval: 'Verval', progressie: 'Progressie', schadelast: 'Schadelast', schade: 'Schade', productiepremie: 'Productiepremie', aantalZaken: 'Aantal zaken', aantalProductiezaken: 'Aantal productiezaken', vervalpremie: 'Vervalpremie', aantalVerval: 'Aantal verval', klantMaatschappij: 'Klant / maatschappij', aantalVervallenZaken: 'Aantal vervallen zaken', vervalKlant: 'Verval door klant', vervalMaatschappij: 'Verval door maatschappij', progressiepremie: 'Progressiepremie', aantalProgressiezaken: 'Aantal progressiezaken', transformatie: 'Transformatie', spNietAfgetopt: 'S/P niet afgetopt', afgetopteSchadelast: 'Afgetopte schadelast', spAfgetopt: 'S/P afgetopt', aantalSchadegevallen: 'Aantal schadegevallen', verdiendePremie: 'Verdiende premie', categorie: 'Categorie', aantal: 'Aantal', spAftop: 'S/P aftop', detailProductie: 'Productie', detailSchade: 'Schade', totaalPrefix: 'Totaal · ', productionPieTitle: 'Verdeling productie', productionPieSub: p => 'Totale productiepremie per tak voor ' + p + '.', productionPieEmpty: 'Geen productiegegevens gevonden voor de verdeling.', vervalPieTitle: 'Verdeling vervalpremie', vervalPieSub: p => 'Totale vervalpremie per tak voor ' + p + '.', vervalPieEmpty: 'Geen vervalgegevens gevonden voor de verdeling.', progressiePieTitle: 'Verdeling progressie', progressiePieSub: p => 'Totale progressiepremie per tak voor ' + p + '.', progressiePieEmpty: 'Geen progressiegegevens gevonden voor de verdeling.', schadePieTitle: 'Verdeling schadelast', schadePieSub: p => 'Totale schadelast per tak voor ' + p + '.', schadePieEmpty: 'Geen schadegegevens gevonden voor de verdeling.',
+    productie: 'Productie', verval: 'Verval', progressie: 'Progressie', schadelast: 'Schadelast', schade: 'Schade', productiepremie: 'Productiepremie', aantalZaken: 'Aantal zaken', aantalProductiezaken: 'Aantal productiezaken', vervalpremie: 'Vervalpremie', aantalVerval: 'Aantal verval', klantMaatschappij: 'Klant / maatschappij', aantalVervallenZaken: 'Aantal vervallen zaken', vervalKlant: 'Verval door klant', vervalMaatschappij: 'Verval door maatschappij', progressiepremie: 'Progressiepremie', aantalProgressiezaken: 'Aantal progressiezaken', transformatie: 'Transformatie', spNietAfgetopt: 'S/P niet afgetopt', afgetopteSchadelast: 'Afgetopte schadelast', spAfgetopt: 'S/P afgetopt', aantalSchadegevallen: 'Aantal schadegevallen', verdiendePremie: 'Verdiende premie', categorie: 'Categorie', aantal: 'Aantal', spAftop: 'S/P afgetopt', detailProductie: 'Productie', detailSchade: 'Schade', totaalPrefix: 'Totaal · ', productionPieTitle: 'Verdeling productie', productionPieSub: p => 'Totale productiepremie per tak voor ' + p + '.', productionPieEmpty: 'Geen productiegegevens gevonden voor de verdeling.', vervalPieTitle: 'Verdeling vervalpremie', vervalPieSub: p => 'Totale vervalpremie per tak voor ' + p + '.', vervalPieEmpty: 'Geen vervalgegevens gevonden voor de verdeling.', progressiePieTitle: 'Verdeling progressie', progressiePieSub: p => 'Totale progressiepremie per tak voor ' + p + '.', progressiePieEmpty: 'Geen progressiegegevens gevonden voor de verdeling.', schadePieTitle: 'Verdeling schadelast', schadePieSub: p => 'Totale schadelast per tak voor ' + p + '.', schadePieEmpty: 'Geen schadegegevens gevonden voor de verdeling.',
     labels: {'Auto':'Auto','Auto Vloten':'Vloten','Auto Niet Vloten':'Niet Vloten','Particulieren':'Particulieren','Particulieren Brand':'Brand','Particulieren BA':'BA','Particulieren Overige':'Overige','Ondernemingen':'Ondernemingen','Ondernemingen Brand':'Brand','Ondernemingen BA':'BA','Ondernemingen Overige':'Overige','Arbeidsongevallen':'Arbeidsongevallen','Rechtsbijstand':'Rechtsbijstand','Rechtsbijstand Stand Alone':'Rechtsbijstand','TOTAAL NON LIFE':'TOTAAL NON LIFE'}
   },
   fr: {
@@ -4952,6 +4952,8 @@ function renderProdCat(cat, rows, prevP, currP) {
   const catRows = rows.filter(r => r[cols.hoofd] === cat);
   const subs = [...new Set(catRows.map(r => r[cols.sub]))];
   const head = catRows.find(r => r[cols.sub] === cat && r[cols.periode] === currP) || {};
+  const prevHeader = kpiComparisonPeriod(prevP);
+  const currHeader = kpiComparisonPeriod(currP);
 
   const summary = [
     metricBlock(msg('productie'),   euro.format(n(head[cols.prodPremie]))),
@@ -4961,9 +4963,9 @@ function renderProdCat(cat, rows, prevP, currP) {
 
   const thead = `<tr>
     <th>${msg('categorie')}</th>
-    <th>PROD ${prevP}</th><th>PROD ${currP}</th><th>Δ PROD</th>
-    <th>${msg('verval')} ${prevP}</th><th>${msg('verval')} ${currP}</th><th>Δ ${msg('verval')}</th>
-    <th>PROGR ${prevP}</th><th>PROGR ${currP}</th><th>Δ PROGR</th>
+    <th>PROD ${prevHeader}</th><th>PROD ${currHeader}</th><th>Δ PROD</th>
+    <th>${msg('verval')} ${prevHeader}</th><th>${msg('verval')} ${currHeader}</th><th>Δ ${msg('verval')}</th>
+    <th>PROGR ${prevHeader}</th><th>PROGR ${currHeader}</th><th>Δ PROGR</th>
   </tr>`;
 
   const tbody = subs.map(s => {
@@ -4998,11 +5000,17 @@ function renderProdCat(cat, rows, prevP, currP) {
 function spCompareCell(prevValue, currValue) {
   return `<span class="spCompare"><span class="spPrev">${pct.format(prevValue)}%</span><span class="spArrow">&gt;</span><span class="spCurr">${pct.format(currValue)}%</span></span>`;
 }
+function spPointDeltaCell(prevValue, currValue) {
+  const delta = ppDelta(prevValue, currValue);
+  return `<span class="${cls(delta, true)}">${signedPointDelta(delta)}</span>`;
+}
 
 function renderSchadeCat(cat, rows, prevP, currP) {
   const catRows = rows.filter(r => r[cols.hoofd] === cat);
   const subs = [...new Set(catRows.map(r => r[cols.sub]))];
   const head = catRows.find(r => r[cols.sub] === cat && r[cols.periode] === currP) || {};
+  const prevHeader = kpiComparisonPeriod(prevP);
+  const currHeader = kpiComparisonPeriod(currP);
 
   const headSpThreshold = spThresholdForLabel(cat, cat);
   const summary = [
@@ -5013,8 +5021,9 @@ function renderSchadeCat(cat, rows, prevP, currP) {
 
   const thead = `<tr>
     <th>${msg('categorie')}</th>
-    <th>${msg('schadelast')} ${prevP}</th><th>${msg('schadelast')} ${currP}</th><th>Δ ${msg('schadelast')}</th>
-    <th>S/P ${prevP} &gt; ${currP}</th><th>${msg('spAftop')} ${prevP} &gt; ${currP}</th>
+    <th>${msg('schadelast')} ${prevHeader}</th><th>${msg('schadelast')} ${currHeader}</th><th>Δ ${msg('schadelast')}</th>
+    <th>S/P ${prevHeader} &gt; ${currHeader}</th><th>Δ S/P</th>
+    <th>${msg('spAftop')} ${prevHeader} &gt; ${currHeader}</th><th>Δ ${msg('spAftop')}</th>
   </tr>`;
 
   const tbody = subs.map(s => {
@@ -5027,7 +5036,9 @@ function renderSchadeCat(cat, rows, prevP, currP) {
       <td>${euro.format(n(b[cols.schadelast]))}</td>
       <td>${pctText(d, true)}</td>
       <td class="${spValueClass(n(b[cols.sp]), spThresholdForLabel(s, cat), s)}">${spCompareCell(n(a[cols.sp]), n(b[cols.sp]))}</td>
+      <td>${spPointDeltaCell(n(a[cols.sp]), n(b[cols.sp]))}</td>
       <td class="${spValueClass(n(b[cols.spCap]), spThresholdForLabel(s, cat), s)}">${spCompareCell(n(a[cols.spCap]), n(b[cols.spCap]))}</td>
+      <td>${spPointDeltaCell(n(a[cols.spCap]), n(b[cols.spCap]))}</td>
     </tr>`;
   }).join('');
 
