@@ -1599,6 +1599,7 @@ body:not(.topInfoReady) .hero .panel .upload-logo{filter:none;margin-left:-12px;
 .upload-zone{background:#fff;border-color:#c5d6e5}
 .upload-zone:hover{background:#edf3f7}
 .kpi .delta,.metric .delta{opacity:1}
+.kpis,.view360AnalysisGrid{--green:#009b77;--red:#c45a15}
 body:not(.topInfoReady) .hero #pageTitle,body:not(.topInfoReady) .upload-title{color:#0d1473}
 body:not(.topInfoReady) .hero .lead{color:#4d4d4d;font-family:'Open Sans',Arial,sans-serif}
 .drillBtn:not(.active),.drillBtn:not(.active):hover{background:#edf5fc;border-color:#cbdff2;color:#0d1473;box-shadow:none}

@@ -4594,7 +4594,7 @@ function ensureProductionPieLayout(mode, prevP, currP) {
   if (!grid) return;
   if (mode === 'progressie') {
     grid.classList.remove('portfolioPieGrid');
-    grid.innerHTML = `<div class="pieWrap progressWaterfallDuo"><div class="progressWaterfallPanel"><canvas id="productionPieCanvas" width="980" height="900"></canvas></div></div><div id="productionPieLegend" class="pieLegend"></div>`;
+    grid.innerHTML = `<div class="pieWrap progressWaterfallDuo"><div class="progressWaterfallPanel"><canvas id="productionPieCanvas" width="980" height="900"></canvas></div></div><div id="productionPieLegend" class="pieLegend"></div><div id="productionPieTooltip" class="pieTooltip portfolioPieTooltip progressWaterfallTooltip"></div>`;
     return;
   }
   grid.classList.add('portfolioPieGrid');
@@ -4637,6 +4637,7 @@ function renderComparisonPies(data, prevP, currP, mode) {
   if (prevTotalEl) prevTotalEl.innerHTML = `${totalLabel}: <b>${euro.format(prevTotal)}</b>`;
   if (currTotalEl) currTotalEl.innerHTML = `${totalLabel}: <b>${euro.format(currTotal)}</b>`;
 }
+const progressWaterfallColors = { productie: '#009b77', verval: '#ff934c', trans: '#6f5bb8', progressie: '#0d1473' };
 function getProgressWaterfallValues(data, period) {
   const row = totalRow(data, 'PRODUCTIE', period) || {};
   const productie = n(row[cols.prodPremie]);
@@ -4700,6 +4701,7 @@ function drawProgressWaterfallCanvas(canvas, values, period, prevValues = null, 
   const barW = Math.min(116, (x1 - x0) / bars.length * .42);
   const gap = ((x1 - x0) - bars.length * barW) / Math.max(1, bars.length - 1);
   const xs = bars.map((_,i)=>x0+i*(barW+gap));
+  const hitRects = [];
   const bottomRoundedRect = (x, top, width, height, radius = 7) => {
     const r = Math.min(radius, width / 2, height);
     ctx.beginPath();
@@ -4728,35 +4730,23 @@ function drawProgressWaterfallCanvas(canvas, values, period, prevValues = null, 
       bottomRoundedRect(x + (barW * .86 - prevW) / 2, top, prevW, bh, 7); ctx.fill();
       ctx.globalAlpha = 1;
       ctx.strokeStyle = '#0d1473'; ctx.lineWidth = 1.4; ctx.setLineDash([6,4]); bottomRoundedRect(x + (barW * .86 - prevW) / 2, top, prevW, bh, 7); ctx.stroke(); ctx.setLineDash([]);
+      hitRects.push({ index: i, mode, x: x + (barW * .86 - prevW) / 2, top, width: prevW, height: bh });
       ctx.restore();
       return;
     }
     const currW = Math.min(68, barW * .76);
     const x = baseX + (barW - currW) / 2;
-    const grad = ctx.createLinearGradient(x, top, x, bottom);
-    if (s.key === 'verval') { grad.addColorStop(0,'#0d1473'); grad.addColorStop(1,'#c5d6e5'); }
-    else if (s.key === 'trans') { grad.addColorStop(0,'#ff934c'); grad.addColorStop(1,'#fff4ed'); }
-    else if (s.key === 'progressie') { grad.addColorStop(0,'#043c93'); grad.addColorStop(1,'#c5d6e5'); }
-    else { grad.addColorStop(0,'#0d1473'); grad.addColorStop(1,'#c5d6e5'); }
-    ctx.fillStyle = grad;
+    const barColor = progressWaterfallColors[s.key];
+    ctx.fillStyle = barColor;
     ctx.save();
-    ctx.shadowColor = s.key === 'trans' ? 'rgba(255,147,76,.16)' : 'rgba(13,20,115,.13)';
+    ctx.shadowColor = 'rgba(13,20,115,.13)';
     ctx.shadowBlur = 22;
     ctx.shadowOffsetY = 10;
     bottomRoundedRect(x, top, currW, bh, 7); ctx.fill();
     ctx.restore();
-    ctx.save();
-    bottomRoundedRect(x, top, currW, bh, 7);
-    ctx.clip();
-    const gloss = ctx.createLinearGradient(x, top, x + currW, top);
-    gloss.addColorStop(0, 'rgba(255,255,255,.20)');
-    gloss.addColorStop(.38, 'rgba(255,255,255,0)');
-    gloss.addColorStop(1, 'rgba(13,20,115,.12)');
-    ctx.fillStyle = gloss;
-    ctx.fillRect(x, top, currW, bh);
-    ctx.restore();
-    ctx.strokeStyle = s.key === 'trans' ? 'rgba(255,147,76,.22)' : 'rgba(13,20,115,.16)';
+    ctx.strokeStyle = barColor;
     bottomRoundedRect(x, top, currW, bh, 7); ctx.stroke();
+    hitRects.push({ index: i, mode, x, top, width: currW, height: bh });
     ctx.fillStyle = '#0d1473'; ctx.font = '500 18px Lato,Arial'; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
     const labelVal = s.key === 'verval'
       ? '-' + euro.format(Math.abs(s.value))
@@ -4778,11 +4768,49 @@ function drawProgressWaterfallCanvas(canvas, values, period, prevValues = null, 
   };
   if (prevBars.length) prevBars.forEach((s,i) => drawBar(s, i, 'prev'));
   bars.forEach((s,i) => drawBar(s, i, 'curr'));
+  canvas._progressWaterfallState = { bars, prevBars, period, prevPeriod, hitRects };
 
   if (prevPeriod) {
     ctx.font = '700 13px Lato,Arial'; ctx.fillStyle = '#4d4d4d'; ctx.textAlign = 'right'; ctx.textBaseline = 'top';
     ctx.fillText(currentLang === 'fr' ? 'Pointillé bleu = période précédente' : 'Blauw gestippeld = vorige periode', x1, 18);
   }
+}
+function attachProgressWaterfallHover(canvas) {
+  if (!canvas || canvas._progressWaterfallHoverAttached) return;
+  canvas._progressWaterfallHoverAttached = true;
+  canvas.addEventListener('mousemove', e => {
+    const state = canvas._progressWaterfallState;
+    const tooltip = $('productionPieTooltip');
+    if (!state || !tooltip) return;
+    const rect = canvas.getBoundingClientRect();
+    const scale = Math.min(rect.width / canvas.width, rect.height / canvas.height);
+    const mx = (e.clientX - rect.left - (rect.width - canvas.width * scale) / 2) / scale;
+    const my = (e.clientY - rect.top - (rect.height - canvas.height * scale) / 2) / scale;
+    const hits = state.hitRects.filter(r => mx >= r.x && mx <= r.x + r.width && my >= r.top && my <= r.top + r.height);
+    const hit = hits.find(r => r.mode === 'curr') || hits[0];
+    if (!hit) {
+      tooltip.style.display = 'none';
+      canvas.style.cursor = '';
+      return;
+    }
+    const current = state.bars[hit.index];
+    const previous = state.prevBars[hit.index];
+    const signedEuro = value => `${value < 0 ? '-' : ''}${euro.format(Math.abs(value))}`;
+    const delta = previous ? current.value - previous.value : 0;
+    tooltip.innerHTML = `<strong>${esc(current.label)}</strong>` +
+      `<span class="muted">${esc(kpiComparisonPeriod(state.period))}: ${signedEuro(current.value)}</span>` +
+      `<span class="muted">${esc(kpiComparisonPeriod(state.prevPeriod))}: ${previous ? signedEuro(previous.value) : '—'}</span>` +
+      `<span class="muted">Δ: ${previous ? `${delta > 0 ? '+' : ''}${signedEuro(delta)}` : '—'}</span>`;
+    tooltip.style.display = 'block';
+    tooltip.style.left = e.clientX + 'px';
+    tooltip.style.top = e.clientY + 'px';
+    canvas.style.cursor = 'pointer';
+  });
+  canvas.addEventListener('mouseleave', () => {
+    const tooltip = $('productionPieTooltip');
+    if (tooltip) tooltip.style.display = 'none';
+    canvas.style.cursor = '';
+  });
 }
 function renderProgressWaterfall(data, currP, prevP = '') {
   const canvas = $('productionPieCanvas'), legend = $('productionPieLegend');
@@ -4796,6 +4824,7 @@ function renderProgressWaterfall(data, currP, prevP = '') {
   const pad = Math.max(1, (maxV - minV) * .14);
   const fixedScale = { lo: minV - pad, hi: maxV + pad };
   drawProgressWaterfallCanvas(canvas, values, currP, prevValues, prevP, fixedScale);
+  attachProgressWaterfallHover(canvas);
   const calc = `${euro.format(values.productie)} − ${euro.format(values.verval)} + ${euro.format(values.transformatie)} = ${euro.format(values.progressie)}`;
   const signedEuro = value => `${value < 0 ? '-' : ''}${euro.format(Math.abs(value))}`;
   const currentItem = (label, color, currDisplay, prevRaw, currRaw, invert=false) => {
@@ -4809,14 +4838,14 @@ function renderProgressWaterfall(data, currP, prevP = '') {
   };
   if (legend) legend.innerHTML = `<div class="netProgressBlock"><div class="netProgressHead"><div>${currentLang === 'fr' ? 'Calcul progression' : 'Berekening progressie'} <span>${esc(currP)}</span></div><div class="netProgressValue ${values.progressie >= 0 ? 'pos' : 'neg'}">${euro.format(values.progressie)}</div></div><div class="note" style="margin:0">${calc}</div></div>` +
     (prevValues
-      ? currentItem(msg('productie'), '#0d1473', values.productie, prevValues.productie, values.productie) +
-        currentItem(msg('verval'), '#0d1473', -values.verval, prevValues.verval, values.verval, true) +
-        currentItem(currentLang === 'fr' ? 'Transformation' : 'Transformatie', '#ff934c', values.transformatie, prevValues.transformatie, values.transformatie) +
-        currentItem(msg('progressie'), '#043c93', values.progressie, prevValues.progressie, values.progressie)
-      : periodItem(msg('productie'), '#0d1473', currP, values.productie) +
-        periodItem(msg('verval'), '#0d1473', currP, -values.verval) +
-        periodItem(currentLang === 'fr' ? 'Transformation' : 'Transformatie', '#ff934c', currP, values.transformatie) +
-        periodItem(msg('progressie'), '#043c93', currP, values.progressie)) +
+      ? currentItem(msg('productie'), progressWaterfallColors.productie, values.productie, prevValues.productie, values.productie) +
+        currentItem(msg('verval'), progressWaterfallColors.verval, -values.verval, prevValues.verval, values.verval, true) +
+        currentItem(currentLang === 'fr' ? 'Transformation' : 'Transformatie', progressWaterfallColors.trans, values.transformatie, prevValues.transformatie, values.transformatie) +
+        currentItem(msg('progressie'), progressWaterfallColors.progressie, values.progressie, prevValues.progressie, values.progressie)
+      : periodItem(msg('productie'), progressWaterfallColors.productie, currP, values.productie) +
+        periodItem(msg('verval'), progressWaterfallColors.verval, currP, -values.verval) +
+        periodItem(currentLang === 'fr' ? 'Transformation' : 'Transformatie', progressWaterfallColors.trans, currP, values.transformatie) +
+        periodItem(msg('progressie'), progressWaterfallColors.progressie, currP, values.progressie)) +
     (prevValues ? `<div class="contributionGroupTitle">${currentLang === 'fr' ? 'Période précédente' : 'Vorige periode'}</div>` +
       periodItem(msg('productie'), '#c5d6e5', prevP, prevValues.productie) +
       periodItem(msg('verval'), '#c5d6e5', prevP, -prevValues.verval) +
