@@ -245,7 +245,7 @@ function setText(id, text) { const el = $(id); if (el) el.textContent = text; }
 function setHtml(id, html) { const el = $(id); if (el) el.innerHTML = html; }
 function exportCopyLabel() { return currentLang === 'fr' ? 'Copier' : 'Kopiëren'; }
 function updateStaticLanguage() {
-  document.documentElement.lang = currentLang; document.title = 'Dashboard VIVIUM Non-Life';
+  document.documentElement.lang = currentLang; document.title = 'Dashboard Vivium Non-Life';
   setText('languageLabel', currentLang === 'fr' ? 'Langue' : 'Taal / Langue'); setText('pageTitle', msg('pageTitle')); setHtml('pageLead', msg('pageLead')); setText('uploadTitle', msg('uploadTitle')); setText('uploadHint', msg('uploadHint')); setText('downloadCsvBtn', msg('downloadCsv')); setText('exportPdfBtn', msg('exportPdf'));
   setText('heroEyebrow', currentLang === 'fr' ? 'Chiffres clés non-vie' : 'Kerncijfers non-life'); setText('heroBenefitAnalysis', currentLang === 'fr' ? 'Analyse automatique' : 'Automatische analyse'); setText('heroBenefitCompare', currentLang === 'fr' ? 'Comparaison directe' : 'Direct vergelijkbaar'); setText('heroBenefitSafe', currentLang === 'fr' ? 'Sécurisé' : 'Veilig'); setText('heroUploadButton', currentLang === 'fr' ? 'Sélectionner le PDF' : 'PDF selecteren'); setText('heroUploadMeta', 'PDF · NL of FR');
   setText('pdfSelectAll', currentLang === 'fr' ? 'Tout sélectionner' : 'Alles selecteren');
@@ -274,7 +274,7 @@ function updateStaticLanguage() {
   let style = document.getElementById(styleId);
   if (!style) { style = document.createElement('style'); style.id = styleId; document.head.appendChild(style); }
   // Gebruik data-attribuut ipv dynamische CSS content-string om XSS-risico en CSS-injection te vermijden
-  style.textContent = `.cat.totalNonLife .catTitle::before{content:attr(data-total-prefix);color:#dcecff;font-weight:950}`;
+  style.textContent = `.cat.totalNonLife .catTitle::before{content:attr(data-total-prefix);color:#dcecff;font-weight:700}`;
   // Stel het data-attribuut in op alle bestaande totalNonLife-titels
   document.querySelectorAll('.cat.totalNonLife .catTitle').forEach(el => {
     el.dataset.totalPrefix = msg('totaalPrefix');
@@ -458,7 +458,7 @@ function exportActionsHtml(options = {}) {
   const label = options.label || 'Blok exporteren';
   const downloadTitle = options.downloadTitle || 'Download als PNG';
   const copyTitle = options.copyTitle || (currentLang === 'fr' ? 'Copier comme image' : 'Kopiëren als afbeelding');
-  return `<div class="${classes}"${target} aria-label="${esc(label)}"><button type="button" class="blockExportBtn blockExportDownload" title="${esc(downloadTitle)}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button><button type="button" class="blockExportBtn blockExportCopy" title="${esc(copyTitle)}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><span style="font-size:11px;font-weight:950;padding-left:4px">${esc(exportCopyLabel())}</span></button></div>`;
+  return `<div class="${classes}"${target} aria-label="${esc(label)}"><button type="button" class="blockExportBtn blockExportDownload" title="${esc(downloadTitle)}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button><button type="button" class="blockExportBtn blockExportCopy" title="${esc(copyTitle)}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><span style="font-size:11px;font-weight:700;padding-left:4px">${esc(exportCopyLabel())}</span></button></div>`;
 }
 function productBlockExportActionsHtml() {
   return exportActionsHtml();
@@ -2269,8 +2269,8 @@ function trendBoxesHtml(items, opts = {}) {
 }
 // ─── Productie-staafdiagram voor samenvatting ─────────────────────────────────
 // Toont per categorie twee overlappende horizontale balken:
-//   – vorig jaar: Vivium blauw (#003b71)
-//   – dit jaar:   Vivium oranje (#f58220)
+//   – vorig jaar: Vivium blauw (#0d1473)
+//   – dit jaar:   Vivium oranje (#ff934c)
 // Hover op een balk toont het exacte bedrag als tooltip.
 function compactCategoryLabelParts(label) {
   const value = String(label || '').trim();
@@ -2355,7 +2355,7 @@ function renderPremiumBarChart(data, prevP, currP, field, lowerIsBetter = false)
   });
   const swatch = (color, opacity) => `<span class="prodBarSwatch" style="background:${color};opacity:${opacity}"></span>`;
   return `<div class="prodBarChart">
-    <div class="prodBarLegend"><span>${swatch('#003b71', '.85')}${esc(prevP)}</span><span>${swatch('#f58220', '1')}${esc(currP)}</span></div>
+    <div class="prodBarLegend"><span>${swatch('#0d1473', '.85')}${esc(prevP)}</span><span>${swatch('#ff934c', '1')}${esc(currP)}</span></div>
     <div class="prodBarGrid">${bars.join('')}</div>
     <div class="prodBarDeltaRow">${deltas.join('')}</div>
     <div class="prodBarLabelRow">${labels.join('')}</div>
@@ -2376,8 +2376,8 @@ function renderVervalBarChart(data, prevP, currP) {
 // Zelfde categorieën en opbouw als productie/verval, maar tooltip en as tonen percentages.
 // Bij S/P is een daling positief en een stijging negatief.
 function renderSpBarChart(data, prevP, currP, field, cellIndex) {
-  const VIVIUM_BLUE   = '#003b71';
-  const VIVIUM_ORANGE = '#f58220';
+  const VIVIUM_BLUE   = '#0d1473';
+  const VIVIUM_ORANGE = '#ff934c';
   const cats = [
     'Auto Vloten','Auto Niet Vloten',
     'Particulieren Brand','Particulieren BA',
@@ -3918,7 +3918,7 @@ function progressionCompositionBars(data, cat, ordered, labels, vals, prevP, cur
           fill.style.cssText = (positive ? 'left:50%;' : 'right:50%;') +
             'width:' + (Math.abs(total) / maxMagnitude * 48) + '%;' +
             (total === 0 ? 'display:none;' : '') +
-            (entry.period !== currP ? 'background:linear-gradient(90deg,#8fb4dc,#003b71);' : '');
+            (entry.period !== currP ? 'background:linear-gradient(90deg,#c5d6e5,#0d1473);' : '');
         }
         track.dataset.period = entry.period;
         track.dataset.amount = formula;
@@ -4211,7 +4211,7 @@ function drawPortfolioPie(canvas, period, items, hoverIndex = -1, centerText = n
   const cx = Math.round(w * .50), cy = Math.round(h * .52), radius = Math.min(w, h) * .44;
   if (!total) {
     ctx.beginPath(); ctx.arc(cx, cy, radius, 0, Math.PI*2); ctx.strokeStyle = '#e6eef7'; ctx.lineWidth = 26; ctx.stroke();
-    ctx.fillStyle = '#8fa3ba'; ctx.font = '800 15px Inter, Segoe UI, Arial'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(msg('portefeuilleEmpty'), cx, cy);
+    ctx.fillStyle = '#8fa3ba'; ctx.font = '700 15px Lato,Arial'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(msg('portefeuilleEmpty'), cx, cy);
     canvas._portfolioPieState = { segments: [], total: 0 };
     return;
   }
@@ -4424,29 +4424,29 @@ function pieCategoryLabel(canonical) {
 }
 function pieSegmentColor(key, index = 0) {
   const palette = {
-    'Auto': '#f58220',
-    'Auto Vloten': '#f58220',
+    'Auto': '#ff934c',
+    'Auto Vloten': '#ff934c',
     'Auto Niet Vloten': '#ffad5c',
     'Particulieren': '#009b77',
     'Particulieren Brand': '#008f73',
     'Particulieren BA': '#39b995',
     'Particulieren Overige': '#7bd3bd',
-    'Ondernemingen': '#003b71',
-    'Ondernemingen Brand': '#003b71',
-    'Ondernemingen BA': '#1f6fb2',
-    'Ondernemingen Overige': '#8fb4dc',
+    'Ondernemingen': '#0d1473',
+    'Ondernemingen Brand': '#0d1473',
+    'Ondernemingen BA': '#043c93',
+    'Ondernemingen Overige': '#c5d6e5',
     'Overige': '#9aa7b5',
     'Arbeidsongevallen': '#6f5bb8',
     'Rechtsbijstand': '#c84f2b'
   };
-  const fallback = ['#f58220','#009b77','#003b71','#9aa7b5','#6f5bb8','#c84f2b'];
+  const fallback = ['#ff934c','#009b77','#0d1473','#9aa7b5','#6f5bb8','#c84f2b'];
   return palette[key] || fallback[index % fallback.length];
 }
 function clampColorChannel(v) { return Math.max(0, Math.min(255, Math.round(v))); }
 function shadeHexColor(hex, percent) {
   const raw = String(hex || '').replace('#','').trim();
   const full = raw.length === 3 ? raw.split('').map(c => c + c).join('') : raw;
-  if (!/^[0-9a-f]{6}$/i.test(full)) return hex || '#003b71';
+  if (!/^[0-9a-f]{6}$/i.test(full)) return hex || '#0d1473';
   const num = parseInt(full, 16);
   const r = (num >> 16) & 255, g = (num >> 8) & 255, b = num & 255;
   const target = percent >= 0 ? 255 : 0, amt = Math.abs(percent) / 100;
@@ -4470,10 +4470,10 @@ function drawGradientPieSegment(ctx, cx, cy, radius, start, end, color, opts = {
 }
 function drawPieCenter(ctx, cx, cy, radius, mainText, subText, fontScale = 1) {
   ctx.beginPath(); ctx.arc(cx, cy, radius * .52, 0, Math.PI * 2); ctx.fillStyle = '#ffffff'; ctx.fill();
-  ctx.strokeStyle = '#d6e4f2'; ctx.lineWidth = 1.5; ctx.stroke();
-  ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--ink').trim() || '#003b71';
-  ctx.font = `900 ${Math.round(18 * fontScale)}px Inter, Segoe UI, Arial`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(mainText || '', cx, cy - 9 * fontScale);
-  ctx.font = `800 ${Math.round(18 * fontScale)}px Inter, Segoe UI, Arial`; ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--muted').trim() || '#62748a'; ctx.fillText(subText || '', cx, cy + 13 * fontScale);
+  ctx.strokeStyle = '#c5d6e5'; ctx.lineWidth = 1.5; ctx.stroke();
+  ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--ink').trim() || '#0d1473';
+  ctx.font = `900 ${Math.round(18 * fontScale)}px Lato,Arial`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(mainText || '', cx, cy - 9 * fontScale);
+  ctx.font = `800 ${Math.round(18 * fontScale)}px Lato,Arial`; ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--muted').trim() || '#62748a'; ctx.fillText(subText || '', cx, cy + 13 * fontScale);
 }
 function getProgressionContributionItems(data, period) {
   const wanted = ['Auto Vloten','Auto Niet Vloten','Particulieren','Ondernemingen Brand','Ondernemingen BA','Arbeidsongevallen','Rechtsbijstand'];
@@ -4683,17 +4683,17 @@ function drawProgressWaterfallCanvas(canvas, values, period, prevValues = null, 
     if (abs >= 1000) return sign + Math.round(abs / 1000) + 'K';
     return sign + Math.round(abs);
   };
-  ctx.strokeStyle = '#d6e4f2'; ctx.lineWidth = 1;
-  ctx.font = '850 14px Inter, Segoe UI, Arial'; ctx.fillStyle = '#5f7288'; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+  ctx.strokeStyle = '#c5d6e5'; ctx.lineWidth = 1;
+  ctx.font = '700 14px Lato,Arial'; ctx.fillStyle = '#4d4d4d'; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
   for (let v = -maxAbs; v <= maxAbs + step / 2; v += step) {
     const yy = y(v);
-    ctx.strokeStyle = v === 0 ? '#003b71' : (Math.abs(v) === maxAbs ? '#d6e4f2' : '#e3edf7');
+    ctx.strokeStyle = v === 0 ? '#0d1473' : (Math.abs(v) === maxAbs ? '#c5d6e5' : '#e3edf7');
     ctx.lineWidth = v === 0 ? 2.2 : 1;
     ctx.setLineDash(v === 0 ? [] : [4,7]);
     ctx.beginPath(); ctx.moveTo(x0-6, yy); ctx.lineTo(x1, yy); ctx.stroke();
     ctx.setLineDash([]);
-    ctx.fillStyle = v === 0 ? '#003b71' : '#5f7288';
-    ctx.font = v === 0 ? '950 14px Inter, Segoe UI, Arial' : '850 14px Inter, Segoe UI, Arial';
+    ctx.fillStyle = v === 0 ? '#0d1473' : '#4d4d4d';
+    ctx.font = v === 0 ? '700 14px Lato,Arial' : '700 14px Lato,Arial';
     ctx.fillText(axisLabel(v), x0-14, yy);
   }
   const zeroY = y(0);
@@ -4724,23 +4724,23 @@ function drawProgressWaterfallCanvas(canvas, values, period, prevValues = null, 
       ctx.save();
       ctx.globalAlpha = .48;
       const prevW = Math.min(76, barW * .86);
-      ctx.fillStyle = 'rgba(143,180,220,.26)';
+      ctx.fillStyle = 'rgba(197,214,229,.26)';
       bottomRoundedRect(x + (barW * .86 - prevW) / 2, top, prevW, bh, 7); ctx.fill();
       ctx.globalAlpha = 1;
-      ctx.strokeStyle = '#003b71'; ctx.lineWidth = 1.4; ctx.setLineDash([6,4]); bottomRoundedRect(x + (barW * .86 - prevW) / 2, top, prevW, bh, 7); ctx.stroke(); ctx.setLineDash([]);
+      ctx.strokeStyle = '#0d1473'; ctx.lineWidth = 1.4; ctx.setLineDash([6,4]); bottomRoundedRect(x + (barW * .86 - prevW) / 2, top, prevW, bh, 7); ctx.stroke(); ctx.setLineDash([]);
       ctx.restore();
       return;
     }
     const currW = Math.min(68, barW * .76);
     const x = baseX + (barW - currW) / 2;
     const grad = ctx.createLinearGradient(x, top, x, bottom);
-    if (s.key === 'verval') { grad.addColorStop(0,'#d85f2a'); grad.addColorStop(.54,'#ff9861'); grad.addColorStop(1,'#ffe2d4'); }
-    else if (s.key === 'trans') { grad.addColorStop(0,'#f58220'); grad.addColorStop(.54,'#ffab66'); grad.addColorStop(1,'#ffe0c2'); }
-    else if (s.key === 'progressie') { grad.addColorStop(0,'#007e97'); grad.addColorStop(.54,'#41a9bc'); grad.addColorStop(1,'#d9eef4'); }
-    else { grad.addColorStop(0,'#003b71'); grad.addColorStop(.54,'#2d84c7'); grad.addColorStop(1,'#9ec0e4'); }
+    if (s.key === 'verval') { grad.addColorStop(0,'#0d1473'); grad.addColorStop(1,'#c5d6e5'); }
+    else if (s.key === 'trans') { grad.addColorStop(0,'#ff934c'); grad.addColorStop(1,'#fff4ed'); }
+    else if (s.key === 'progressie') { grad.addColorStop(0,'#043c93'); grad.addColorStop(1,'#c5d6e5'); }
+    else { grad.addColorStop(0,'#0d1473'); grad.addColorStop(1,'#c5d6e5'); }
     ctx.fillStyle = grad;
     ctx.save();
-    ctx.shadowColor = s.key === 'trans' ? 'rgba(245,130,32,.16)' : 'rgba(0,59,113,.13)';
+    ctx.shadowColor = s.key === 'trans' ? 'rgba(255,147,76,.16)' : 'rgba(13,20,115,.13)';
     ctx.shadowBlur = 22;
     ctx.shadowOffsetY = 10;
     bottomRoundedRect(x, top, currW, bh, 7); ctx.fill();
@@ -4751,36 +4751,36 @@ function drawProgressWaterfallCanvas(canvas, values, period, prevValues = null, 
     const gloss = ctx.createLinearGradient(x, top, x + currW, top);
     gloss.addColorStop(0, 'rgba(255,255,255,.20)');
     gloss.addColorStop(.38, 'rgba(255,255,255,0)');
-    gloss.addColorStop(1, 'rgba(0,59,113,.12)');
+    gloss.addColorStop(1, 'rgba(13,20,115,.12)');
     ctx.fillStyle = gloss;
     ctx.fillRect(x, top, currW, bh);
     ctx.restore();
-    ctx.strokeStyle = s.key === 'trans' ? 'rgba(245,130,32,.22)' : 'rgba(0,59,113,.16)';
+    ctx.strokeStyle = s.key === 'trans' ? 'rgba(255,147,76,.22)' : 'rgba(13,20,115,.16)';
     bottomRoundedRect(x, top, currW, bh, 7); ctx.stroke();
-    ctx.fillStyle = '#003b71'; ctx.font = '500 18px Inter, Segoe UI, Arial'; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+    ctx.fillStyle = '#0d1473'; ctx.font = '500 18px Lato,Arial'; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
     const labelVal = s.key === 'verval'
       ? '-' + euro.format(Math.abs(s.value))
       : (s.key === 'productie' || s.key === 'progressie'
           ? (s.value < 0 ? '-' : '') + euro.format(Math.abs(s.value))
           : (s.value > 0 ? '+' : (s.value < 0 ? '-' : '')) + euro.format(Math.abs(s.value)));
     const labelY = s.value >= 0 ? top - 34 : bottom + 38;
-    ctx.fillStyle = s.value < 0 ? '#d85f2a' : '#003b71';
+    ctx.fillStyle = s.value < 0 ? '#0d1473' : '#0d1473';
     ctx.fillText(labelVal, x + currW/2, labelY);
     if (prevValues) {
       const prevBar = prevBars[i] || { value: 0 };
       const delta = s.value - prevBar.value;
-      ctx.font = '500 18px Inter, Segoe UI, Arial';
-      ctx.fillStyle = delta > 0 ? '#007e97' : (delta < 0 ? '#d85f2a' : '#5f7288');
+      ctx.font = '500 18px Lato,Arial';
+      ctx.fillStyle = delta > 0 ? '#043c93' : (delta < 0 ? '#0d1473' : '#4d4d4d');
       ctx.fillText('(Δ ' + (delta > 0 ? '+' : delta < 0 ? '-' : '') + euro.format(Math.abs(delta)) + ')', x + currW/2, s.value >= 0 ? top - 10 : bottom + 62);
     }
-    ctx.fillStyle = '#405775'; ctx.font = '950 18px Inter, Segoe UI, Arial'; ctx.textBaseline = 'top';
+    ctx.fillStyle = '#405775'; ctx.font = '700 18px Lato,Arial'; ctx.textBaseline = 'top';
     ctx.fillText(s.label, baseX + barW/2, h - 96);
   };
   if (prevBars.length) prevBars.forEach((s,i) => drawBar(s, i, 'prev'));
   bars.forEach((s,i) => drawBar(s, i, 'curr'));
 
   if (prevPeriod) {
-    ctx.font = '850 13px Inter, Segoe UI, Arial'; ctx.fillStyle = '#5f7288'; ctx.textAlign = 'right'; ctx.textBaseline = 'top';
+    ctx.font = '700 13px Lato,Arial'; ctx.fillStyle = '#4d4d4d'; ctx.textAlign = 'right'; ctx.textBaseline = 'top';
     ctx.fillText(currentLang === 'fr' ? 'Pointillé bleu = période précédente' : 'Blauw gestippeld = vorige periode', x1, 18);
   }
 }
@@ -4809,19 +4809,19 @@ function renderProgressWaterfall(data, currP, prevP = '') {
   };
   if (legend) legend.innerHTML = `<div class="netProgressBlock"><div class="netProgressHead"><div>${currentLang === 'fr' ? 'Calcul progression' : 'Berekening progressie'} <span>${esc(currP)}</span></div><div class="netProgressValue ${values.progressie >= 0 ? 'pos' : 'neg'}">${euro.format(values.progressie)}</div></div><div class="note" style="margin:0">${calc}</div></div>` +
     (prevValues
-      ? currentItem(msg('productie'), '#003b71', values.productie, prevValues.productie, values.productie) +
-        currentItem(msg('verval'), '#d85f2a', -values.verval, prevValues.verval, values.verval, true) +
-        currentItem(currentLang === 'fr' ? 'Transformation' : 'Transformatie', '#f58220', values.transformatie, prevValues.transformatie, values.transformatie) +
-        currentItem(msg('progressie'), '#007e97', values.progressie, prevValues.progressie, values.progressie)
-      : periodItem(msg('productie'), '#003b71', currP, values.productie) +
-        periodItem(msg('verval'), '#d85f2a', currP, -values.verval) +
-        periodItem(currentLang === 'fr' ? 'Transformation' : 'Transformatie', '#f58220', currP, values.transformatie) +
-        periodItem(msg('progressie'), '#007e97', currP, values.progressie)) +
+      ? currentItem(msg('productie'), '#0d1473', values.productie, prevValues.productie, values.productie) +
+        currentItem(msg('verval'), '#0d1473', -values.verval, prevValues.verval, values.verval, true) +
+        currentItem(currentLang === 'fr' ? 'Transformation' : 'Transformatie', '#ff934c', values.transformatie, prevValues.transformatie, values.transformatie) +
+        currentItem(msg('progressie'), '#043c93', values.progressie, prevValues.progressie, values.progressie)
+      : periodItem(msg('productie'), '#0d1473', currP, values.productie) +
+        periodItem(msg('verval'), '#0d1473', currP, -values.verval) +
+        periodItem(currentLang === 'fr' ? 'Transformation' : 'Transformatie', '#ff934c', currP, values.transformatie) +
+        periodItem(msg('progressie'), '#043c93', currP, values.progressie)) +
     (prevValues ? `<div class="contributionGroupTitle">${currentLang === 'fr' ? 'Période précédente' : 'Vorige periode'}</div>` +
-      periodItem(msg('productie'), '#8fb4dc', prevP, prevValues.productie) +
-      periodItem(msg('verval'), '#8fb4dc', prevP, -prevValues.verval) +
-      periodItem(currentLang === 'fr' ? 'Transformation' : 'Transformatie', '#8fb4dc', prevP, prevValues.transformatie) +
-      periodItem(msg('progressie'), '#8fb4dc', prevP, prevValues.progressie) : '');
+      periodItem(msg('productie'), '#c5d6e5', prevP, prevValues.productie) +
+      periodItem(msg('verval'), '#c5d6e5', prevP, -prevValues.verval) +
+      periodItem(currentLang === 'fr' ? 'Transformation' : 'Transformatie', '#c5d6e5', prevP, prevValues.transformatie) +
+      periodItem(msg('progressie'), '#c5d6e5', prevP, prevValues.progressie) : '');
 }
 function renderProductionPie(data, currP, mode = 'productie') {
   const titleKeyByMode = { productie: 'productionPieTitle', verval: 'vervalPieTitle', progressie: 'progressiePieTitle', schade: 'schadePieTitle' };
@@ -4845,11 +4845,11 @@ function renderDetails(data, prodCats, schadeCats, prevP, currP) {
   const schadeHtml = schadeCats.map(cat => renderSchadeCat(cat, schadeRows, prevP, currP)).join('');
   $('categoryDetails').innerHTML = [
       `<div id="detailProductieBlock" class="detailSectionBlock productionDetail">`,
-      `<div class="detailSectionTitleRow"><h3 class="detailSectionTitle"><span class="detailSectionIcon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg></span>${msg('detailProductie')}</h3><div class="blockExportActions" data-export-target="detailProductie" aria-label="Detail productie exporteren"><button type="button" class="blockExportBtn blockExportDownload" title="Download detail productie als PNG"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button><button type="button" class="blockExportBtn blockExportCopy" title="${currentLang === 'fr' ? 'Copier détail production comme image' : 'Kopiëren detail productie als afbeelding'}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><span style="font-size:11px;font-weight:950;padding-left:4px">${exportCopyLabel()}</span></button></div></div>`,
+      `<div class="detailSectionTitleRow"><h3 class="detailSectionTitle"><span class="detailSectionIcon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg></span>${msg('detailProductie')}</h3><div class="blockExportActions" data-export-target="detailProductie" aria-label="Detail productie exporteren"><button type="button" class="blockExportBtn blockExportDownload" title="Download detail productie als PNG"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button><button type="button" class="blockExportBtn blockExportCopy" title="${currentLang === 'fr' ? 'Copier détail production comme image' : 'Kopiëren detail productie als afbeelding'}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><span style="font-size:11px;font-weight:700;padding-left:4px">${exportCopyLabel()}</span></button></div></div>`,
       prodHtml,
     `</div>`,
       `<div id="detailSchadeBlock" class="detailSectionBlock schadeDetail">`,
-      `<div class="detailSectionTitleRow"><h3 class="detailSectionTitle"><span class="detailSectionIcon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span>${msg('detailSchade')}</h3><div class="blockExportActions" data-export-target="detailSchade" aria-label="Detail schade exporteren"><button type="button" class="blockExportBtn blockExportDownload" title="Download detail schade als PNG"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button><button type="button" class="blockExportBtn blockExportCopy" title="${currentLang === 'fr' ? 'Copier détail sinistres comme image' : 'Kopiëren detail schade als afbeelding'}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><span style="font-size:11px;font-weight:950;padding-left:4px">${exportCopyLabel()}</span></button></div></div>`,
+      `<div class="detailSectionTitleRow"><h3 class="detailSectionTitle"><span class="detailSectionIcon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span>${msg('detailSchade')}</h3><div class="blockExportActions" data-export-target="detailSchade" aria-label="Detail schade exporteren"><button type="button" class="blockExportBtn blockExportDownload" title="Download detail schade als PNG"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button><button type="button" class="blockExportBtn blockExportCopy" title="${currentLang === 'fr' ? 'Copier détail sinistres comme image' : 'Kopiëren detail schade als afbeelding'}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><span style="font-size:11px;font-weight:700;padding-left:4px">${exportCopyLabel()}</span></button></div></div>`,
       schadeHtml || `<div class="note">${msg('noSchade')}</div>`,
     `</div>`
   ].join('');
