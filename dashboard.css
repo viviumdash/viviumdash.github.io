@@ -395,6 +395,9 @@ th{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--mute
 .portfolioCompareDelta{align-self:center;margin-bottom:115px;flex:0 0 auto;padding:9px 12px;border-radius:999px;background:#fff;border:1px solid var(--line);box-shadow:0 8px 18px rgba(15,23,42,.10);font-size:13px;font-weight:700;white-space:nowrap;position:relative;z-index:1}
 .portfolioCompareDelta.periodComparisonDelta{align-self:flex-end;margin-bottom:var(--period-delta-y,70px);background:linear-gradient(135deg,#fff1e4,#fff8f1);border-color:#f5b879;color:var(--orange);box-shadow:0 8px 18px rgba(255,147,76,.18)}
 .portfolioCompareDelta.periodComparisonDelta.pos,.portfolioCompareDelta.periodComparisonDelta.neg{color:var(--orange)}
+.portfolioCompareDelta{padding:6px 8px;text-align:center;line-height:1.15}
+.portfolioCompareDelta span,.portfolioCompareDelta small{display:block}
+.portfolioCompareDelta small{margin-top:3px;font-size:inherit;font-weight:inherit}
 .portfolioAmounts{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}
 .portfolioAmountItem{border:1px solid var(--line);border-radius:14px;padding:13px;background:#fff}
 .portfolioAmountItem b{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);line-height:1.25}

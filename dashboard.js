@@ -4167,7 +4167,8 @@ function portfolioPeriodComparisonBars(data, key, prevP, currP) {
     barsWithDeltas.push(bar);
     if (i < yearItems.length - 1) {
       const d = yoy(yearItems[i].value, yearItems[i + 1].value);
-      barsWithDeltas.push(`<div class="portfolioCompareDelta ${cls(d)}">${d >= 0 ? '+' : ''}${pct.format(d)}%</div>`);
+      const amountDelta = yearItems[i + 1].value - yearItems[i].value;
+      barsWithDeltas.push(`<div class="portfolioCompareDelta ${cls(d)}"><span>${d >= 0 ? '+' : ''}${pct.format(d)}%</span><small>€ ${amountDelta >= 0 ? '+' : ''}${num.format(amountDelta)}</small></div>`);
     }
   });
 
@@ -4175,7 +4176,8 @@ function portfolioPeriodComparisonBars(data, key, prevP, currP) {
   const currH = Math.max(2, Math.abs(currVal) / max * 100);
   const periodDeltaY = Math.round(10 + currH * 1.15);
   if (yearItems.length) {
-    barsWithDeltas.push(`<div class="portfolioCompareDelta periodComparisonDelta ${cls(periodDelta)}" style="--period-delta-y:${periodDeltaY}px">${periodDelta >= 0 ? '+' : ''}${pct.format(periodDelta)}%</div>`);
+    const amountDelta = currVal - prevVal;
+    barsWithDeltas.push(`<div class="portfolioCompareDelta periodComparisonDelta ${cls(periodDelta)}" style="--period-delta-y:${periodDeltaY}px"><span>${periodDelta >= 0 ? '+' : ''}${pct.format(periodDelta)}%</span><small>€ ${amountDelta >= 0 ? '+' : ''}${num.format(amountDelta)}</small></div>`);
   }
   barsWithDeltas.push(`<div class="portfolioCompareBarCol">
     <div class="portfolioBarValue">${euro.format(currVal)}<small>${esc(currP)}</small></div>
