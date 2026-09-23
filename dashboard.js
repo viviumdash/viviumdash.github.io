@@ -1819,21 +1819,22 @@ function totalNumber(row, field, cellIndex) {
 }
 function yoy(oldv, newv) { return oldv ? ((newv - oldv) / Math.abs(oldv)) * 100 : (newv ? 100 : 0) }
 function ppDelta(oldv, newv) { return n(newv) - n(oldv) }
+function signedPointDelta(d) { return `${d >= 0 ? '+' : ''}${pct.format(d)}% ptn`; }
 function cls(v, invert = false) { const x = invert ? -v : v; return x > 0 ? 'pos' : x < 0 ? 'neg' : 'neu' }
 function fmt(v, type) { if (type === 'money') return euro.format(v); if (type === 'pct') return pct.format(v) + '%'; return num.format(v) }
 function pctText(v, invert = false) { return `<span class="${cls(v, invert)}">${v >= 0 ? '+' : ''}${pct.format(v)}%</span>` }
 function deltaHtml(d, oldVal, prevP, type, invert = false) {
   const prevFmt = fmt(oldVal, type);
-  return `<div class="delta ${cls(d, invert)}">${d >= 0 ? '+' : ''}${pct.format(d)}% ${msg('vs')} ${prevP} <span style="opacity:.7">(${prevFmt})</span></div>`;
+  return `<div class="delta ${cls(d, invert)}">${type === 'pct' ? signedPointDelta(d) : `${d >= 0 ? '+' : ''}${pct.format(d)}%`} ${msg('vs')} ${prevP} <span style="opacity:.7">(${prevFmt})</span></div>`;
 }
 
 function barDeltaTextHtml(oldVal, newVal, invert = false) {
   const d = yoy(Number(oldVal) || 0, Number(newVal) || 0);
-  return `<span class="barValueDelta ${cls(d, invert)}">(${d >= 0 ? '+' : ''}${pct.format(d)}%)</span>`;
+  return `<span class="barValueDelta ${cls(d, invert)}">${d >= 0 ? '+' : ''}${pct.format(d)}%</span>`;
 }
 function barAbsolutePctDeltaTextHtml(oldVal, newVal, invert = false) {
   const d = ppDelta(oldVal, newVal);
-  return `<span class="barValueDelta ${cls(d, invert)}">(${d >= 0 ? '+' : ''}${pct.format(d)}%)</span>`;
+  return `<span class="barValueDelta ${cls(d, invert)}">${signedPointDelta(d)}</span>`;
 }
 
 function esc(s) { return String(s ?? '').replace(/[&<>"]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[m])) }
@@ -2415,8 +2416,6 @@ function renderSpBarChart(data, prevP, currP, field, cellIndex) {
     const hPrev = Math.max(2, Math.round(Math.abs(x.prev) / max * CHART_H));
     const hCurr = Math.max(2, Math.round(Math.abs(x.curr) / max * CHART_H));
     const dClass = x.d > 0 ? 'neg' : x.d < 0 ? 'pos' : 'neu';
-    const dSign = x.d >= 0 ? '+' : '';
-
     barHtml.push(`<div class="prodBarCol">
       <div class="prodBarPair">
         <div class="prodBarStick prevPeriod"
@@ -2434,7 +2433,7 @@ function renderSpBarChart(data, prevP, currP, field, cellIndex) {
       </div>
     </div>`);
 
-    deltaHtml.push(`<div class="prodBarDeltaCol ${dClass}">${dSign}${pct.format(x.d)}%</div>`);
+    deltaHtml.push(`<div class="prodBarDeltaCol ${dClass}">${signedPointDelta(x.d)}</div>`);
     labelHtml.push(`<div class="prodBarLabelCol" title="${esc(x.label)}">${compactProdBarLabelHtml(x.label)}</div>`);
   });
 
@@ -2915,7 +2914,7 @@ function view360HistoryHtml(data, item, periods, cfg) {
   const rows = values.map((x, i) => {
     const previous = i > 0 ? values[i - 1].value : null;
     const delta = previous ? (cfg.type === 'pct' ? ppDelta(previous, x.value) : yoy(previous, x.value)) : null;
-    const deltaText = cfg.type === 'pct' ? `${delta >= 0 ? '+' : ''}${pct.format(delta)} ptn` : `${delta >= 0 ? '+' : ''}${pct.format(delta)}%`;
+    const deltaText = cfg.type === 'pct' ? signedPointDelta(delta) : `${delta >= 0 ? '+' : ''}${pct.format(delta)}%`;
     const deltaHtml = delta === null ? `<span></span>` : `<span class="view360HistoryDelta ${cls(delta, !!cfg.invert)}">${deltaText}</span>`;
     return `<div class="view360HistoryRow"><span class="view360HistoryYear">${esc(fullYearLabel(x.period))}</span><span class="view360HistoryAmount">${fmt(x.value, cfg.type || 'money')}</span>${deltaHtml}</div>`;
   }).join('');
@@ -3113,7 +3112,7 @@ function view360MetricDelta(oldValue, newValue, metric) {
   return metric.type === 'pct' ? ppDelta(oldValue, newValue) : yoy(oldValue, newValue);
 }
 function view360DeltaText(delta, metric) {
-  return metric.type === 'pct' ? `${delta >= 0 ? '+' : ''}${pct.format(delta)} ptn` : signedPct(delta);
+  return metric.type === 'pct' ? signedPointDelta(delta) : signedPct(delta);
 }
 function view360EvolutionNoun(delta, metric) {
   const isBetter = metric?.invert ? delta < 0 : delta > 0;
@@ -3421,7 +3420,7 @@ function updateTopKpisForActiveTab() {
 
 function kpiSpDeltaText(prev, curr) {
   const diff = ppDelta(prev, curr);
-  return `${diff >= 0 ? '+' : ''}${pct.format(diff)}%`;
+  return signedPointDelta(diff);
 }
 function kpiComparisonPeriod(value) {
   const match = String(value ?? '').trim().match(/^(\d{1,2})[\s/]+(\d{4})$/);
@@ -3438,7 +3437,7 @@ function kpiCompareValueText(value, type) {
 function kpiCompareBubbleText(x) {
   const delta = n(x.v) - n(x.o);
   if (x.type === 'pct' || x.type === 'sp-category' || x.type === 'pct-combo' || x.type === 'pct-combo-plain') {
-    return `Δ ${delta >= 0 ? '+' : ''}${pct.format(delta)} ptn`;
+    return `Δ ${signedPointDelta(delta)}`;
   }
   return `Δ ${delta > 0 ? '+' : delta < 0 ? '-' : ''}${fmt(Math.abs(delta), x.type || 'money')}`;
 }
@@ -3708,7 +3707,7 @@ function barCompareHtmlWithPreviousYears(labels, a, b, la, lb, type, color, pare
       const value = Number(year.values[i]) || 0;
       const previous = yearIndex > 0 ? Number(previousYears[yearIndex - 1].values[i]) || 0 : null;
       const yearDelta = previous ? (isPct || options?.absolutePctDelta ? ppDelta(previous, value) : yoy(previous, value)) : null;
-      const yearDeltaText = isPct || options?.absolutePctDelta ? `${yearDelta >= 0 ? '+' : ''}${pct.format(yearDelta)} ptn` : `${yearDelta >= 0 ? '+' : ''}${pct.format(yearDelta)}%`;
+      const yearDeltaText = isPct || options?.absolutePctDelta ? signedPointDelta(yearDelta) : `${yearDelta >= 0 ? '+' : ''}${pct.format(yearDelta)}%`;
       const yearDeltaHtml = yearDelta === null ? '' : `<span class="previousYearsDelta ${cls(yearDelta, !!options?.invertDelta)}">${yearDeltaText}</span>`;
       return `<div class="barline previousYearLine"><div class="period">${esc(fmtPeriod(year.period))}</div><div class="track"><div class="fill" style="width:${Math.abs(value) / max * 100}%"></div></div><div class="barDeltaSlot">${yearDeltaHtml}</div><div class="value">${fmt(value, type)}</div></div>`;
     }).reverse().join('');

@@ -1599,7 +1599,8 @@ body:not(.topInfoReady) .hero .panel .upload-logo{filter:none;margin-left:-12px;
 .upload-zone{background:#fff;border-color:#c5d6e5}
 .upload-zone:hover{background:#edf3f7}
 .kpi .delta,.metric .delta{opacity:1}
-.kpis,.view360AnalysisGrid{--green:#009b77;--red:#c45a15}
+.kpis,.view360AnalysisGrid{--green:#009b77;--red:#ff934c}
+.kpiCompareTrack>.kpiCompareFill,.kpiCompareZeroLine .kpiCompareZeroFill,.kpiCompareHistoryLine .kpiCompareZeroFill{top:calc(50% - 4px);height:8px}
 body:not(.topInfoReady) .hero #pageTitle,body:not(.topInfoReady) .upload-title{color:#0d1473}
 body:not(.topInfoReady) .hero .lead{color:#4d4d4d;font-family:'Open Sans',Arial,sans-serif}
 .drillBtn:not(.active),.drillBtn:not(.active):hover{background:#edf5fc;border-color:#cbdff2;color:#0d1473;box-shadow:none}
@@ -1607,5 +1608,12 @@ body:not(.topInfoReady) .hero .lead{color:#4d4d4d;font-family:'Open Sans',Arial,
 .topCompactBar .btn-csv{color:#0d1473!important}
 .heroUploadButton,#topInfoToggleBtn{background:#ff934c;color:#fff;border-color:#ff934c}
 #topInfoToggleBtn:hover{background:#ed7f35;color:#fff;border-color:#ed7f35}
+.barline{grid-template-columns:82px minmax(130px,1fr) 104px 118px}
+.barDeltaSlot{--green:#009b77;--red:#ff934c}
+.barDeltaSlot>.barValueDelta,.barDeltaSlot>.previousYearsDelta{font-size:11px;line-height:1;padding:4px 8px;border:1px solid var(--line)}
+.barDeltaSlot>.pos{background:#e5f4f7;color:#009b77;border-color:#b7dce6}
+.barDeltaSlot>.neg{background:#fff4e8;color:#ff934c;border-color:#ffd2b0}
+@media(max-width:640px){.barline{grid-template-columns:62px minmax(72px,1fr) 78px 88px;gap:4px}.barDeltaSlot>.barValueDelta,.barDeltaSlot>.previousYearsDelta{font-size:9px;padding:2px 4px}.bararea>.barline>.barDeltaSlot>.barValueDelta,.bararea>.previousYearLine>.barDeltaSlot>.previousYearsDelta{left:13px}}
+.pdfExportRoot .pdfTestCategoryPage .barline{grid-template-columns:58px minmax(86px,1fr) 66px 86px!important}
 @media(max-width:980px){body:not(.topInfoReady) .hero{grid-template-columns:1fr;min-height:0}body:not(.topInfoReady) .hero .panel{border-right:0;border-bottom:1px solid rgba(214,228,242,.72)}body:not(.topInfoReady) .upload-zone{min-height:390px}}
 @media(max-width:640px){body:not(.topInfoReady) .hero .panel{padding:34px 24px}body:not(.topInfoReady) .upload{padding:24px}body:not(.topInfoReady) .hero #pageTitle{font-size:24px!important}.heroBenefits{grid-template-columns:1fr}.heroBenefit{white-space:normal}body:not(.topInfoReady) .upload-zone{min-height:350px;padding:24px}.heroUploadButton{min-width:0;width:100%}}
