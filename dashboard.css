@@ -58,7 +58,7 @@ body.topInfoReady.topInfoCollapsed .hero,body.topInfoReady.topInfoCollapsed #imp
 .kpi[data-kpi-cat]:focus-visible{outline:3px solid rgba(255,147,76,.32);outline-offset:3px}
 .tabs{display:flex;justify-content:space-between;gap:8px;margin:var(--stack-gap) 0;align-items:stretch;padding:6px;background:#edf4fb;border:1px solid var(--line);border-radius:16px}
 .tab{border:1px solid transparent;background:transparent;color:#41556d;border-radius:10px;padding:10px 16px;font-size:14px;min-height:40px;font-weight:700;cursor:pointer;position:relative;transition:background .15s ease,color .15s ease,box-shadow .15s ease,border-color .15s ease;flex:0 1 auto;white-space:nowrap}
-.tab:hover{background:#dcecff;color:var(--ink);box-shadow:0 6px 14px rgba(15,23,42,.06)}
+.tab:hover:not(.active){background:#ff934c;color:#fff;box-shadow:0 6px 14px rgba(13,20,115,.10)}
 .tab.active{background:var(--orange);color:#fff;border-color:var(--orange);box-shadow:0 10px 22px rgba(255,147,76,.22);z-index:2}
 .tab.active::after{content:'';position:absolute;left:14px;right:14px;bottom:-7px;height:3px;background:var(--tab-color);border-radius:999px;opacity:.95}
 
@@ -1535,6 +1535,7 @@ body.topInfoReady .topCompactActions #topInfoToggleBtn{order:9}
 #tabSamenvatting:before{background-color:var(--blue3)}
 /* Active tab: always white icon */
 .tab.active:before{background-color:#fff!important}
+.tab:hover:before{background-color:#fff!important}
 
 /* Startpagina volgens het goedgekeurde dashboardconcept */
 body:not(.topInfoReady) .wrap{padding-top:24px}
@@ -1582,8 +1583,9 @@ body:not(.topInfoReady) .hero .status:not(.warn):before{width:22px;height:22px;m
 body{background:#f4f4f4;font-family:Lato,Arial,sans-serif}
 button,input,select{font-family:inherit}
 .panel,.upload,.card,.kpi,.miniCard,.cat{box-shadow:var(--shadow)}
-.catHead{background:#fff4ed;border-bottom-color:#c5d6e5}
-.cat.totalNonLife .catHead,.tab.active,.heroUploadButton{background:#0d1473;box-shadow:none}
+.catHead{background:linear-gradient(135deg,#fff0df,#f7fbff);border-bottom-color:#c5d6e5}
+.cat.totalNonLife .catHead{background:linear-gradient(135deg,var(--blue),#043c93);box-shadow:none}
+.tab.active,.heroUploadButton{background:#0d1473;box-shadow:none}
 .btn,.btn-csv,.drillBtn,.heroUploadButton{box-shadow:none}
 .btn-csv,.drillBtn.active{background:#ff934c;color:#0d1473}
 .pill,.heroEyebrow{color:#0d1473}
@@ -1591,7 +1593,7 @@ button,input,select{font-family:inherit}
 .lead,.view360AnalysisNarrative,.releaseNotesContent,.insightText{font-family:'Open Sans',Arial,sans-serif;color:#4d4d4d;font-weight:400}
 .view360AnalysisNarrative strong,.lead strong{font-weight:700}
 body:not(.topInfoReady) .hero{background:#fff;box-shadow:0 8px 26px rgba(13,20,115,.06);border-color:#c5d6e5}
-body:not(.topInfoReady) .hero .panel .upload-logo{filter:none;margin-bottom:32px}
+body:not(.topInfoReady) .hero .panel .upload-logo{filter:none;margin-left:-12px;margin-bottom:32px}
 .heroUploadIcon{background:#0d1473;box-shadow:none}
 .heroBenefit{background:#fff;box-shadow:none;border-color:#c5d6e5}
 .upload-zone{background:#fff;border-color:#c5d6e5}
@@ -1599,6 +1601,8 @@ body:not(.topInfoReady) .hero .panel .upload-logo{filter:none;margin-bottom:32px
 .kpi .delta,.metric .delta{opacity:1}
 body:not(.topInfoReady) .hero #pageTitle,body:not(.topInfoReady) .upload-title{color:#0d1473}
 body:not(.topInfoReady) .hero .lead{color:#4d4d4d;font-family:'Open Sans',Arial,sans-serif}
-.dashboardToolbar .drillBtn.active,.topCompactBar .btn-csv{color:#0d1473!important}
+.drillBtn:not(.active),.drillBtn:not(.active):hover{background:#edf5fc;border-color:#cbdff2;color:#0d1473;box-shadow:none}
+.dashboardToolbar .drillBtn.active,.dashboardToolbar .drillBtn.active:hover{background:#ff934c;border-color:#ff934c;color:#fff!important}
+.topCompactBar .btn-csv{color:#0d1473!important}
 @media(max-width:980px){body:not(.topInfoReady) .hero{grid-template-columns:1fr;min-height:0}body:not(.topInfoReady) .hero .panel{border-right:0;border-bottom:1px solid rgba(214,228,242,.72)}body:not(.topInfoReady) .upload-zone{min-height:390px}}
 @media(max-width:640px){body:not(.topInfoReady) .hero .panel{padding:34px 24px}body:not(.topInfoReady) .upload{padding:24px}body:not(.topInfoReady) .hero #pageTitle{font-size:24px!important}.heroBenefits{grid-template-columns:1fr}.heroBenefit{white-space:normal}body:not(.topInfoReady) .upload-zone{min-height:350px;padding:24px}.heroUploadButton{min-width:0;width:100%}}
