@@ -201,7 +201,7 @@ const I18N = {
   nl: {
     pageTitle: 'Van PDF naar helder inzicht',
     pageLead: 'Upload je <strong>kerncijfers non-life PDF</strong>. Het dashboard zet de gegevens automatisch om in een duidelijke analyse van productie, verval, progressie en schade. Dit dashboard werkt met de PDF kerncijfers nonlife die je hebt gedownload vanuit Salesforce (je moet de PDF effectief downloaden als bestand, afdrukken als PDF werkt niet), zowel op groepsniveau, koepelniveau alsook voor de kerncijfers AM, CDR of CD.',
-    printPdf: 'Print to PDF', printPdfBusy: 'Afdrukweergave voorbereiden…', printPdfError: 'Afdrukweergave kon niet worden gemaakt: ',
+    printPdf: 'Print to PDF', printPdfBusy: 'Afdrukweergave voorbereiden…', printPdfError: 'Afdrukweergave kon niet worden gemaakt: ', printPdfDestinationHint: 'Kies in het afdrukvenster ‘Opslaan als PDF’ als bestemming/printer.',
     uploadTitle: 'Sleep je PDF hierheen', uploadHint: 'of klik om een bestand te kiezen', importPdf: 'Importeer', downloadCsv: 'Download CSV', exportPdf: 'Exporteer PDF', pdfExportAction: 'Export', pdfBusy: 'PDF wordt gemaakt…', pdfOptionsTitle: 'PDF secties', pdfNoSections: 'Selecteer minstens één PDF-sectie.', noPdf: 'Klaar om je kerncijfers te verwerken', processing: '⏳ PDF verwerken…',
     success: n => '✅ PDF geladen & verwerkt: ' + n + ' datarijen. Percentages en schade-totalen komen rechtstreeks uit de PDF.', error: '❌ Fout bij verwerken PDF: ',
     broker: 'Makelaar', koepelnummer: 'koepelnummer', groepsnummer: 'groepsnummer', vs: 'vs', main: 'Hoofd', sub: 'Sub', lowerPositive: 'daling is positief', lowerBetter: 'schade: lager is beter', viewModeLabel: 'Weergave', viewAll: 'Hoofd- en subcategorieën', viewMainOnly: 'Hoofdcategorieën', viewSubOnly: 'Subcategorieën', previousYears: 'Vorige jaren', drillDown: 'Alles inklappen', drillDownActive: 'Alles uitklappen', importControlTitle: 'Importcontrole', importControlSub: 'Snelle controle of de PDF correct werd geïnterpreteerd', importPeriods: 'Aantal periodes gevonden', importLatestPeriod: 'Laatste periode gevonden', importTotalProd: 'TOTAAL NON LIFE productie', importTotalSchade: 'TOTAAL NON LIFE schade', importSpPct: 'S/P % correct gelezen', importBroker: 'Makelaar/koepelnummer', yes: 'Ja', no: 'Nee', topCompactTitle: 'PDF import & controle', topShow: 'Toon importinformatie', topHide: 'Verberg importinformatie', topOk: 'Importcontrole OK', topAttention: n => n + ' aandachtspunt' + (n === 1 ? '' : 'en'), topPeriodsShort: 'periodes', topLatestShort: 'laatste',
@@ -214,7 +214,7 @@ const I18N = {
     labels: {'Auto':'Auto','Auto Vloten':'Vloten','Auto Niet Vloten':'Niet Vloten','Particulieren':'Particulieren','Particulieren Brand':'Brand','Particulieren BA':'BA','Particulieren Overige':'Overige','Ondernemingen':'Ondernemingen','Ondernemingen Brand':'Brand','Ondernemingen BA':'BA','Ondernemingen Overige':'Overige','Arbeidsongevallen':'Arbeidsongevallen','Rechtsbijstand':'Rechtsbijstand','Rechtsbijstand Stand Alone':'Rechtsbijstand','TOTAAL NON LIFE':'TOTAAL NON LIFE'}
   },
   fr: {
-    printPdf: 'Imprimer en PDF', printPdfBusy: 'Préparation de l’impression…', printPdfError: 'Impossible de préparer l’impression : ',
+    printPdf: 'Imprimer en PDF', printPdfBusy: 'Préparation de l’impression…', printPdfError: 'Impossible de préparer l’impression : ', printPdfDestinationHint: 'Choisissez « Enregistrer au format PDF » comme destination/imprimante dans la fenêtre d’impression.',
     pageTitle: 'Du PDF à une vision claire',
     pageLead: 'Téléchargez votre <strong>PDF chiffres clés non-vie</strong>. Le tableau de bord transforme automatiquement les données en une analyse claire de la production, de la chute, de la progression et des sinistres. Ce tableau de bord utilise le PDF des chiffres clés non-vie téléchargé depuis Salesforce (vous devez effectivement télécharger le PDF en tant que fichier ; l’impression au format PDF ne fonctionne pas), tant au niveau du groupe et de la coupole que pour les chiffres clés AM, CDR ou CD.',
     uploadTitle: 'Glissez votre PDF ici', uploadHint: 'ou cliquez pour choisir un fichier', importPdf: 'Importer', downloadCsv: 'Télécharger CSV', exportPdf: 'Exporter PDF', pdfExportAction: 'Exporter', pdfBusy: 'Création du PDF…', pdfOptionsTitle: 'Sections PDF', pdfNoSections: 'Sélectionnez au moins une section PDF.', noPdf: 'Prêt à traiter vos chiffres clés', processing: '⏳ Traitement du PDF…',
@@ -254,6 +254,7 @@ function updateStaticLanguage() {
   setText('pdfSelectAll', currentLang === 'fr' ? 'Tout sélectionner' : 'Alles selecteren');
   setText('pdfSelectNone', currentLang === 'fr' ? 'Tout désélectionner' : 'Niets selecteren');
   setText('printPdfBtn', msg('printPdf'));
+  setText('pdfPrintDestinationHint', msg('printPdfDestinationHint'));
   setText('pdfOptionsTitle', msg('pdfOptionsTitle')); setText('pdfOptSummary', msg('tabSamenvatting')); setText('pdfOpt360', msg('tab360')); setText('pdfOptProductie', msg('tabProductie')); setText('pdfOptVerval', msg('tabVerval')); setText('pdfOptSchade', msg('tabSchade')); setText('pdfOptDistributions', currentLang === 'fr' ? 'Répartitions' : 'Verdelingen'); setText('pdfOptDetail', msg('tabDetail'));
   setText('tabSamenvatting', msg('tabSamenvatting')); setText('tab360', msg('tab360')); setText('tabProductie', msg('tabProductie')); setText('tabVerval', msg('tabVerval')); setText('tabProgressie', msg('tabProgressie')); setText('tabSchade', msg('tabSchade')); setText('tabPortefeuille', msg('tabPortefeuille')); setText('tabKpis', msg('tabKpis')); setText('tabDetail', msg('tabDetail'));
   setText('kpiCheckSamenvatting', msg('tabSamenvatting')); setText('kpiCheckProductie', msg('tabProductie')); setText('kpiCheckVerval', msg('tabVerval')); setText('kpiCheckProgressie', msg('tabProgressie')); setText('kpiCheckSchade', msg('tabSchade')); setText('kpiCheckPortefeuille', msg('tabPortefeuille')); updateKpiSelectorLabel();
@@ -1449,6 +1450,26 @@ function preparePdf360Block(block) {
   clone.classList.remove('view360Collapsed');
   clone.querySelectorAll('.view360CollapseToggle').forEach(button => button.replaceWith(document.createTextNode(button.querySelector('.view360BlockLabel')?.textContent || button.textContent)));
   clone.querySelectorAll('.blockExportActions').forEach(el => el.remove());
+  if (clone.classList.contains('view360AnalysisBlock')) {
+    const analysisTitle = clone.querySelector(':scope > .view360BlockHead')?.textContent?.trim() || '';
+    clone.querySelector(':scope > .view360BlockHead')?.remove();
+    clone.querySelector(':scope > .view360CollapseBody > p')?.remove();
+    clone.querySelectorAll('.view360AnalysisCategoryTitle').forEach(title => {
+      const category = title.textContent.trim();
+      title.textContent = analysisTitle.toLocaleLowerCase().endsWith(` ${category.toLocaleLowerCase()}`)
+        ? analysisTitle
+        : `${analysisTitle} ${category}`.trim();
+    });
+  }
+  if (clone.classList.contains('view360GroupedBlock')) {
+    clone.querySelector(':scope > .view360BlockHead')?.remove();
+    if (clone.querySelector('.view360PortfolioCard')) clone.classList.add('pdf360PortfolioGroup');
+  }
+  const summary = clone.querySelector('.view360ProductionSummaryKpis')?.closest('.view360Block');
+  const summaryTitle = summary?.querySelector(':scope > h3');
+  if (summaryTitle) summaryTitle.textContent = currentLang === 'fr'
+    ? 'Résumé production/chute/progression'
+    : 'Samenvatting productie/verval/progressie';
   clone.querySelectorAll('canvas[id]').forEach(canvas => {
     const source = document.getElementById(canvas.id);
     if (!source) return;
@@ -1466,6 +1487,14 @@ function preparePdf360Block(block) {
 function buildPdf360Page(blocks) {
   const page = document.createElement('div');
   page.className = 'pdfExportPage pdfTestPage pdfTest360Page';
+  const header = buildPdfHeader();
+  header.classList.add('pdf360Header');
+  header.querySelectorAll('[id]').forEach(el => el.removeAttribute('id'));
+  const viewTitle = document.createElement('div');
+  viewTitle.className = 'pdf360ViewTitle';
+  viewTitle.textContent = '360°-view';
+  header.querySelector('.brokerInfo')?.insertBefore(viewTitle, header.querySelector('.brokerLogo'));
+  page.appendChild(header);
   const frame = document.createElement('div');
   frame.className = 'view360Frame';
   blocks.forEach(block => frame.appendChild(preparePdf360Block(block)));
@@ -1478,39 +1507,72 @@ async function buildPdf360Pages(root) {
   if (document.fonts?.ready) await document.fonts.ready;
   const source = $('view360Content');
   const groups = source ? Array.from(source.children).filter(el => !el.classList.contains('hidden')) : [];
+  const combineMainAnalyses = view360AnalysisModeFor() === 'main' && view360OpenSubcategories.size === 0;
+  let firstAnalysisPage = null;
 
   // Paginate each main topic separately, using its actual export layout.
-  for (const group of groups) {
+  for (const [groupIndex, group] of groups.entries()) {
     const prepared = preparePdf360Block(group);
     const isAnalysis = prepared.classList.contains('view360AnalysisBlock');
+    const isPortfolioGroup = prepared.classList.contains('pdf360PortfolioGroup');
     const containerSelector = isAnalysis ? '.view360AnalysisCategories' : ':scope > .view360CollapseBody';
     const content = prepared.querySelector(containerSelector);
     if (!content) throw new Error('360-view: ontbrekende inhoud voor PDF-export.');
-    const units = Array.from(content.children).filter(el => !el.classList.contains('hidden'));
+    const sourceUnits = Array.from(content.children).filter(el => !el.classList.contains('hidden'));
+    const isProductionGroup = !isAnalysis && !!content.querySelector('.view360ProductionSummaryKpis') && sourceUnits.length === 5;
+    const batches = isProductionGroup
+      ? [[sourceUnits[0]], [sourceUnits[1], sourceUnits[3]], [sourceUnits[2], sourceUnits[4]]]
+      : sourceUnits.map(unit => [unit]);
     content.replaceChildren();
     let page, frame, shell, destination, count;
 
-    const startPage = () => {
-      page = buildPdf360Page([]);
+    const startPage = (reuseFirstAnalysisPage = false) => {
+      page = reuseFirstAnalysisPage ? firstAnalysisPage : buildPdf360Page([]);
       frame = page.querySelector('.view360Frame');
       // Flex shrinking would disguise overflow while measuring.
       frame.style.display = 'block';
       shell = prepared.cloneNode(true);
       destination = shell.querySelector(containerSelector);
       frame.appendChild(shell);
-      root.appendChild(page);
+      if (!reuseFirstAnalysisPage) root.appendChild(page);
       count = 0;
     };
-    const bottomLimit = () => frame.getBoundingClientRect().bottom - 2;
-    const shellBottom = () => shell.getBoundingClientRect().bottom;
-    startPage();
+    const bottomLimit = () => frame.getBoundingClientRect().bottom - (isPortfolioGroup ? 18 : 4);
+    const shellBottom = () => Math.max(
+      shell.getBoundingClientRect().bottom,
+      ...(isPortfolioGroup ? Array.from(shell.querySelectorAll('.pieLegendItem:last-child'), el => el.getBoundingClientRect().bottom) : [])
+    );
+    let sharingAnalysisPage = combineMainAnalyses && groupIndex === 1 && isAnalysis && !!firstAnalysisPage;
+    if (sharingAnalysisPage) {
+      firstAnalysisPage.querySelector('.view360Frame > .view360AnalysisBlock')?.style.setProperty('margin-bottom', '11px', 'important');
+    }
+    startPage(sharingAnalysisPage);
 
-    for (const unit of units) {
+    const decodeUnitImages = unit => Promise.all(Array.from(unit.querySelectorAll('img')).map(img =>
+      img.decode ? img.decode().catch(() => {}) : Promise.resolve()
+    ));
+    for (const batch of batches) {
+      if (batch.length > 1) {
+        batch.forEach(unit => destination.appendChild(unit));
+        await Promise.all(batch.map(decodeUnitImages));
+        if (shellBottom() > bottomLimit() && count > 0) {
+          batch.forEach(unit => unit.remove());
+          startPage();
+          batch.forEach(unit => destination.appendChild(unit));
+        }
+        if (shellBottom() <= bottomLimit()) {
+          count += batch.length;
+          continue;
+        }
+        // Alleen als de combinatie zelfs op een lege pagina niet past,
+        // laten we de bestaande veilige paginering per blok beslissen.
+        batch.forEach(unit => unit.remove());
+      }
+      for (const unit of batch) {
       destination.appendChild(unit);
-      await Promise.all(Array.from(unit.querySelectorAll('img')).map(img =>
-        img.decode ? img.decode().catch(() => {}) : Promise.resolve()
-      ));
-      if (shellBottom() > bottomLimit() && count > 0) {
+      await decodeUnitImages(unit);
+      const keepAnalysisPair = isAnalysis && count === 1;
+      if (shellBottom() > bottomLimit() && count > 0 && !sharingAnalysisPage && !keepAnalysisPair) {
         unit.remove();
         startPage();
         destination.appendChild(unit);
@@ -1541,8 +1603,12 @@ async function buildPdf360Pages(root) {
         throw new Error('360-view: pagina-overloop gedetecteerd; export gestopt om afkappen te vermijden.');
       }
       count++;
+      }
     }
     if (!count) page.remove();
+    if (combineMainAnalyses && groupIndex === 0 && isAnalysis && sourceUnits.length === 1 && count === 1) {
+      firstAnalysisPage = page;
+    }
   }
 }
 
@@ -1647,6 +1713,14 @@ async function exportSummaryPdf() {
   }
 }
 
+function printPdfSuggestedTitle() {
+  const name = String(brokerInfo?.name || $('brokerName')?.textContent || '').trim()
+    .replace(/[\\/:*?"<>|]+/g, '-')
+    .replace(/\s+/g, ' ')
+    .slice(0, 80);
+  return name ? `Dashboard Vivium Non-Life - ${name}` : 'Dashboard Vivium Non-Life';
+}
+
 let printPdfCleanup = null;
 async function printSelectedPdf() {
   if (!lastData || printPdfCleanup || document.body.classList.contains('pdfExportBusy')) return;
@@ -1659,6 +1733,7 @@ async function printSelectedPdf() {
   const printBtn = $('printPdfBtn');
   const mainBtn = $('exportPdfBtn');
   const exportBtn = $('pdfExportConfirmBtn');
+  const originalTitle = document.title;
   setPdfOptionsOpen(false);
   if (printBtn) { printBtn.disabled = true; printBtn.textContent = msg('printPdfBusy'); }
   if (mainBtn) mainBtn.disabled = true;
@@ -1669,6 +1744,7 @@ async function printSelectedPdf() {
   const finish = () => {
     window.removeEventListener('afterprint', finish);
     root?.remove();
+    document.title = originalTitle;
     document.body.classList.remove('printingPdf', 'pdfPrintPreparing', 'pdfExportBusy');
     if (printBtn) { printBtn.disabled = false; printBtn.textContent = msg('printPdf'); }
     if (mainBtn) mainBtn.disabled = false;
@@ -1723,6 +1799,7 @@ async function printSelectedPdf() {
     printPdfCleanup = finish;
     window.addEventListener('afterprint', finish, { once: true });
     document.body.classList.add('printingPdf');
+    document.title = printPdfSuggestedTitle();
     window.print();
   } catch (err) {
     console.error(err);
