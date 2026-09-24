@@ -1428,6 +1428,37 @@ function appendPrintPiePage(root, mode) {
   root.appendChild(page);
 }
 
+// Beide PDF-opties gebruiken exact dezelfde secties, volgorde en paginering.
+async function buildSelectedPdfPages(root, selected, items) {
+  if (selected.has('summary')) {
+    root.appendChild(buildPdfTestPage(items.slice(0, 2), true, true));
+    root.appendChild(buildPdfTestPage(items.slice(2, 4)));
+  }
+  document.body.appendChild(root);
+  await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+  for (const [section, source] of [
+    ['productie', 'prodGrouped'],
+    ['verval', 'vervalGrouped'],
+    ['schade', 'schadeGrouped']
+  ]) {
+    if (!selected.has(section)) continue;
+    await buildPdfTestCategoryPages(root, source, section);
+    appendPrintPiePage(root, section);
+  }
+  if (selected.has('distributions')) {
+    for (const mode of ['productie', 'verval', 'schade', 'portfolio']) {
+      if (mode === 'portfolio' || !selected.has(mode)) appendPrintPiePage(root, mode);
+    }
+  }
+  if (selected.has('detail')) await buildPdfTestDetailPages(root);
+  if (selected.has('view360')) await buildPdf360Pages(root);
+  addPdfTestPageNumbers(root);
+  preparePrintVectorDetails(root);
+  if (document.fonts?.ready) await document.fonts.ready;
+  await Promise.all(Array.from(root.querySelectorAll('img')).map(img => img.decode ? img.decode().catch(() => {}) : Promise.resolve()));
+  await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+}
+
 function preparePrintVectorDetails(root) {
   root.querySelectorAll('.bararea > .barline > .barDeltaSlot:has(>span)').forEach(slot => {
     const arrow = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
@@ -1645,7 +1676,7 @@ async function exportSummaryPdf() {
     if (exportBtn) exportBtn.disabled = true;
     if (printBtn) printBtn.disabled = true;
     if (mainLabel) mainLabel.textContent = msg('pdfBusy');
-    document.body.classList.add('pdfExportBusy');
+    document.body.classList.add('pdfExportBusy', 'pdfPrintPreparing');
 
     if (selected.has('summary')) renderDashboardSection('samenvatting');
     if (selected.has('view360')) renderDashboardSection('view360');
@@ -1660,20 +1691,7 @@ async function exportSummaryPdf() {
     {
       const root = document.createElement('div');
       root.className = 'pdfExportRoot';
-      if (selected.has('summary')) {
-        root.appendChild(buildPdfTestPage(items.slice(0, 2), true, true));
-        root.appendChild(buildPdfTestPage(items.slice(2, 4)));
-      }
-      document.body.appendChild(root);
-      await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
-      if (selected.has('productie')) await buildPdfTestCategoryPages(root, 'prodGrouped', 'productie');
-      if (selected.has('verval')) await buildPdfTestCategoryPages(root, 'vervalGrouped', 'verval');
-      if (selected.has('schade')) await buildPdfTestCategoryPages(root, 'schadeGrouped', 'schade');
-      if (selected.has('distributions')) buildPdfDistributionPages(root, lastData, dashboardCurrentPeriod);
-      if (selected.has('detail')) await buildPdfTestDetailPages(root);
-      if (selected.has('view360')) await buildPdf360Pages(root);
-      addPdfTestPageNumbers(root);
-      await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+      await buildSelectedPdfPages(root, selected, items);
       const { jsPDF } = window.jspdf;
       const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4', compress: true });
       const pageW = pdf.internal.pageSize.getWidth();
@@ -1705,7 +1723,7 @@ async function exportSummaryPdf() {
     if (root) root.remove();
     const testRoot = document.querySelector('.pdfTestScreenshotRoot');
     if (testRoot) testRoot.remove();
-    document.body.classList.remove('pdfExportBusy');
+    document.body.classList.remove('pdfPrintPreparing', 'pdfExportBusy');
     if (mainBtn) mainBtn.disabled = false;
     if (mainLabel) mainLabel.textContent = msg('exportPdf');
     if (exportBtn) exportBtn.disabled = false;
@@ -1765,36 +1783,7 @@ async function printSelectedPdf() {
 
     root = document.createElement('div');
     root.className = 'pdfExportRoot';
-    if (selected.has('summary')) {
-      root.appendChild(buildPdfTestPage(items.slice(0, 2), true, true));
-      root.appendChild(buildPdfTestPage(items.slice(2, 4)));
-    }
-    document.body.appendChild(root);
-    await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
-    if (selected.has('productie')) {
-      await buildPdfTestCategoryPages(root, 'prodGrouped', 'productie');
-      appendPrintPiePage(root, 'productie');
-    }
-    if (selected.has('verval')) {
-      await buildPdfTestCategoryPages(root, 'vervalGrouped', 'verval');
-      appendPrintPiePage(root, 'verval');
-    }
-    if (selected.has('schade')) {
-      await buildPdfTestCategoryPages(root, 'schadeGrouped', 'schade');
-      appendPrintPiePage(root, 'schade');
-    }
-    if (selected.has('distributions')) {
-      for (const mode of ['productie', 'verval', 'schade', 'portfolio']) {
-        if (mode === 'portfolio' || !selected.has(mode)) appendPrintPiePage(root, mode);
-      }
-    }
-    if (selected.has('detail')) await buildPdfTestDetailPages(root);
-    if (selected.has('view360')) await buildPdf360Pages(root);
-    addPdfTestPageNumbers(root);
-    preparePrintVectorDetails(root);
-    if (document.fonts?.ready) await document.fonts.ready;
-    await Promise.all(Array.from(root.querySelectorAll('img')).map(img => img.decode ? img.decode().catch(() => {}) : Promise.resolve()));
-    await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+    await buildSelectedPdfPages(root, selected, items);
 
     printPdfCleanup = finish;
     window.addEventListener('afterprint', finish, { once: true });

@@ -1806,29 +1806,29 @@ body.pdfPrintPreparing .pdfExportRoot .previousYearLine .pdfPrintDeltaArrow{top:
   body.printingPdf .pdfExportPage.pdfTestPage{width:210mm!important;height:296.8mm!important;min-height:0!important;margin:0!important;break-inside:avoid-page;page-break-inside:avoid;print-color-adjust:exact;-webkit-print-color-adjust:exact}
   body.printingPdf .pdfExportPage.pdfTestPage:not(:last-child){break-after:page;page-break-after:always}
   body.printingPdf .pdfExportPage.pdfTestPage:last-child{break-after:auto;page-break-after:auto}
-  /* Enkel de browserafdruk: behoud de KPI-vergelijking en schermkleuren. */
-  body.printingPdf .pdfExportRoot .pdfTestPageWithKpis .pdfSummaryKpis .kpi{height:126px!important;min-height:126px!important;padding:7px 8px!important}
-  body.printingPdf .pdfExportRoot .pdfSummaryKpis .kpiCompare{display:flex!important;gap:3px!important;padding-top:4px!important;margin-top:auto!important}
-  body.printingPdf .pdfExportRoot .pdfSummaryKpis .kpiCompareLine,
-  body.printingPdf .pdfExportRoot .pdfSummaryKpis .kpiCompareZeroLine{grid-template-columns:31px minmax(0,1fr) 42px!important;gap:2px!important}
-  body.printingPdf .pdfExportRoot .pdfSummaryKpis .kpiComparePeriod,
-  body.printingPdf .pdfExportRoot .pdfSummaryKpis .kpiCompareAmount{font-size:7px!important}
-  body.printingPdf .pdfExportRoot .pdfSummaryKpis .kpiCompareTrack,
-  body.printingPdf .pdfExportRoot .pdfSummaryKpis .kpiCompareZeroLine .kpiCompareZeroTrack{height:11px!important}
-  body.printingPdf .pdfExportRoot .pdfSummaryKpis .kpiCompareFill,
-  body.printingPdf .pdfExportRoot .pdfSummaryKpis .kpiCompareZeroLine .kpiCompareZeroFill{height:7px!important;top:1px!important}
-  body.printingPdf .pdfExportRoot .pdfSummaryKpis .kpiCompareBubble{font-size:7.5px!important;padding:2px 5px!important;margin-top:0!important}
-  body.printingPdf .pdfExportRoot .pdfTestPage .insightItemHeader{margin:-9px -12px 0!important;padding:7px 12px!important;min-height:39px!important;border-radius:14px 14px 0 0!important;background:linear-gradient(135deg,var(--blue),#043c93)!important;color:#fff!important}
-  body.printingPdf .pdfExportRoot .pdfTestPage .insightItemHeader h3{color:#fff!important}
-  body.printingPdf .pdfExportRoot .pdfTestPage .insightItemIcon{background:rgba(255,255,255,.12)!important}
-  body.printingPdf .pdfExportRoot .pdfTestPageWithKpis .insightItem:first-child .insightItemIcon{color:#009b77!important}
-  body.printingPdf .pdfExportRoot .pdfTestPageWithKpis .insightItem:nth-child(2) .insightItemIcon{color:#ff934c!important}
-  body.printingPdf .pdfExportRoot .pdfTestPage:not(.pdfTestPageWithKpis) .insightItemIcon{color:#c0392b!important}
-  body.printingPdf .pdfExportRoot .pdfTestPage .prodBarStick.prevPeriod{background:linear-gradient(180deg,#24338a,#0d1473)!important}
-  body.printingPdf .pdfExportRoot .pdfTestPage .prodBarStick.currPeriod{background:linear-gradient(180deg,#ffae77,#ff934c)!important}
-  body.printingPdf .pdfExportRoot .pdfTestPage .prodBarStick{border-radius:0!important;border:0!important;box-shadow:none!important}
-  body.printingPdf .pdfExportRoot .portfolioBarShell,
-  body.printingPdf .pdfExportRoot .portfolioBarFill{border-radius:0!important;box-shadow:none!important}
 }
+/* Dezelfde visuele regels voor de directe PDF-download en de browserafdruk. */
+body.pdfPrintPreparing .pdfExportRoot .pdfTestPageWithKpis .pdfSummaryKpis .kpi{height:126px!important;min-height:126px!important;padding:7px 8px!important}
+body.pdfPrintPreparing .pdfExportRoot .pdfSummaryKpis .kpiCompare{display:flex!important;gap:3px!important;padding-top:4px!important;margin-top:auto!important}
+body.pdfPrintPreparing .pdfExportRoot .pdfSummaryKpis .kpiCompareLine,
+body.pdfPrintPreparing .pdfExportRoot .pdfSummaryKpis .kpiCompareZeroLine{grid-template-columns:31px minmax(0,1fr) 42px!important;gap:2px!important}
+body.pdfPrintPreparing .pdfExportRoot .pdfSummaryKpis .kpiComparePeriod,
+body.pdfPrintPreparing .pdfExportRoot .pdfSummaryKpis .kpiCompareAmount{font-size:7px!important}
+body.pdfPrintPreparing .pdfExportRoot .pdfSummaryKpis .kpiCompareTrack,
+body.pdfPrintPreparing .pdfExportRoot .pdfSummaryKpis .kpiCompareZeroLine .kpiCompareZeroTrack{height:11px!important}
+body.pdfPrintPreparing .pdfExportRoot .pdfSummaryKpis .kpiCompareFill,
+body.pdfPrintPreparing .pdfExportRoot .pdfSummaryKpis .kpiCompareZeroLine .kpiCompareZeroFill{height:7px!important;top:1px!important}
+body.pdfPrintPreparing .pdfExportRoot .pdfSummaryKpis .kpiCompareBubble{font-size:7.5px!important;padding:2px 5px!important;margin-top:0!important}
+body.pdfPrintPreparing .pdfExportRoot .pdfTestPage .insightItemHeader{margin:-9px -12px 0!important;padding:7px 12px!important;min-height:39px!important;border-radius:14px 14px 0 0!important;background:linear-gradient(135deg,var(--blue),#043c93)!important;color:#fff!important}
+body.pdfPrintPreparing .pdfExportRoot .pdfTestPage .insightItemHeader h3{color:#fff!important}
+body.pdfPrintPreparing .pdfExportRoot .pdfTestPage .insightItemIcon{background:rgba(255,255,255,.12)!important}
+body.pdfPrintPreparing .pdfExportRoot .pdfTestPageWithKpis .insightItem:first-child .insightItemIcon{color:#009b77!important}
+body.pdfPrintPreparing .pdfExportRoot .pdfTestPageWithKpis .insightItem:nth-child(2) .insightItemIcon{color:#ff934c!important}
+body.pdfPrintPreparing .pdfExportRoot .pdfTestPage:not(.pdfTestPageWithKpis) .insightItemIcon{color:#c0392b!important}
+body.pdfPrintPreparing .pdfExportRoot .pdfTestPage .prodBarStick.prevPeriod{background:linear-gradient(180deg,#24338a,#0d1473)!important}
+body.pdfPrintPreparing .pdfExportRoot .pdfTestPage .prodBarStick.currPeriod{background:linear-gradient(180deg,#ffae77,#ff934c)!important}
+body.pdfPrintPreparing .pdfExportRoot .pdfTestPage .prodBarStick{border-radius:0!important;border:0!important;box-shadow:none!important}
+body.pdfPrintPreparing .pdfExportRoot .portfolioBarShell,
+body.pdfPrintPreparing .pdfExportRoot .portfolioBarFill{border-radius:0!important;box-shadow:none!important}
 @media(max-width:980px){body:not(.topInfoReady) .hero{grid-template-columns:1fr;min-height:0}body:not(.topInfoReady) .hero .panel{border-right:0;border-bottom:1px solid rgba(214,228,242,.72)}body:not(.topInfoReady) .upload-zone{min-height:390px}}
 @media(max-width:640px){body:not(.topInfoReady) .hero .panel{padding:34px 24px}body:not(.topInfoReady) .upload{padding:24px}body:not(.topInfoReady) .hero #pageTitle{font-size:24px!important}.heroBenefits{grid-template-columns:1fr}.heroBenefit{white-space:normal}body:not(.topInfoReady) .upload-zone{min-height:350px;padding:24px}.heroUploadButton{min-width:0;width:100%}}
