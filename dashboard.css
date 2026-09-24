@@ -1602,8 +1602,8 @@ body:not(.topInfoReady) .hero .panel .upload-logo{filter:none;margin-left:-12px;
 .upload-zone{background:#fff;border-color:#c5d6e5}
 .upload-zone:hover{background:#edf3f7}
 .kpi .delta,.metric .delta{opacity:1}
-.kpis,.view360AnalysisGrid{--green:#009b77;--red:#ff934c}
-#productie .metric,#verval .metric,#progressie .metric,#schade .metric{--green:#009b77;--red:#ff934c}
+.kpis,.view360AnalysisGrid{--green:#007a60;--red:#b65314}
+#productie .metric,#verval .metric,#progressie .metric,#schade .metric,.pdfExportRoot .pdfTestCategoryPage .metric{--green:#007a60;--red:#b65314}
 .kpiCompareTrack>.kpiCompareFill,.kpiCompareZeroLine .kpiCompareZeroFill,.kpiCompareHistoryLine .kpiCompareZeroFill{top:calc(50% - 4px);height:8px}
 body:not(.topInfoReady) .hero #pageTitle,body:not(.topInfoReady) .upload-title{color:#0d1473}
 body:not(.topInfoReady) .hero .lead{color:#4d4d4d;font-family:'Open Sans',Arial,sans-serif}
@@ -1613,10 +1613,10 @@ body:not(.topInfoReady) .hero .lead{color:#4d4d4d;font-family:'Open Sans',Arial,
 .heroUploadButton,#topInfoToggleBtn{background:#ff934c;color:#fff;border-color:#ff934c}
 #topInfoToggleBtn:hover{background:#ed7f35;color:#fff;border-color:#ed7f35}
 .barline{grid-template-columns:82px minmax(130px,1fr) 104px 118px}
-.barDeltaSlot{--green:#009b77;--red:#ff934c}
+.barDeltaSlot{--green:#007a60;--red:#b65314}
 .barDeltaSlot>.barValueDelta,.barDeltaSlot>.previousYearsDelta{font-size:11px;line-height:1;padding:4px 8px;border:1px solid var(--line)}
-.barDeltaSlot>.pos{background:#e5f4f7;color:#009b77;border-color:#b7dce6}
-.barDeltaSlot>.neg{background:#fff4e8;color:#ff934c;border-color:#ffd2b0}
+.barDeltaSlot>.pos{background:#e5f4f7;color:#007a60;border-color:#b7dce6}
+.barDeltaSlot>.neg{background:#fff4e8;color:#b65314;border-color:#ffd2b0}
 @media(max-width:640px){.barline{grid-template-columns:62px minmax(72px,1fr) 78px 88px;gap:4px}.barDeltaSlot>.barValueDelta,.barDeltaSlot>.previousYearsDelta{font-size:9px;padding:2px 4px}.bararea>.barline>.barDeltaSlot>.barValueDelta,.bararea>.previousYearLine>.barDeltaSlot>.previousYearsDelta{left:13px}}
 .pdfExportRoot .pdfTestCategoryPage .barline{grid-template-columns:58px minmax(86px,1fr) 66px 86px!important}
 /* Vaste categoriekleuren voor tab- en sectie-iconen. */
@@ -1719,8 +1719,8 @@ body.pdfPrintPreparing .pdfExportRoot .pdfPrintLogoWrap{position:relative;displa
 body.pdfPrintPreparing .pdfExportRoot .pdfPrintLogoWrap .brokerLogo{position:absolute!important;left:0;top:0;height:204px!important;max-width:366px!important;margin:0!important;transform:scale(.333333);transform-origin:top left}
 body.pdfPrintPreparing .pdfExportRoot .bararea>.barline>.barDeltaSlot:has(>.pdfPrintDeltaArrow)::before{content:none!important}
 body.pdfPrintPreparing .pdfExportRoot .pdfPrintDeltaArrow{position:absolute;left:0;top:-3px;width:11px;height:23px;transform:translateY(-50%) scale(-1,-1);color:var(--blue);overflow:visible}
-body.pdfPrintPreparing .pdfExportRoot .barDeltaSlot:has(>span.pos)>.pdfPrintDeltaArrow{color:#009b77}
-body.pdfPrintPreparing .pdfExportRoot .barDeltaSlot:has(>span.neg)>.pdfPrintDeltaArrow{color:#ff934c}
+body.pdfPrintPreparing .pdfExportRoot .barDeltaSlot:has(>span.pos)>.pdfPrintDeltaArrow{color:#007a60}
+body.pdfPrintPreparing .pdfExportRoot .barDeltaSlot:has(>span.neg)>.pdfPrintDeltaArrow{color:#b65314}
 body.pdfPrintPreparing .pdfExportRoot .previousYearLine .pdfPrintDeltaArrow{top:calc(100% + 5px)}
 @media print{
   @page{size:A4 portrait;margin:0}
