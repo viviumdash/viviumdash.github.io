@@ -1603,6 +1603,7 @@ body:not(.topInfoReady) .hero .panel .upload-logo{filter:none;margin-left:-12px;
 .upload-zone:hover{background:#edf3f7}
 .kpi .delta,.metric .delta{opacity:1}
 .kpis,.view360AnalysisGrid{--green:#009b77;--red:#ff934c}
+#productie .metric,#verval .metric,#progressie .metric,#schade .metric{--green:#009b77;--red:#ff934c}
 .kpiCompareTrack>.kpiCompareFill,.kpiCompareZeroLine .kpiCompareZeroFill,.kpiCompareHistoryLine .kpiCompareZeroFill{top:calc(50% - 4px);height:8px}
 body:not(.topInfoReady) .hero #pageTitle,body:not(.topInfoReady) .upload-title{color:#0d1473}
 body:not(.topInfoReady) .hero .lead{color:#4d4d4d;font-family:'Open Sans',Arial,sans-serif}
