@@ -37,10 +37,9 @@
     <div class="topCompactActions">
       <button id="downloadCsvBtn" class="btn-csv hidden"><svg style="width:14px;height:14px;flex:0 0 auto;vertical-align:-2px;margin-right:5px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Download CSV</button>
       <div id="exportPdfWrap" class="pdfExportWrap hidden">
-        <button id="exportPdfBtn" class="btn-pdf"><svg style="width:15px;height:15px;flex:0 0 auto;vertical-align:-2px;margin-right:6px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>Exporteer PDF</button>
         <div id="pdfOptionsWrap" class="pdfOptionsWrap">
-          <button id="pdfOptionsBtn" class="pdfOptionsBtn" type="button" title="PDF secties kiezen" aria-label="PDF secties kiezen" aria-expanded="false"><svg style="width:14px;height:14px;display:block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>
-          <div id="pdfOptionsMenu" class="pdfOptionsMenu" role="menu" aria-label="PDF secties">
+          <button id="exportPdfBtn" class="btn-pdf pdfDropdownTrigger" type="button" aria-haspopup="dialog" aria-controls="pdfOptionsMenu" aria-expanded="false"><svg style="width:15px;height:15px;flex:0 0 auto" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg><span id="exportPdfLabel">Exporteer PDF</span><svg class="pdfDropdownChevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></button>
+          <div id="pdfOptionsMenu" class="pdfOptionsMenu" role="dialog" aria-label="PDF secties">
             <div id="pdfOptionsTitle" class="pdfOptionsTitle">PDF secties</div>
             <div class="pdfSelectionActions"><button type="button" id="pdfSelectAll" onclick="selectAllPdfSections(true)">Alles selecteren</button><button type="button" id="pdfSelectNone" onclick="selectAllPdfSections(false)">Niets selecteren</button></div>
             <label class="pdfOption"><input type="checkbox" class="pdfSectionCheck" value="summary" checked><span id="pdfOptSummary">Samenvatting</span></label>
@@ -50,7 +49,7 @@
             <label class="pdfOption"><input type="checkbox" class="pdfSectionCheck" value="distributions" checked><span id="pdfOptDistributions">Verdelingen</span></label>
             <label class="pdfOption"><input type="checkbox" class="pdfSectionCheck" value="detail" checked><span id="pdfOptDetail">Detail</span></label>
             <label class="pdfOption"><input type="checkbox" class="pdfSectionCheck" value="view360" checked><span id="pdfOpt360">360-view</span></label>
-            <div class="pdfPrintAction"><button type="button" id="printPdfBtn">Print to PDF</button></div>
+            <div class="pdfOutputActions"><button type="button" id="printPdfBtn">Print to PDF</button><button type="button" id="pdfExportConfirmBtn">Export</button></div>
           </div>
         </div>
       </div>
@@ -382,6 +381,7 @@ Icoontjes meer kleur gegeven en correct uitgelijnd ten opzichte van de tekst.
 Bij portefeuille extra delta-informatie tussen de balken toegevoegd.
 In de Detail-tab delta's voor S/P en S/P afgetopt toegevoegd.
 Bij Exporteer PDF is "Print to PDF" toegevoegd. Naast de bestaande export op basis van schermafbeeldingen kun je via "Opslaan als PDF" in het afdrukvenster een lichtere PDF maken. Deze nieuwe optie houdt rekening met de actieve weergave-instellingen en exporteert alleen de secties die je in de dropdown selecteert.
+Exporteer PDF knop aangepast, zodat je altijd eerst secties moet kiezen en onderaan dan keuze kan maken tussen Print to PDF en Export.
 </script>
 <script src="dashboard.js"></script>
 

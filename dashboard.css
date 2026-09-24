@@ -10,11 +10,9 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:-1;ba
 .topCompactActions{display:inline-flex;align-items:center;gap:8px;flex:0 0 auto}
 .topCompactActions .btn-csv{width:auto;min-width:116px;height:34px;padding:0 12px;font-size:12px;box-shadow:none;background:#fff7ef;color:#b8570b;border:1px solid #ffd0a8}
 .topCompactActions .btn-csv:hover{background:#fff1e3}
-.topCompactActions .pdfExportWrap{width:auto;align-self:auto}
-.topCompactActions .btn-pdf{height:36px;padding:0 15px;font-size:12px;border-radius:999px 0 0 999px;box-shadow:0 8px 18px rgba(13,20,115,.16)}
+.topCompactActions .pdfExportWrap{width:174px;align-self:auto}
+.topCompactActions .btn-pdf{height:36px;padding:0 15px;font-size:12px;border-radius:999px;box-shadow:0 8px 18px rgba(13,20,115,.16)}
 .topCompactActions .pdfOptionsWrap{margin-left:0}
-.topCompactActions .pdfOptionsBtn{width:38px;height:36px;border-radius:0 999px 999px 0;border:0;border-left:1px solid rgba(255,255,255,.24);background:#0d4b84;color:#fff;box-shadow:0 8px 18px rgba(13,20,115,.16);font-size:15px}
-.topCompactActions .pdfOptionsBtn:hover{background:#14558f}
 .topInfoToggleBtn{width:auto;min-width:78px;height:36px;padding:0 14px;border-radius:999px;border:1px solid #cbdff2;background:#fff;color:var(--blue);font-size:12px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;box-shadow:0 6px 14px rgba(13,20,115,.10);flex:0 0 auto;transition:background .15s ease,transform .15s ease,box-shadow .15s ease}
 .topInfoToggleBtn:hover{background:#edf5fc;transform:scale(1.05);box-shadow:0 9px 18px rgba(13,20,115,.16)}
 body.topInfoReady.topInfoCollapsed .hero,body.topInfoReady.topInfoCollapsed #importControl{display:none!important}
@@ -204,12 +202,11 @@ th{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--mute
 .btn-csv{display:inline-flex;align-items:center;justify-content:center;border:0;border-radius:999px;background:var(--orange);color:white;font-weight:700;padding:12px 20px;cursor:pointer;box-shadow:0 8px 18px rgba(255,147,76,.25);font-size:14px;width:220px;align-self:center}
 .pdfExportWrap{position:relative;display:inline-flex;align-items:center;justify-content:center;align-self:center;width:220px}
 .btn-pdf{display:inline-flex;align-items:center;justify-content:center;border:0;border-radius:999px;background:var(--blue);color:white;font-weight:700;padding:12px 20px;cursor:pointer;box-shadow:0 8px 18px rgba(13,20,115,.24);font-size:14px;flex:1;min-width:0}.btn-pdf:disabled{opacity:.62;cursor:wait}
-.pdfOptionsWrap{position:relative;display:inline-flex;margin-left:8px;z-index:1}
+.pdfOptionsWrap{position:relative;display:inline-flex;width:100%;z-index:1}
 .pdfOptionsWrap.open{z-index:10050}
-.pdfOptionsBtn{width:40px;height:40px;border-radius:999px;border:1px solid #cbdff2;background:#fff;color:var(--blue);font-size:18px;font-weight:700;cursor:pointer;box-shadow:0 8px 18px rgba(13,20,115,.12);display:inline-flex;align-items:center;justify-content:center}
-.pdfOptionsBtn:hover{background:#edf5fc;box-shadow:0 10px 22px rgba(13,20,115,.16)}
-.pdfOptionsBtn:disabled{opacity:.62;cursor:wait}
-.pdfOptionsMenu{position:absolute;right:0;top:48px;width:248px;background:#fff;border:1px solid #cbdff2;border-radius:16px;box-shadow:0 18px 44px rgba(15,23,42,.18);padding:12px;z-index:10060;display:none;text-align:left;backdrop-filter:blur(8px)}
+.pdfDropdownTrigger{width:100%;gap:7px}
+.pdfDropdownChevron{width:14px;height:14px;flex:0 0 auto;margin-left:auto}
+.pdfOptionsMenu{position:absolute;right:0;top:calc(100% + 8px);width:270px;max-height:min(70vh,520px);overflow-y:auto;background:#fff;border:1px solid #cbdff2;border-radius:16px;box-shadow:0 18px 44px rgba(15,23,42,.18);padding:12px;z-index:10060;display:none;text-align:left;backdrop-filter:blur(8px)}
 .pdfOptionsWrap.open .pdfOptionsMenu{display:block}
 .pdfSelectionActions{display:flex;gap:6px;margin:0 0 8px;padding-bottom:10px;border-bottom:1px solid var(--line)}
 .pdfSelectionActions button{flex:1;border:1px solid var(--line);border-radius:8px;padding:7px 5px;background:#f5f9fd;color:var(--blue);font-family:inherit;font-weight:700;font-size:11px;line-height:1.3;cursor:pointer}
@@ -1230,7 +1227,8 @@ th{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--mute
 
 /* KPI's: uniforme layout op alle tabs */
 .kpi{min-height:218px;height:218px;display:flex;flex-direction:column;justify-content:flex-start}
-.kpi .label,.dynamicCategoryKpi .label{font-size:11px!important;text-transform:uppercase!important;letter-spacing:.06em!important;font-weight:700!important;color:var(--muted)!important;line-height:1.15!important;min-height:30px!important;display:block!important}.kpi .label span,.dynamicCategoryKpi .label span{display:block;font:inherit;letter-spacing:inherit;color:inherit;text-transform:inherit}.kpi .label .kpi-period,.dynamicCategoryKpi .label .kpi-period{margin-top:2px}
+#kpis>.kpi{height:auto;min-height:218px}
+.kpi .label,.dynamicCategoryKpi .label{font-size:11px!important;text-transform:uppercase!important;letter-spacing:.06em!important;font-weight:700!important;color:var(--muted)!important;line-height:1.15!important;min-height:var(--kpi-label-height,30px)!important;display:block!important}.kpi .label span,.dynamicCategoryKpi .label span{display:block;font:inherit;letter-spacing:inherit;color:inherit;text-transform:inherit}.kpi .label .kpi-period,.dynamicCategoryKpi .label .kpi-period{margin-top:2px}
 .kpi .value,.dynamicCategoryKpi .value{font-size:26px!important;font-weight:700!important;line-height:1.08!important;margin-top:8px!important;text-align:left!important;color:var(--blue)!important}
 .kpi-subvalue,.dynamicCategoryKpi .kpi-subvalue{font-size:20px!important;line-height:1.15!important;margin-top:2px!important}
 .kpi .delta,.dynamicCategoryKpi .delta{font-size:13px!important;font-weight:700!important;line-height:1.28!important;margin-top:5px!important;text-align:left!important}
@@ -1656,13 +1654,15 @@ body:not(.topInfoReady) .hero .lead{color:#4d4d4d;font-family:'Open Sans',Arial,
 /* Detailkoppen gebruiken dezelfde icoonkleuren als de samenvatting. */
 .detailSectionBlock.productionDetail .detailSectionTitleRow .detailSectionIcon{color:#009b77!important;background:rgba(0,155,119,.12)!important;border-color:transparent}
 .detailSectionBlock.schadeDetail .detailSectionTitleRow .detailSectionIcon{color:#c0392b!important;background:rgba(192,57,43,.12)!important;border-color:transparent}
-.pdfPrintAction{margin-top:9px;padding-top:10px;border-top:1px solid var(--line)}
-.pdfPrintAction button{width:100%;border:1px solid var(--blue);border-radius:9px;padding:10px 12px;background:var(--blue);color:#fff;font:700 12px Lato,Arial,sans-serif;cursor:pointer}
-.pdfPrintAction button:hover{background:var(--blue3)}
-.pdfPrintAction button:disabled{opacity:.62;cursor:wait}
-/* Beide helften van deze gesplitste knoppen houden dezelfde kleur. */
-#exportPdfWrap .pdfOptionsBtn,#kpiSelectorControls .viewDropdownBtn{background:var(--blue);color:#fff}
-#exportPdfWrap:hover .btn-pdf,#exportPdfWrap:hover .pdfOptionsBtn,
+.pdfOutputActions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:9px;padding-top:10px;border-top:1px solid var(--line)}
+.pdfOutputActions button{border:1px solid var(--blue);border-radius:9px;padding:10px 6px;font:700 12px Lato,Arial,sans-serif;cursor:pointer}
+#printPdfBtn{background:#fff;color:var(--blue)}
+#printPdfBtn:hover{background:#edf5fc}
+#pdfExportConfirmBtn{background:var(--blue);color:#fff}
+#pdfExportConfirmBtn:hover{background:var(--blue3)}
+.pdfOutputActions button:disabled{opacity:.62;cursor:wait}
+#kpiSelectorControls .viewDropdownBtn{background:var(--blue);color:#fff}
+#exportPdfWrap:hover .btn-pdf,
 #kpiSelectorControls:hover .viewDropdownMain,#kpiSelectorControls:hover .viewDropdownBtn{background:#14558f}
 /* Dezelfde maten tijdens opbouw en afdruk, zodat de paginering klopt. */
 body.pdfPrintPreparing .pdfExportRoot .pdfTestSchadePage .miniGrid{grid-template-columns:repeat(2,minmax(0,1fr))!important}

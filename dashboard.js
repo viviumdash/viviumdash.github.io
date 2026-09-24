@@ -201,7 +201,7 @@ const I18N = {
     pageTitle: 'Van PDF naar helder inzicht',
     pageLead: 'Upload je <strong>kerncijfers non-life PDF</strong>. Het dashboard zet de gegevens automatisch om in een duidelijke analyse van productie, verval, progressie en schade. Dit dashboard werkt met de PDF kerncijfers nonlife die je hebt gedownload vanuit Salesforce (je moet de PDF effectief downloaden als bestand, afdrukken als PDF werkt niet), zowel op groepsniveau, koepelniveau alsook voor de kerncijfers AM, CDR of CD.',
     printPdf: 'Print to PDF', printPdfBusy: 'Afdrukweergave voorbereiden…', printPdfError: 'Afdrukweergave kon niet worden gemaakt: ',
-    uploadTitle: 'Sleep je PDF hierheen', uploadHint: 'of klik om een bestand te kiezen', importPdf: 'Importeer', downloadCsv: 'Download CSV', exportPdf: 'Exporteer PDF', pdfBusy: 'PDF wordt gemaakt…', pdfOptionsTitle: 'PDF secties', pdfNoSections: 'Selecteer minstens één PDF-sectie.', noPdf: 'Klaar om je kerncijfers te verwerken', processing: '⏳ PDF verwerken…',
+    uploadTitle: 'Sleep je PDF hierheen', uploadHint: 'of klik om een bestand te kiezen', importPdf: 'Importeer', downloadCsv: 'Download CSV', exportPdf: 'Exporteer PDF', pdfExportAction: 'Export', pdfBusy: 'PDF wordt gemaakt…', pdfOptionsTitle: 'PDF secties', pdfNoSections: 'Selecteer minstens één PDF-sectie.', noPdf: 'Klaar om je kerncijfers te verwerken', processing: '⏳ PDF verwerken…',
     success: n => '✅ PDF geladen & verwerkt: ' + n + ' datarijen. Percentages en schade-totalen komen rechtstreeks uit de PDF.', error: '❌ Fout bij verwerken PDF: ',
     broker: 'Makelaar', koepelnummer: 'koepelnummer', groepsnummer: 'groepsnummer', vs: 'vs', main: 'Hoofd', sub: 'Sub', lowerPositive: 'daling is positief', lowerBetter: 'schade: lager is beter', viewModeLabel: 'Weergave', viewAll: 'Hoofd- en subcategorieën', viewMainOnly: 'Hoofdcategorieën', viewSubOnly: 'Subcategorieën', previousYears: 'Vorige jaren', drillDown: 'Alles inklappen', drillDownActive: 'Alles uitklappen', importControlTitle: 'Importcontrole', importControlSub: 'Snelle controle of de PDF correct werd geïnterpreteerd', importPeriods: 'Aantal periodes gevonden', importLatestPeriod: 'Laatste periode gevonden', importTotalProd: 'TOTAAL NON LIFE productie', importTotalSchade: 'TOTAAL NON LIFE schade', importSpPct: 'S/P % correct gelezen', importBroker: 'Makelaar/koepelnummer', yes: 'Ja', no: 'Nee', topCompactTitle: 'PDF import & controle', topShow: 'Toon importinformatie', topHide: 'Verberg importinformatie', topOk: 'Importcontrole OK', topAttention: n => n + ' aandachtspunt' + (n === 1 ? '' : 'en'), topPeriodsShort: 'periodes', topLatestShort: 'laatste',
     tabSamenvatting: 'Samenvatting', tab360: '360-view', tabProductie: 'Productie', tabVerval: 'Verval', tabProgressie: 'Progressie', tabSchade: 'Schade', tabPortefeuille: 'Portefeuille', tabKpis: "KPI's", tabDetail: 'Detail', kpiSelectorLabel: "KPI's", kpiSelectorAll: "Alle KPI's", kpiSelectorCount: n => n + " KPI-sectie" + (n === 1 ? '' : 's'), kpiOverviewEmpty: 'Selecteer minstens één KPI-sectie.',
@@ -216,7 +216,7 @@ const I18N = {
     printPdf: 'Imprimer en PDF', printPdfBusy: 'Préparation de l’impression…', printPdfError: 'Impossible de préparer l’impression : ',
     pageTitle: 'Du PDF à une vision claire',
     pageLead: 'Téléchargez votre <strong>PDF chiffres clés non-vie</strong>. Le tableau de bord transforme automatiquement les données en une analyse claire de la production, de la chute, de la progression et des sinistres. Ce tableau de bord utilise le PDF des chiffres clés non-vie téléchargé depuis Salesforce (vous devez effectivement télécharger le PDF en tant que fichier ; l’impression au format PDF ne fonctionne pas), tant au niveau du groupe et de la coupole que pour les chiffres clés AM, CDR ou CD.',
-    uploadTitle: 'Glissez votre PDF ici', uploadHint: 'ou cliquez pour choisir un fichier', importPdf: 'Importer', downloadCsv: 'Télécharger CSV', exportPdf: 'Exporter PDF', pdfBusy: 'Création du PDF…', pdfOptionsTitle: 'Sections PDF', pdfNoSections: 'Sélectionnez au moins une section PDF.', noPdf: 'Prêt à traiter vos chiffres clés', processing: '⏳ Traitement du PDF…',
+    uploadTitle: 'Glissez votre PDF ici', uploadHint: 'ou cliquez pour choisir un fichier', importPdf: 'Importer', downloadCsv: 'Télécharger CSV', exportPdf: 'Exporter PDF', pdfExportAction: 'Exporter', pdfBusy: 'Création du PDF…', pdfOptionsTitle: 'Sections PDF', pdfNoSections: 'Sélectionnez au moins une section PDF.', noPdf: 'Prêt à traiter vos chiffres clés', processing: '⏳ Traitement du PDF…',
     success: n => '✅ PDF chargé & traité : ' + n + ' lignes de données. Les pourcentages et totaux sinistres proviennent directement du PDF.', error: '❌ Erreur lors du traitement du PDF : ',
     broker: 'Courtier', koepelnummer: 'n° coupole', groepsnummer: 'n° groupe', vs: 'vs', main: 'Principal', sub: 'Sous-cat.', lowerPositive: 'baisse positive', lowerBetter: 'sinistres : plus bas est meilleur', viewModeLabel: 'Affichage', viewAll: 'Tout', viewMainOnly: 'Catégories principales', viewSubOnly: 'Sous-catégories', previousYears: 'Années précédentes', drillDown: 'Tout replier', drillDownActive: 'Tout déplier', importControlTitle: 'Contrôle import', importControlSub: 'Contrôle rapide de l’interprétation du PDF', importPeriods: 'Nombre de périodes', importLatestPeriod: 'Dernière période trouvée', importTotalProd: 'TOTAL NON VIE production', importTotalSchade: 'TOTAL NON VIE sinistres', importSpPct: 'S/P % lu correctement', importBroker: 'Courtier/n° coupole', yes: 'Oui', no: 'Non', topCompactTitle: 'Import PDF & contrôle', topShow: 'Afficher les informations import', topHide: 'Masquer les informations import', topOk: 'Contrôle import OK', topAttention: n => n + ' point' + (n === 1 ? '' : 's') + ' d’attention', topPeriodsShort: 'périodes', topLatestShort: 'dernière',
     tabSamenvatting: 'Résumé', tab360: 'Vue 360', tabProductie: 'Production', tabVerval: 'Chute', tabProgressie: 'Progression', tabSchade: 'Sinistres', tabPortefeuille: 'Portefeuille', tabKpis: 'KPI', tabDetail: 'Détail', kpiSelectorLabel: 'KPI', kpiSelectorAll: 'Tous les KPI', kpiSelectorCount: n => n + ' section' + (n === 1 ? '' : 's') + ' KPI', kpiOverviewEmpty: 'Sélectionnez au moins une section KPI.',
@@ -248,7 +248,7 @@ function setHtml(id, html) { const el = $(id); if (el) el.innerHTML = html; }
 function exportCopyLabel() { return currentLang === 'fr' ? 'Copier' : 'Kopiëren'; }
 function updateStaticLanguage() {
   document.documentElement.lang = currentLang; document.title = 'Dashboard Vivium Non-Life';
-  setText('languageLabel', currentLang === 'fr' ? 'Langue' : 'Taal / Langue'); setText('pageTitle', msg('pageTitle')); setHtml('pageLead', msg('pageLead')); setText('uploadTitle', msg('uploadTitle')); setText('uploadHint', msg('uploadHint')); setText('downloadCsvBtn', msg('downloadCsv')); setText('exportPdfBtn', msg('exportPdf'));
+  setText('languageLabel', currentLang === 'fr' ? 'Langue' : 'Taal / Langue'); setText('pageTitle', msg('pageTitle')); setHtml('pageLead', msg('pageLead')); setText('uploadTitle', msg('uploadTitle')); setText('uploadHint', msg('uploadHint')); setText('downloadCsvBtn', msg('downloadCsv')); setText('exportPdfLabel', msg('exportPdf')); setText('pdfExportConfirmBtn', msg('pdfExportAction'));
   setText('heroEyebrow', currentLang === 'fr' ? 'Chiffres clés non-vie' : 'Kerncijfers non-life'); setText('heroBenefitAnalysis', currentLang === 'fr' ? 'Analyse automatique' : 'Automatische analyse'); setText('heroBenefitCompare', currentLang === 'fr' ? 'Comparaison directe' : 'Direct vergelijkbaar'); setText('heroBenefitSafe', currentLang === 'fr' ? 'Sécurisé' : 'Veilig'); setText('heroUploadButton', currentLang === 'fr' ? 'Sélectionner le PDF' : 'PDF selecteren'); setText('heroUploadMeta', 'PDF · NL of FR');
   setText('pdfSelectAll', currentLang === 'fr' ? 'Tout sélectionner' : 'Alles selecteren');
   setText('pdfSelectNone', currentLang === 'fr' ? 'Tout désélectionner' : 'Niets selecteren');
@@ -1486,24 +1486,29 @@ function selectedPdfSections() {
     .filter(input => input.checked)
     .map(input => input.value));
 }
+function setPdfOptionsOpen(open) {
+  $('pdfOptionsWrap')?.classList.toggle('open', open);
+  $('exportPdfBtn')?.setAttribute('aria-expanded', open ? 'true' : 'false');
+  if (open) $('pdfOptionsMenu')?.querySelector('.pdfSectionCheck')?.focus();
+}
 
 async function exportSummaryPdf() {
-  if (!lastData) return;
+  if (!lastData || document.body.classList.contains('pdfExportBusy')) return;
   const mainBtn = $('exportPdfBtn');
-  const optionsBtn = $('pdfOptionsBtn');
-  const optionsWrap = $('pdfOptionsWrap');
-  const oldText = mainBtn ? mainBtn.textContent : '';
+  const mainLabel = $('exportPdfLabel');
+  const exportBtn = $('pdfExportConfirmBtn');
+  const printBtn = $('printPdfBtn');
   try {
     const selected = selectedPdfSections();
     if (!selected.size) {
       alert(msg('pdfNoSections'));
       return;
     }
-    if (optionsWrap) optionsWrap.classList.remove('open');
-    if (optionsBtn) optionsBtn.setAttribute('aria-expanded', 'false');
+    setPdfOptionsOpen(false);
     if (mainBtn) mainBtn.disabled = true;
-    if (optionsBtn) optionsBtn.disabled = true;
-    if (mainBtn) mainBtn.textContent = msg('pdfBusy');
+    if (exportBtn) exportBtn.disabled = true;
+    if (printBtn) printBtn.disabled = true;
+    if (mainLabel) mainLabel.textContent = msg('pdfBusy');
     document.body.classList.add('pdfExportBusy');
 
     if (selected.has('summary')) renderDashboardSection('samenvatting');
@@ -1565,8 +1570,10 @@ async function exportSummaryPdf() {
     const testRoot = document.querySelector('.pdfTestScreenshotRoot');
     if (testRoot) testRoot.remove();
     document.body.classList.remove('pdfExportBusy');
-    if (mainBtn) { mainBtn.disabled = false; mainBtn.textContent = oldText || msg('exportPdf'); }
-    if (optionsBtn) optionsBtn.disabled = false;
+    if (mainBtn) mainBtn.disabled = false;
+    if (mainLabel) mainLabel.textContent = msg('exportPdf');
+    if (exportBtn) exportBtn.disabled = false;
+    if (printBtn) printBtn.disabled = false;
   }
 }
 
@@ -1581,13 +1588,11 @@ async function printSelectedPdf() {
 
   const printBtn = $('printPdfBtn');
   const mainBtn = $('exportPdfBtn');
-  const optionsBtn = $('pdfOptionsBtn');
-  const optionsWrap = $('pdfOptionsWrap');
-  optionsWrap?.classList.remove('open');
-  optionsBtn?.setAttribute('aria-expanded', 'false');
+  const exportBtn = $('pdfExportConfirmBtn');
+  setPdfOptionsOpen(false);
   if (printBtn) { printBtn.disabled = true; printBtn.textContent = msg('printPdfBusy'); }
   if (mainBtn) mainBtn.disabled = true;
-  if (optionsBtn) optionsBtn.disabled = true;
+  if (exportBtn) exportBtn.disabled = true;
   document.body.classList.add('pdfExportBusy', 'pdfPrintPreparing');
 
   let root = null;
@@ -1597,7 +1602,7 @@ async function printSelectedPdf() {
     document.body.classList.remove('printingPdf', 'pdfPrintPreparing', 'pdfExportBusy');
     if (printBtn) { printBtn.disabled = false; printBtn.textContent = msg('printPdf'); }
     if (mainBtn) mainBtn.disabled = false;
-    if (optionsBtn) optionsBtn.disabled = false;
+    if (exportBtn) exportBtn.disabled = false;
     printPdfCleanup = null;
   };
 
@@ -1656,24 +1661,24 @@ async function printSelectedPdf() {
   }
 }
 
-$('exportPdfBtn')?.addEventListener('click', exportSummaryPdf);
+$('pdfExportConfirmBtn')?.addEventListener('click', exportSummaryPdf);
 $('printPdfBtn')?.addEventListener('click', printSelectedPdf);
-$('pdfOptionsBtn')?.addEventListener('click', e => {
+$('exportPdfBtn')?.addEventListener('click', e => {
   e.preventDefault();
   e.stopPropagation();
   const wrap = $('pdfOptionsWrap');
   if (!wrap) return;
-  const open = !wrap.classList.contains('open');
-  wrap.classList.toggle('open', open);
-  $('pdfOptionsBtn')?.setAttribute('aria-expanded', open ? 'true' : 'false');
+  setPdfOptionsOpen(!wrap.classList.contains('open'));
 });
 $('pdfOptionsMenu')?.addEventListener('click', e => e.stopPropagation());
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Escape' || !$('pdfOptionsWrap')?.classList.contains('open')) return;
+  setPdfOptionsOpen(false);
+  $('exportPdfBtn')?.focus();
+});
 document.addEventListener('click', () => {
   const wrap = $('pdfOptionsWrap');
-  if (wrap?.classList.contains('open')) {
-    wrap.classList.remove('open');
-    $('pdfOptionsBtn')?.setAttribute('aria-expanded', 'false');
-  }
+  if (wrap?.classList.contains('open')) setPdfOptionsOpen(false);
   const viewWrap = $('viewDropdownWrap');
   if (viewWrap?.classList.contains('open')) {
     viewWrap.classList.remove('open');
@@ -2783,6 +2788,7 @@ function equalizeSummaryRows() {
 window.addEventListener('resize', () => {
   window.clearTimeout(window.__summaryEqualizeTimer);
   window.__summaryEqualizeTimer = window.setTimeout(equalizeSummaryRows, 120);
+  scheduleKpiLabelAlignment();
 });
 
 function scrollToKpiStart() {
@@ -3007,6 +3013,7 @@ function renderKpiOverview() {
     return `<div class="kpiOverviewBlock">${actions}<div class="kpiOverviewHead"><h3>${esc(cfg.label)}</h3><span class="small">${esc(fmtPeriod(prevP))} vs ${esc(fmtPeriod(currP))}</span></div><div class="kpis kpiOverviewGrid">${html}</div></div>`;
   }).join('');
   updateKpiSelectorLabel();
+  scheduleKpiLabelAlignment();
 }
 
 function kpiOverviewHistoryConfig(sectionId, item, index) {
@@ -3562,6 +3569,7 @@ function render360View() {
   renderView360SchadePies(lastData, schadePrevFull, currP);
   attachPortfolioBarHover(target);
   setupView360Collapse(target);
+  scheduleKpiLabelAlignment();
 }
 function updateTopKpisForActiveTab() {
   if (!lastKpiContext || !lastData || !dashboardPreviousPeriod || !dashboardCurrentPeriod) return;
@@ -3683,7 +3691,9 @@ function kpiCardsHtml(items, prevP, currP, options = {}) {
   const interactive = options.interactive !== false;
   const allowSpToggle = options.allowSpToggle !== false;
   return items.map((x, i) => {
-    const titleLabel = x.showPeriodInLabel === false ? `${x.metricLabel || x.l} ${x.l}` : `${x.l}`;
+    const titleLabel = x.type === 'sp-category'
+      ? `${showCappedSpKpis ? msg('spAfgetopt') : 'S/P'} ${x.l}`
+      : (x.showPeriodInLabel === false ? `${x.metricLabel || x.l} ${x.l}` : `${x.l}`);
     const label = `<span>${esc(titleLabel)}</span><span class="kpi-period">ULT. ${esc(currP)}</span>`;
     const cardClass = 'kpi' + (x.dynamicCategory ? ' dynamicCategoryKpi' : '');
     const kpiAttrs = x.dynamicCategory && interactive ? ` data-kpi-cat="${esc(x.jumpCat || x.l)}" role="button" tabindex="0"` : '';
@@ -3700,9 +3710,7 @@ function kpiCardsHtml(items, prevP, currP, options = {}) {
       const toggleHtml = allowSpToggle ? `<button type="button" class="kpiSpToggle${toggleClass}" data-kpi-key="${esc(key)}" aria-label="${esc(`${toggleLabel}. ${spToggleHelpText().replace(/\n/g, ' ')}`)}">${esc(toggleLabel)}</button>` : '';
       const view = { ...x, v: value, o: previous, spToggleHtml: toggleHtml };
       const d = ppDelta(previous, value);
-      const metric = capped ? msg('spAfgetopt') : 'S/P';
-      const metricDisplay = currentLang === 'fr' ? metric : metric.replace('afgetopt', 'afget.');
-      return `${openCard}<div class="label">${label}</div><div class="value">${metricDisplay} ${pct.format(value)}%</div><div class="delta ${cls(d, x.invert)}">${kpiSpDeltaLine(previous, value, prevP)}</div>${kpiCompareHtml(view, prevP, currP)}</div>`;
+      return `${openCard}<div class="label">${label}</div><div class="value">${pct.format(value)}%</div><div class="delta ${cls(d, x.invert)}">${kpiSpDeltaLine(previous, value, prevP)}</div>${kpiCompareHtml(view, prevP, currP)}</div>`;
     }
 
     if (x.type === 'pct-combo-plain') {
@@ -3725,7 +3733,7 @@ function kpiCardsHtml(items, prevP, currP, options = {}) {
 
     const d = x.type === 'pct' ? ppDelta(x.o, x.v) : yoy(x.o, x.v);
     if (x.type === 'pct') {
-      return `${openCard}<div class="label">${label}</div><div class="value">${fmt(x.v, x.type)}</div><div class="delta ${cls(d, x.invert)}">${d >= 0 ? '+' : ''}${pct.format(d)}% ${msg('vs')} ${kpiComparisonPeriod(prevP)} (${pct.format(n(x.o))}%)</div>${compareHtml}</div>`;
+      return `${openCard}<div class="label">${label}</div><div class="value">${fmt(x.v, x.type)}</div><div class="delta ${cls(d, x.invert)}">${signedPointDelta(d)} ${msg('vs')} ${kpiComparisonPeriod(prevP)} (${pct.format(n(x.o))}%)</div>${compareHtml}</div>`;
     }
     const amountDelta = x.v - x.o;
     const showPreviousAmount = x.compareAmountMode === 'previous';
@@ -3739,9 +3747,37 @@ function renderKpis(items, prevP, currP) {
   const target = $('kpis');
   if (!target) return;
   target.innerHTML = kpiCardsHtml(items, prevP, currP);
+  scheduleKpiLabelAlignment();
   animateKpiNumbers(target);
   triggerKpiMotion(target.closest('.kpiExportWrap'));
 }
+
+let kpiLabelAlignmentFrame = 0;
+function scheduleKpiLabelAlignment() {
+  cancelAnimationFrame(kpiLabelAlignmentFrame);
+  kpiLabelAlignmentFrame = requestAnimationFrame(alignKpiLabelHeights);
+}
+function alignKpiLabelHeights() {
+  document.querySelectorAll('.kpis').forEach(grid => {
+    const cards = [...grid.children].filter(card => card.classList.contains('kpi'));
+    const labels = cards.map(card => card.querySelector('.label'));
+    labels.forEach(label => label?.style.removeProperty('--kpi-label-height'));
+    if (!grid.getClientRects().length) return;
+    const rows = new Map();
+    cards.forEach((card, index) => {
+      const label = labels[index];
+      if (!label) return;
+      const top = Math.round(card.getBoundingClientRect().top);
+      if (!rows.has(top)) rows.set(top, []);
+      rows.get(top).push(label);
+    });
+    rows.forEach(rowLabels => {
+      const height = Math.ceil(Math.max(...rowLabels.map(label => label.getBoundingClientRect().height)));
+      rowLabels.forEach(label => label.style.setProperty('--kpi-label-height', `${height}px`));
+    });
+  });
+}
+document.fonts?.ready.then(scheduleKpiLabelAlignment);
 
 function plainTextFromHtml(html) {
   return String(html ?? '')
@@ -4010,8 +4046,8 @@ function renderVervalGroup(cat, rows, prevP, currP, data) {
     metricHtml(msg('klantMaatschappij'), `${euro.format(n(head[cols.vervalKlant]))} / ${euro.format(n(head[cols.vervalMij]))}`) +
     `</div>`;
   const extraCards = `<details class="vervalExtraDetails"><summary>${extraTitle}</summary><div class="vervalExtraGrid">` +
-    miniCardHtml(msg('vervalKlant'), barCompareHtmlWithPreviousYears(labels, vals(cols.vervalKlant, prevP), vals(cols.vervalKlant, currP), prevP, currP, 'money', 'orange', '', { invertDelta: true }, vervalKlantHistory)) +
-    miniCardHtml(msg('vervalMaatschappij'), barCompareHtmlWithPreviousYears(labels, vals(cols.vervalMij, prevP), vals(cols.vervalMij, currP), prevP, currP, 'money', 'orange', '', { invertDelta: true }, vervalMijHistory)) +
+    miniCardHtml(msg('vervalKlant'), barCompareHtmlWithPreviousYears(labels, vals(cols.vervalKlant, prevP), vals(cols.vervalKlant, currP), prevP, currP, 'money', 'orange', '', { showDelta: true, invertDelta: true }, vervalKlantHistory)) +
+    miniCardHtml(msg('vervalMaatschappij'), barCompareHtmlWithPreviousYears(labels, vals(cols.vervalMij, prevP), vals(cols.vervalMij, currP), prevP, currP, 'money', 'orange', '', { showDelta: true, invertDelta: true }, vervalMijHistory)) +
     `</div></details>`;
   const cards = `<div class="miniGrid vervalMiniGrid">` +
     miniCardHtml(`${msg('vervalpremie')} ${vervalRatioNote}`, barCompareHtmlWithPreviousYears(labels, vals(cols.vervalPremie, prevP), vals(cols.vervalPremie, currP), prevP, currP, 'money', 'orange', '', { showDelta: true, invertDelta: true }, vervalPremieHistory)) +
