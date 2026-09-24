@@ -1659,6 +1659,10 @@ body:not(.topInfoReady) .hero .lead{color:#4d4d4d;font-family:'Open Sans',Arial,
 .pdfPrintAction button{width:100%;border:1px solid var(--blue);border-radius:9px;padding:10px 12px;background:var(--blue);color:#fff;font:700 12px Lato,Arial,sans-serif;cursor:pointer}
 .pdfPrintAction button:hover{background:var(--blue3)}
 .pdfPrintAction button:disabled{opacity:.62;cursor:wait}
+/* Beide helften van deze gesplitste knoppen houden dezelfde kleur. */
+#exportPdfWrap .pdfOptionsBtn,#kpiSelectorControls .viewDropdownBtn{background:var(--blue);color:#fff}
+#exportPdfWrap:hover .btn-pdf,#exportPdfWrap:hover .pdfOptionsBtn,
+#kpiSelectorControls:hover .viewDropdownMain,#kpiSelectorControls:hover .viewDropdownBtn{background:#14558f}
 /* Dezelfde maten tijdens opbouw en afdruk, zodat de paginering klopt. */
 body.pdfPrintPreparing .pdfExportRoot .pdfTestSchadePage .miniGrid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
 body.pdfPrintPreparing .pdfExportRoot .pdfTestCategoryPage .miniCard{min-width:0!important}
