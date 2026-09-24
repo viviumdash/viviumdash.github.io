@@ -169,9 +169,10 @@ let csvResult   = '';
 let brokerInfo  = { label: '', number: '', name: '' };
 let dashboardCurrentPeriod = null;
 let dashboardPreviousPeriod = null;
-let viewMode = 'all';
+let viewMode = 'main';
 let previousYearsMode = false;
-let view360AnalysisMode = 'all';
+let view360AnalysisMode = 'main';
+const view360OpenSubcategories = new Set();
 let drillMode = true;
 let productionPieState = { segments: [], total: 0 };
 let topInfoCollapsed = false;
@@ -258,6 +259,7 @@ function updateStaticLanguage() {
   setText('kpiCheckSamenvatting', msg('tabSamenvatting')); setText('kpiCheckProductie', msg('tabProductie')); setText('kpiCheckVerval', msg('tabVerval')); setText('kpiCheckProgressie', msg('tabProgressie')); setText('kpiCheckSchade', msg('tabSchade')); setText('kpiCheckPortefeuille', msg('tabPortefeuille')); updateKpiSelectorLabel();
   setText('viewModeLabel', msg('viewModeLabel')); setText('viewAllBtn', msg('viewAll')); setText('viewMainBtn', msg('viewMainOnly')); setText('viewSubBtn', msg('viewSubOnly')); setText('previousYearsToggleLabel', msg('previousYears')); setText('drillToggleBtn', drillMode ? msg('drillDownActive') : msg('drillDown')); updateViewDropdownLabel(); setText('topCompactTitle', msg('topCompactTitle')); if (lastData && dashboardCurrentPeriod) { renderImportControl(lastData, dashboardCurrentPeriod); renderTopCompactBar(); updateTopInfoToggleButton(); }
   setText('summaryTitle', msg('tabSamenvatting')); setText('view360Title', msg('tab360')); setText('view360MainBtn', msg('viewMainOnly')); setText('view360SubBtn', msg('viewSubOnly')); setText('view360AllBtn', msg('viewAll')); setText('prodTitle', msg('prodTitle')); setText('vervalTitle', msg('vervalTitle')); setText('progTitle', msg('progTitle')); setText('schadeTitle', msg('schadeTitle')); setText('portefeuilleTitle', msg('portefeuilleTitle')); setText('kpiOverviewTitle', msg('tabKpis')); setText('detailTitle', msg('detailTitle')); setText('productionPieTitle', msg('productionPieTitle'));
+  document.querySelectorAll('[data-view360-analysis]').forEach(button => button.classList.toggle('active', button.dataset.view360Analysis === view360AnalysisMode));
   updateSectionPeriodInline(dashboardPreviousPeriod, dashboardCurrentPeriod);
   setText('prodNote', msg('prodNote')); setText('vervalNote', msg('vervalNote')); setText('progNote', msg('progNote')); setText('schadeNote', msg('schadeNote')); setText('portefeuilleNote', msg('portefeuilleNote'));
   document.querySelectorAll('.exportCopyText, .blockExportCopy span').forEach(el => { el.textContent = exportCopyLabel(); });
@@ -312,6 +314,28 @@ function hasManualClosedCategories() {
 function categoryExpansionBlocks(section) {
   return Array.from(section?.querySelectorAll('.cat:not(.totalNonLife),.portfolioCategoryBlock:not(.portfolioTotalBlock)') || []);
 }
+function subcategoryToggleHtml(hasSubcategories) {
+  if (!hasSubcategories) return '';
+  return `<button type="button" class="categorySubcategoryToggle" aria-expanded="false">${currentLang === 'fr' ? 'afficher les sous-catégories' : 'toon subcategorieën'}</button>`;
+}
+function updateCategorySubcategoryToggle(block) {
+  const button = block?.querySelector('.categorySubcategoryToggle');
+  if (!button) return;
+  const expanded = block.classList.contains('subcategoriesOpen');
+  button.textContent = currentLang === 'fr'
+    ? (expanded ? 'masquer les sous-catégories' : 'afficher les sous-catégories')
+    : (expanded ? 'verberg subcategorieën' : 'toon subcategorieën');
+  button.setAttribute('aria-expanded', String(expanded));
+  if (block.classList.contains('portfolioCategoryBlock')) {
+    const key = block.dataset.categoryKey;
+    block.parentElement?.querySelectorAll('.portfolioSubBlock').forEach(sub => {
+      if (sub.dataset.parentCategory !== key) return;
+      sub.classList.toggle('subcategoriesFromMain', expanded);
+      sub.classList.toggle('drillOpen', expanded && drillMode);
+      if (expanded) sub.classList.remove('manualClosed');
+    });
+  }
+}
 function categoryExpansionKey(block, index) {
   return `${index}:${block.dataset.categoryKey || ''}`;
 }
@@ -319,7 +343,8 @@ function captureCategoryExpansionState(section) {
   return categoryExpansionBlocks(section).map((block, index) => ({
     key: categoryExpansionKey(block, index),
     drillOpen: block.classList.contains('drillOpen'),
-    manualClosed: block.classList.contains('manualClosed')
+    manualClosed: block.classList.contains('manualClosed'),
+    subcategoriesOpen: block.classList.contains('subcategoriesOpen')
   }));
 }
 function restoreCategoryExpansionState(section, savedState) {
@@ -330,6 +355,8 @@ function restoreCategoryExpansionState(section, savedState) {
     if (!state) return;
     block.classList.toggle('drillOpen', state.drillOpen);
     block.classList.toggle('manualClosed', state.manualClosed);
+    block.classList.toggle('subcategoriesOpen', !!state.subcategoriesOpen);
+    updateCategorySubcategoryToggle(block);
   });
 }
 
@@ -340,6 +367,7 @@ function applyDashboardDisplayModes() {
   dash.classList.toggle('view-sub-only', viewMode === 'sub');
   dash.classList.toggle('drillMode', !!drillMode);
   document.querySelectorAll('[data-view]').forEach(btn => btn.classList.toggle('active', btn.dataset.view === viewMode));
+  document.querySelectorAll('[data-view360-analysis]').forEach(btn => btn.classList.toggle('active', btn.dataset.view360Analysis === view360AnalysisMode));
   const previousYearsToggle = $('previousYearsToggle');
   if (previousYearsToggle) previousYearsToggle.checked = !!previousYearsMode;
   updateViewDropdownLabel();
@@ -354,6 +382,12 @@ function applyDashboardDisplayModes() {
 }
 function setViewMode(mode) {
   viewMode = ['all', 'main', 'sub'].includes(mode) ? mode : 'all';
+  if (viewMode === 'main') {
+    document.querySelectorAll('#productie .cat.subcategoriesOpen,#verval .cat.subcategoriesOpen,#progressie .cat.subcategoriesOpen,#schade .cat.subcategoriesOpen,#portefeuille .portfolioCategoryBlock.subcategoriesOpen').forEach(block => {
+      block.classList.remove('subcategoriesOpen');
+      updateCategorySubcategoryToggle(block);
+    });
+  }
   applyDashboardDisplayModes();
   markDashboardSectionsDirty('portefeuille');
   if (lastData && activeTabId() === 'portefeuille') {
@@ -607,12 +641,30 @@ document.addEventListener('DOMContentLoaded', () => {
   updateStaticLanguage();
   applyDashboardDisplayModes();
   $('dashboard')?.addEventListener('click', e => {
+    const view360SubToggle = e.target.closest('.view360SubcategoryToggle');
+    if (view360SubToggle && view360AnalysisMode === 'main') {
+      e.preventDefault();
+      const parent = view360SubToggle.closest('.view360AnalysisBlock');
+      const key = view360SubToggle.dataset.parentCategory;
+      const expanded = view360SubToggle.getAttribute('aria-expanded') !== 'true';
+      if (expanded) view360OpenSubcategories.add(key);
+      else view360OpenSubcategories.delete(key);
+      parent?.querySelectorAll('.view360AnalysisCategory.subRow').forEach(row => {
+        if (row.dataset.parentCategory === key) row.classList.toggle('hidden', !expanded);
+      });
+      view360SubToggle.setAttribute('aria-expanded', String(expanded));
+      view360SubToggle.textContent = currentLang === 'fr'
+        ? (expanded ? 'masquer les sous-catégories' : 'afficher les sous-catégories')
+        : (expanded ? 'verberg subcategorieën' : 'toon subcategorieën');
+      return;
+    }
     const analysisBtn = e.target.closest('[data-view360-analysis]');
     if (analysisBtn) {
       e.preventDefault();
       const scrollY = window.scrollY;
       const requestedMode = analysisBtn.dataset.view360Analysis;
       view360AnalysisMode = ['all', 'main', 'sub'].includes(requestedMode) ? requestedMode : 'all';
+      if (view360AnalysisMode === 'main') view360OpenSubcategories.clear();
       document.querySelectorAll('[data-view360-analysis]').forEach(btn => btn.classList.toggle('active', btn.dataset.view360Analysis === view360AnalysisMode));
       render360View();
       requestAnimationFrame(() => window.scrollTo({ top: scrollY, left: 0, behavior: 'auto' }));
@@ -623,6 +675,16 @@ document.addEventListener('DOMContentLoaded', () => {
       e.preventDefault();
       e.stopPropagation();
       exportBlockAsImage(exportBtn, exportBtn.classList.contains('blockExportCopy') ? 'copy' : 'download');
+      return;
+    }
+    const subcategoryToggle = e.target.closest('.categorySubcategoryToggle');
+    if (subcategoryToggle && viewMode === 'main') {
+      e.preventDefault();
+      const block = subcategoryToggle.closest('.cat,.portfolioCategoryBlock');
+      if (block) {
+        block.classList.toggle('subcategoriesOpen');
+        updateCategorySubcategoryToggle(block);
+      }
       return;
     }
     const portfolioHead = e.target.closest('.portfolioCategoryHead');
@@ -769,6 +831,9 @@ $('pdfFile').addEventListener('change', async e => {
   if (!file) return;
   const generation = ++pdfImportGeneration;
   pendingCategoryExpansion.clear();
+  viewMode = 'main';
+  view360AnalysisMode = 'main';
+  view360OpenSubcategories.clear();
   csvResult = '';
   $('fileName').textContent = file.name;
   $('dashboard').classList.add('hidden');
@@ -931,7 +996,7 @@ function renderBrokerInfo() {
     }
     const displayName = brokerDisplayName();
     $('brokerName').textContent = displayName;
-    const latestPeriod = String(dashboardCurrentPeriod || '').trim().replace(/[\/.\-]+/g, ' ');
+    const latestPeriod = fmtPeriod(dashboardCurrentPeriod || '');
     const periodEl = $('brokerPeriod');
     if (periodEl) {
       periodEl.textContent = latestPeriod
@@ -1117,6 +1182,11 @@ function preparePdfTestCategoryBlock(block, sectionType) {
   const clone = block.cloneNode(true);
   clone.classList.remove('manualClosed', 'drillOpen');
   clone.querySelectorAll('.blockExportActions').forEach(el => el.remove());
+  if (viewMode === 'main' && !block.classList.contains('subcategoriesOpen')) {
+    clone.querySelectorAll('.barrow:has(.catSubText),.vervalRatioSection.subRatioSection').forEach(el => el.remove());
+  } else if (viewMode === 'sub' && !block.classList.contains('totalNonLife')) {
+    clone.querySelectorAll('.barrow:has(.catMainText.hasSubs),.vervalRatioSection.mainRatioSection.hasSubs').forEach(el => el.remove());
+  }
   addPdfTestSectionLabel(clone, sectionType);
 
   if (sectionType === 'verval') {
@@ -1416,7 +1486,7 @@ async function buildPdf360Pages(root) {
     const containerSelector = isAnalysis ? '.view360AnalysisCategories' : ':scope > .view360CollapseBody';
     const content = prepared.querySelector(containerSelector);
     if (!content) throw new Error('360-view: ontbrekende inhoud voor PDF-export.');
-    const units = Array.from(content.children);
+    const units = Array.from(content.children).filter(el => !el.classList.contains('hidden'));
     content.replaceChildren();
     let page, frame, shell, destination, count;
 
@@ -1958,7 +2028,7 @@ function fmt(v, type) { if (type === 'money') return euro.format(v); if (type ==
 function pctText(v, invert = false) { return `<span class="${cls(v, invert)}">${v >= 0 ? '+' : ''}${pct.format(v)}%</span>` }
 function deltaHtml(d, oldVal, prevP, type, invert = false) {
   const prevFmt = fmt(oldVal, type);
-  return `<div class="delta ${cls(d, invert)}">${type === 'pct' ? signedPointDelta(d) : `${d >= 0 ? '+' : ''}${pct.format(d)}%`} ${msg('vs')} ${prevP} <span style="opacity:.7">(${prevFmt})</span></div>`;
+  return `<div class="delta ${cls(d, invert)}">${type === 'pct' ? signedPointDelta(d) : `${d >= 0 ? '+' : ''}${pct.format(d)}%`} ${msg('vs')} ${fmtPeriod(prevP)} <span style="opacity:.7">(${prevFmt})</span></div>`;
 }
 
 function barDeltaTextHtml(oldVal, newVal, invert = false) {
@@ -2069,7 +2139,7 @@ function inspectSpPercentages(data) {
       if (Number.isFinite(val)) {
         values.push(val);
       } else {
-        issues.push(`${r[cols.periode] || '-'} · ${r[cols.hoofd] || '-'} / ${r[cols.sub] || '-'} · ${label}: niet numeriek gelezen (${raw})`);
+        issues.push(`${fmtPeriod(r[cols.periode] || '-')} · ${r[cols.hoofd] || '-'} / ${r[cols.sub] || '-'} · ${label}: niet numeriek gelezen (${raw})`);
       }
     });
   });
@@ -2093,19 +2163,19 @@ function renderImportControl(data, currP) {
   const yes = msg('yes'), no = msg('no');
   const periodDetail = periods.length ? '' : detailList('Geen periodes gevonden. Controleer of de PDF-tabellen correct zijn uitgelezen.', []);
   const latestDetail = latest !== '-' ? '' : detailList('Geen laatste periode bepaald omdat er geen geldige periodes gevonden zijn.', []);
-  const prodDetail = hasProdTotal ? '' : detailList(`Niet gevonden: PRODUCTIE / TOTAAL NON LIFE voor periode ${latest}.`, [
+  const prodDetail = hasProdTotal ? '' : detailList(`Niet gevonden: PRODUCTIE / TOTAAL NON LIFE voor periode ${fmtPeriod(latest)}.`, [
     `Aantal productie-rijen: ${rowsOf(data, 'PRODUCTIE').length}`,
-    `Gevonden periodes: ${periods.join(', ') || '-'}`
+    `Gevonden periodes: ${periods.map(fmtPeriod).join(', ') || '-'}`
   ]);
-  const schadeDetail = hasSchadeTotal ? '' : detailList(`Niet gevonden: SCHADE / TOTAAL NON LIFE voor periode ${latest}.`, [
+  const schadeDetail = hasSchadeTotal ? '' : detailList(`Niet gevonden: SCHADE / TOTAAL NON LIFE voor periode ${fmtPeriod(latest)}.`, [
     `Aantal schade-rijen: ${schadeRows.length}`,
-    `Gevonden periodes: ${periods.join(', ') || '-'}`
+    `Gevonden periodes: ${periods.map(fmtPeriod).join(', ') || '-'}`
   ]);
   const spDetail = spOk ? '' : detailList('S/P-controle niet geslaagd. Mogelijke oorzaken: ontbrekende schade-rijen, ontbrekende percentages of niet-numeriek gelezen waarden.', spInspection.issues);
   box.innerHTML = `<div class="importControlHead"><div class="importControlTitle">${esc(msg('importControlTitle'))}</div><div class="importControlSub">${esc(msg('importControlSub'))}</div></div>` +
     `<div class="importGrid">` +
     importCheckHtml(msg('importPeriods'), String(periods.length), periods.length > 0, periodDetail) +
-    importCheckHtml(msg('importLatestPeriod'), latest, latest !== '-', latestDetail) +
+    importCheckHtml(msg('importLatestPeriod'), fmtPeriod(latest), latest !== '-', latestDetail) +
     importCheckHtml(msg('importTotalProd'), hasProdTotal ? yes : no, hasProdTotal, prodDetail) +
     importCheckHtml(msg('importTotalSchade'), hasSchadeTotal ? yes : no, hasSchadeTotal, schadeDetail) +
     importCheckHtml(msg('importSpPct'), spOk ? yes : no, spOk, spDetail) +
@@ -2132,9 +2202,9 @@ function build(data) {
   dashboardCurrentPeriod = currP;
   renderBrokerInfo();
   renderImportControl(data, currP);
-  ['prodSub', 'vervalSub', 'progSub', 'detailSub'].forEach(id => $(id).textContent = msg('comparison', prevP, currP));
-  $('schadeSub').textContent = msg('schadeComparison', prevP, currP);
-  $('portefeuilleSub').textContent = msg('portefeuilleSub', prevP, currP);
+  ['prodSub', 'vervalSub', 'progSub', 'detailSub'].forEach(id => $(id).textContent = msg('comparison', fmtPeriod(prevP), fmtPeriod(currP)));
+  $('schadeSub').textContent = msg('schadeComparison', fmtPeriod(prevP), fmtPeriod(currP));
+  $('portefeuilleSub').textContent = msg('portefeuilleSub', fmtPeriod(prevP), fmtPeriod(currP));
   updateSectionPeriodInline(prevP, currP);
   lastKpiContext = {
     summary: summaryKpiItems(totalProdPrev, totalProdCurr, totalSchadePrev, totalSchadeCurr),
@@ -2308,7 +2378,7 @@ function executiveMoneyText(label, prev, curr, d, items, opts = {}) {
     const watch = badText
       ? badText
       : `Aucun mouvement moins positif marque ne ressort par branche.`;
-    return `${label} ${verb} a <span class="insightStrong">${euro.format(curr)}</span> (<span class="${cls(d, lowerBetter)}">${signedPct(d)}</span> vs ${euro.format(prev)} en ${opts.prevP || 'periode precedente'}). ${driver} ${watch}`;
+    return `${label} ${verb} a <span class="insightStrong">${euro.format(curr)}</span> (<span class="${cls(d, lowerBetter)}">${signedPct(d)}</span> vs ${euro.format(prev)} en ${fmtPeriod(opts.prevP || 'periode precedente')}). ${driver} ${watch}`;
   }
   const verb = neutral ? 'blijft stabiel' : lowerBetter ? (d < 0 ? 'daalt' : 'stijgt') : (d > 0 ? 'groeit' : 'daalt');
   const driver = goodText
@@ -2317,7 +2387,7 @@ function executiveMoneyText(label, prev, curr, d, items, opts = {}) {
   const watch = badText
     ? badText
     : `Er is geen uitgesproken minder positieve beweging per tak.`;
-  return `${label} ${verb} naar <span class="insightStrong">${euro.format(curr)}</span> (<span class="${cls(d, lowerBetter)}">${signedPct(d)}</span> vs ${euro.format(prev)} in ${opts.prevP || 'vorige periode'}). ${driver} ${watch}`;
+  return `${label} ${verb} naar <span class="insightStrong">${euro.format(curr)}</span> (<span class="${cls(d, lowerBetter)}">${signedPct(d)}</span> vs ${euro.format(prev)} in ${fmtPeriod(opts.prevP || 'vorige periode')}). ${driver} ${watch}`;
 }
 function executivePctText(label, prev, curr, d, items, opts = {}) {
   const lowerBetter = opts.lowerBetter ?? true;
@@ -2489,7 +2559,7 @@ function renderPremiumBarChart(data, prevP, currP, field, lowerIsBetter = false)
   });
   const swatch = (color, opacity) => `<span class="prodBarSwatch" style="background:${color};opacity:${opacity}"></span>`;
   return `<div class="prodBarChart">
-    <div class="prodBarLegend"><span>${swatch('#0d1473', '.85')}${esc(prevP)}</span><span>${swatch('#ff934c', '1')}${esc(currP)}</span></div>
+    <div class="prodBarLegend"><span>${swatch('#0d1473', '.85')}${esc(fmtPeriod(prevP))}</span><span>${swatch('#ff934c', '1')}${esc(fmtPeriod(currP))}</span></div>
     <div class="prodBarGrid">${bars.join('')}</div>
     <div class="prodBarDeltaRow">${deltas.join('')}</div>
     <div class="prodBarLabelRow">${labels.join('')}</div>
@@ -2571,8 +2641,8 @@ function renderSpBarChart(data, prevP, currP, field, cellIndex) {
   });
 
   const swatch = (color, op) => `<span class="prodBarSwatch" style="background:${color};opacity:${op}"></span>`;
-  const legendPrev = `${swatch(VIVIUM_BLUE, '.85')}${esc(prevP)}`;
-  const legendCurr = `${swatch(VIVIUM_ORANGE, '1')}${esc(currP)}`;
+  const legendPrev = `${swatch(VIVIUM_BLUE, '.85')}${esc(fmtPeriod(prevP))}`;
+  const legendCurr = `${swatch(VIVIUM_ORANGE, '1')}${esc(fmtPeriod(currP))}`;
 
   return `<div class="prodBarChart">
     <div class="prodBarLegend"><span>${legendPrev}</span><span>${legendCurr}</span></div>
@@ -3105,11 +3175,9 @@ function view360SummaryKpiCardsHtml(data, items, prevP, currP) {
   const configs = [
     { sourceType: 'PRODUCTIE', field: cols.prodPremie, cellIndex: 5, type: 'money', key: 'TOTAAL NON LIFE' },
     { sourceType: 'PRODUCTIE', field: cols.vervalPremie, cellIndex: 7, type: 'money', key: 'TOTAAL NON LIFE', invert: true },
-    { sourceType: 'PRODUCTIE', field: cols.progPremie, cellIndex: 9, type: 'money', key: 'TOTAAL NON LIFE' },
-    { sourceType: 'SCHADE', field: cols.sp, cellIndex: 18, type: 'pct', key: 'TOTAAL NON LIFE', invert: true },
-    { sourceType: 'SCHADE', field: cols.spCap, cellIndex: 20, type: 'pct', key: 'TOTAAL NON LIFE', invert: true }
+    { sourceType: 'PRODUCTIE', field: cols.progPremie, cellIndex: 9, type: 'money', key: 'TOTAAL NON LIFE' }
   ];
-  return view360KpiCardsWithHistoryHtml(data, items, prevP, currP, (_item, index) => configs[index] || configs[0]);
+  return view360KpiCardsWithHistoryHtml(data, items.slice(0, 3), prevP, currP, (_item, index) => configs[index]);
 }
 function view360PiePanelsHtml(prefix, prevTitle, currTitle, tooltipClass = '') {
   return `<div class="portfolioPiePair">
@@ -3132,13 +3200,13 @@ function view360PiePanelsHtml(prefix, prevTitle, currTitle, tooltipClass = '') {
 function renderView360ComparisonPies(data, prevP, currP, mode, prefix) {
   const prevItems = getProductionPieItems(data, prevP, mode).map((x, i) => ({ ...x, color: pieSegmentColor(x.key, i) }));
   const currItems = getProductionPieItems(data, currP, mode).map((x, i) => ({ ...x, color: pieSegmentColor(x.key, i) }));
-  const emptyKey = mode === 'schade' ? 'schadePieEmpty' : 'productionPieEmpty';
+  const emptyKey = mode === 'schade' ? 'schadePieEmpty' : mode === 'verval' ? 'vervalPieEmpty' : 'productionPieEmpty';
   renderStaticPieLegend($(`${prefix}PrevLegend`), prevItems, msg(emptyKey));
   renderStaticPieLegend($(`${prefix}CurrLegend`), currItems, msg(emptyKey));
   const prevCanvas = $(`${prefix}PrevCanvas`), currCanvas = $(`${prefix}CurrCanvas`);
   if (prevCanvas) prevCanvas.dataset.tooltipId = `${prefix}Tooltip`;
   if (currCanvas) currCanvas.dataset.tooltipId = `${prefix}Tooltip`;
-  const centerText = mode === 'schade' ? msg('schadelast') : msg('productie');
+  const centerText = mode === 'schade' ? msg('schadelast') : msg(mode === 'verval' ? 'verval' : 'productie');
   drawPortfolioPie(prevCanvas, prevP, prevItems, -1, centerText);
   drawPortfolioPie(currCanvas, currP, currItems, -1, centerText);
   attachPortfolioPieHover(prevCanvas);
@@ -3153,6 +3221,9 @@ function renderView360ComparisonPies(data, prevP, currP, mode, prefix) {
 }
 function renderView360ProductionPies(data, prevP, currP) {
   renderView360ComparisonPies(data, prevP, currP, 'productie', 'view360ProdPie');
+}
+function renderView360VervalPies(data, prevP, currP) {
+  renderView360ComparisonPies(data, prevP, currP, 'verval', 'view360VervalPie');
 }
 function renderView360SchadePies(data, prevP, currP) {
   renderView360ComparisonPies(data, prevP, currP, 'schade', 'view360SchadePie');
@@ -3237,26 +3308,26 @@ function view360KmoMetrics() {
 function view360SpCapMetric() {
   return { key: 'spCap', title: msg('spAfgetopt'), textMetric: msg('spAfgetopt'), sourceType: 'SCHADE', field: cols.spCap, cellIndex: 20, type: 'pct', invert: true };
 }
-function view360KmoRows(data, mode, currP, config) {
+function view360KmoRows(data, mode, prevP, currP, fullYears, config) {
   const baseCats = config.cats || [];
   const out = [];
   baseCats.forEach(cat => {
     const rows = rowsOfHead(data, 'PRODUCTIE', cat);
     const ordered = orderedSubs(rows, cat);
     const subRows = ordered.filter(sub => sub !== cat);
-    const visibleRows = mode === 'main'
-      ? [cat]
-      : mode === 'sub'
+    const visibleRows = mode === 'sub'
         ? (subRows.length ? subRows : [cat])
         : ordered;
     visibleRows.forEach(sub => {
       const isMain = sub === cat;
-      out.push({
+      const row = {
         head: cat,
         sub,
         labelHtml: escLabel(sub),
-        isMain
-      });
+        isMain,
+        hasSubcategories: subRows.length > 0
+      };
+      out.push(row);
     });
   });
   return out;
@@ -3421,10 +3492,16 @@ function view360KmoCategoryHtml(data, row, prevP, currP, fullYears, config) {
   const spText = view360KmoAnalysisText(data, metrics[3], prevP, currP, fullYears, row, config);
   const spCapText = view360KmoAnalysisText(data, view360SpCapMetric(), prevP, currP, fullYears, row, config);
   const narrative = `<p>${prodText} ${vervalText}</p><p>${progressieText}</p><p>${spText} ${spCapText}</p>`;
-  return `<div class="view360AnalysisCategory ${row.isMain ? 'mainRow' : 'subRow'}">
+  const mainMode = view360AnalysisModeFor() === 'main';
+  const expanded = mainMode && view360OpenSubcategories.has(row.head);
+  const toggle = mainMode && row.isMain && row.hasSubcategories
+    ? `<button type="button" class="view360SubcategoryToggle" data-parent-category="${esc(row.head)}" aria-expanded="${expanded}">${currentLang === 'fr' ? (expanded ? 'masquer les sous-catégories' : 'afficher les sous-catégories') : (expanded ? 'verberg subcategorieën' : 'toon subcategorieën')}</button>`
+    : '';
+  return `<div class="view360AnalysisCategory ${row.isMain ? 'mainRow' : 'subRow'}${mainMode && !row.isMain && !expanded ? ' hidden' : ''}" data-parent-category="${esc(row.head)}">
     <div class="view360AnalysisCategoryTitle">${row.labelHtml}</div>
     <div class="view360AnalysisGrid">${metrics.map(metric => view360KmoMetricHtml(data, metric, prevP, currP, fullYears, row, config)).join('')}</div>
     <div class="view360AnalysisNarrative">${narrative}</div>
+    ${toggle}
   </div>`;
 }
 function view360AnalysisModeFor() {
@@ -3433,7 +3510,7 @@ function view360AnalysisModeFor() {
 function view360KmoAnalysisHtml(data, prevP, currP, config) {
   const fullYears = getFullYearPeriods(data, 'PRODUCTIE', currP, 3);
   const analysisMode = view360AnalysisModeFor();
-  const rows = view360KmoRows(data, analysisMode, currP, config);
+  const rows = view360KmoRows(data, analysisMode, prevP, currP, fullYears, config);
   const categoriesHtml = rows.map(row => view360KmoCategoryHtml(data, row, prevP, currP, fullYears, config)).join('');
   return `<div class="view360AnalysisBlock">
     ${exportActionsHtml({ label: config.title })}
@@ -3447,9 +3524,9 @@ const view360ClosedBlocks = new Set();
 function setupView360Collapse(target) {
   const originalBlocks = Array.from(target.children);
   const groups = [
-    { start: 3, end: 7, title: currentLang === 'fr' ? 'Production/Chute' : 'Productie/verval' },
-    { start: 7, end: 9, title: msg('tabPortefeuille') },
-    { start: 9, end: 12, title: msg('tabSchade') }
+    { start: 3, end: 8, title: currentLang === 'fr' ? 'Production/Chute' : 'Productie/verval' },
+    { start: 8, end: 10, title: msg('tabPortefeuille') },
+    { start: 10, end: 13, title: msg('tabSchade') }
   ];
   groups.forEach(({ start, end, title }) => {
     const children = originalBlocks.slice(start, end);
@@ -3498,7 +3575,7 @@ function setupView360Collapse(target) {
     const icon = iconKey
       ? `<img class="catIcon" src="${CATEGORY_ICONS[iconKey]}" alt="" />`
       : '<span class="view360HeaderIcon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 20h16M6 16V9h3v7m3 0V4h3v12m3 0v-5h3v5"/></svg></span>';
-    button.innerHTML = `<span class="catTitle">${icon}<span class="view360BlockLabel">${esc(title)}</span></span><span class="small">${esc(dashboardPreviousPeriod)} → ${esc(dashboardCurrentPeriod)}</span><span class="view360CollapseHint"></span>`;
+    button.innerHTML = `<span class="catTitle">${icon}<span class="view360BlockLabel">${esc(title)}</span></span><span class="small">${esc(fmtPeriod(dashboardPreviousPeriod))} → ${esc(fmtPeriod(dashboardCurrentPeriod))}</span><span class="view360CollapseHint"></span>`;
     button.setAttribute('aria-controls', body.id);
     const newHeader = document.createElement('h3');
     newHeader.className = 'view360BlockHead';
@@ -3542,10 +3619,11 @@ function render360View() {
   const vervalItems = categoryKpiItems(lastData, 'verval', prevP, currP) || [];
   const schadeItems = categoryKpiItems(lastData, 'schade', prevP, currP) || [];
   const prodPrevFull = getPreviousFullYearPeriodForPie(lastData, currP, 'productie') || prevP;
+  const vervalPrevFull = getPreviousFullYearPeriodForPie(lastData, currP, 'verval') || prevP;
   const schadePrevFull = getPreviousFullYearPeriodForPie(lastData, currP, 'schade') || prevP;
   const portYearItems = getPortfolioYearItems(lastData, 'TOTAAL NON LIFE', currP);
   const portPrevFull = portYearItems[portYearItems.length - 1]?.period || prevP;
-  const leftTitle = currentLang === 'fr' ? 'Année complète + période' : 'Vorig volledig jaar + periode';
+  const leftTitle = portfolioYearsPeriodTitle(prevP, currP);
   const portfolioEvolutionTitle = currentLang === 'fr' ? 'Evolution portefeuille' : 'Portefeuille-evolutie';
   const portPrevVal = getPortfolioValue(lastData, 'TOTAAL NON LIFE', prevP);
   const portCurrVal = getPortfolioValue(lastData, 'TOTAAL NON LIFE', currP);
@@ -3553,18 +3631,20 @@ function render360View() {
   const portPieTitle = currentLang === 'fr' ? 'Répartition prime acquise' : 'Verdeling verdiende premie';
   target.innerHTML = [
     ...view360AnalysisConfigs().map(config => view360KmoAnalysisHtml(lastData, prevP, currP, config)),
-    `<div class="view360Block"><h3>${esc(msg('tabSamenvatting'))}</h3><div class="kpis kpiOverviewGrid">${view360SummaryKpiCardsHtml(lastData, lastKpiContext.summary, prevP, currP)}</div></div>`,
+    `<div class="view360Block"><h3>${esc(msg('tabSamenvatting'))}</h3><div class="kpis kpiOverviewGrid view360ProductionSummaryKpis">${view360SummaryKpiCardsHtml(lastData, lastKpiContext.summary, prevP, currP)}</div></div>`,
     `<div class="view360Block"><h3>${esc(msg('tabProductie'))}</h3><div class="kpis kpiOverviewGrid">${view360ProductionKpiCardsHtml(lastData, prodItems, prevP, currP)}</div></div>`,
-    `<div class="portfolioPieCard view360PieCard"><div class="portfolioPieHeader"><h2>${esc(msg('productionPieTitle'))}</h2></div>${view360PiePanelsHtml('view360ProdPie', pieComparisonPanelTitle('prevFull', prodPrevFull), pieComparisonPanelTitle('curr', currP))}</div>`,
     `<div class="view360Block"><h3>${esc(msg('tabVerval'))}</h3><div class="kpis kpiOverviewGrid">${view360KpiCardsWithHistoryHtml(lastData, vervalItems, prevP, currP, { sourceType: 'PRODUCTIE', field: cols.vervalPremie, cellIndex: 7, type: 'money', invert: true })}</div></div>`,
-    `<div class="view360PortfolioCard"><h3>${esc(portfolioEvolutionTitle)}</h3><div class="portfolioGrid"><div class="portfolioChartCard"><h3>${esc(leftTitle)}</h3>${portfolioPeriodComparisonBars(lastData, 'TOTAAL NON LIFE', prevP, currP)}</div><div class="portfolioChartCard"><h3>${esc(msg('portefeuilleComparison'))}</h3>${hasPortCompare ? portfolioAmountSummary(prevP, currP, portPrevVal, portCurrVal) : `<div class="portfolioNoData">${msg('portefeuilleEmpty')}</div>`}</div></div></div>`,
-    `<div class="portfolioPieCard view360PieCard"><div class="portfolioPieHeader"><h2>${esc(portPieTitle)}</h2></div>${view360PiePanelsHtml('view360PortPie', (currentLang === 'fr' ? 'Année complète précédente · ' : 'Volledig voorgaand jaar · ') + portPrevFull, (currentLang === 'fr' ? 'Dernière période · ' : 'Laatste periode · ') + currP)}</div>`,
+    `<div class="portfolioPieCard view360PieCard"><div class="portfolioPieHeader"><h2>${esc(msg('productionPieTitle'))}</h2></div>${view360PiePanelsHtml('view360ProdPie', pieComparisonPanelTitle('prevFull', prodPrevFull), pieComparisonPanelTitle('curr', currP))}</div>`,
+    `<div class="portfolioPieCard view360PieCard"><div class="portfolioPieHeader"><h2>${esc(msg('vervalPieTitle'))}</h2></div>${view360PiePanelsHtml('view360VervalPie', pieComparisonPanelTitle('prevFull', vervalPrevFull), pieComparisonPanelTitle('curr', currP))}</div>`,
+    `<div class="view360PortfolioCard"><h3>${esc(portfolioEvolutionTitle)}</h3><div class="portfolioGrid"><div class="portfolioChartCard"><h3>${esc(leftTitle)}</h3>${portfolioPeriodComparisonBars(lastData, 'TOTAAL NON LIFE', prevP, currP)}</div><div class="portfolioChartCard"><h3>${esc(portfolioPeriodTitle(prevP, currP))}</h3>${hasPortCompare ? portfolioAmountSummary(prevP, currP, portPrevVal, portCurrVal) : `<div class="portfolioNoData">${msg('portefeuilleEmpty')}</div>`}</div></div></div>`,
+    `<div class="portfolioPieCard view360PieCard"><div class="portfolioPieHeader"><h2>${esc(portPieTitle)}</h2></div>${view360PiePanelsHtml('view360PortPie', (currentLang === 'fr' ? 'Année complète précédente · ' : 'Volledig voorgaand jaar · ') + fmtPeriod(portPrevFull), (currentLang === 'fr' ? 'Dernière période · ' : 'Laatste periode · ') + fmtPeriod(currP))}</div>`,
     `<div class="view360Block"><h3>S/P</h3><div class="kpis kpiOverviewGrid">${view360KpiCardsWithHistoryHtml(lastData, schadeKpiMetricItems(schadeItems, false), prevP, currP, { sourceType: 'SCHADE', field: cols.sp, cellIndex: 18, type: 'pct', invert: true })}</div></div>`,
     `<div class="view360Block"><h3>${esc(msg('spAfgetopt'))}</h3><div class="kpis kpiOverviewGrid">${view360KpiCardsWithHistoryHtml(lastData, schadeKpiMetricItems(schadeItems, true), prevP, currP, { sourceType: 'SCHADE', field: cols.spCap, cellIndex: 20, type: 'pct', invert: true })}</div></div>`,
     `<div class="portfolioPieCard view360PieCard"><div class="portfolioPieHeader"><h2>${esc(msg('schadePieTitle'))}</h2></div>${view360PiePanelsHtml('view360SchadePie', pieComparisonPanelTitle('prevFull', schadePrevFull), pieComparisonPanelTitle('curr', currP))}</div>`
   ].join('');
   target.querySelectorAll('.view360RuntimeTooltip').forEach(tooltip => document.body.appendChild(tooltip));
   renderView360ProductionPies(lastData, prodPrevFull, currP);
+  renderView360VervalPies(lastData, vervalPrevFull, currP);
   renderView360PortfolioPies(lastData, currP);
   renderView360SchadePies(lastData, schadePrevFull, currP);
   attachPortfolioBarHover(target);
@@ -3694,7 +3774,7 @@ function kpiCardsHtml(items, prevP, currP, options = {}) {
     const titleLabel = x.type === 'sp-category'
       ? `${showCappedSpKpis ? msg('spAfgetopt') : 'S/P'} ${x.l}`
       : (x.showPeriodInLabel === false ? `${x.metricLabel || x.l} ${x.l}` : `${x.l}`);
-    const label = `<span>${esc(titleLabel)}</span><span class="kpi-period">ULT. ${esc(currP)}</span>`;
+    const label = `<span>${esc(titleLabel)}</span><span class="kpi-period">ULT. ${esc(fmtPeriod(currP))}</span>`;
     const cardClass = 'kpi' + (x.dynamicCategory ? ' dynamicCategoryKpi' : '');
     const kpiAttrs = x.dynamicCategory && interactive ? ` data-kpi-cat="${esc(x.jumpCat || x.l)}" role="button" tabindex="0"` : '';
     const compareHtml = kpiCompareHtml(x, prevP, currP);
@@ -3831,7 +3911,7 @@ function barCompareHtml(labels, a, b, la, lb, type, color, parentCategory = '', 
       const fillClass = spVisualClass(v);
       const valClass  = spValueClass(v, threshold, label);
       const hasOverflow = v > 100 || v < 0;
-      return `<div class="barline progressLine"><div class="period">${period}</div><div class="progressTrack"><div class="progressFill ${fillClass} ${periodClass}" style="width:${width}%"></div></div><div class="barDeltaSlot">${delta}</div><div class="value ${valClass}">${fmt(v, type)}</div></div>`;
+      return `<div class="barline progressLine"><div class="period">${fmtPeriod(period)}</div><div class="progressTrack"><div class="progressFill ${fillClass} ${periodClass}" style="width:${width}%"></div></div><div class="barDeltaSlot">${delta}</div><div class="value ${valClass}">${fmt(v, type)}</div></div>`;
     };
     return `<div class="bars">` + labels.map((l, i) => {
       const threshold = spThresholdForLabel(l, parentCategory);
@@ -3845,8 +3925,8 @@ function barCompareHtml(labels, a, b, la, lb, type, color, parentCategory = '', 
   return `<div class="bars">` + labels.map((l, i) => {
     const delta = options.showDelta ? (options.absolutePctDelta ? barAbsolutePctDeltaTextHtml(a[i], b[i], !!options.invertDelta) : barDeltaTextHtml(a[i], b[i], !!options.invertDelta)) : '';
     return `<div class="barrow"><div class="barlabel">${l}</div><div class="bararea">` +
-    `<div class="barline"><div class="period">${lb}</div><div class="track"><div class="fill currPeriod" style="width:${Math.abs(b[i]) / max * 100}%"></div></div><div class="barDeltaSlot"></div><div class="value">${fmt(b[i], type)}</div></div>` +
-    `<div class="barline"><div class="period">${la}</div><div class="track"><div class="fill prevPeriod" style="width:${Math.abs(a[i]) / max * 100}%"></div></div><div class="barDeltaSlot">${delta}</div><div class="value">${fmt(a[i], type)}</div></div>` +
+    `<div class="barline"><div class="period">${fmtPeriod(lb)}</div><div class="track"><div class="fill currPeriod" style="width:${Math.abs(b[i]) / max * 100}%"></div></div><div class="barDeltaSlot"></div><div class="value">${fmt(b[i], type)}</div></div>` +
+    `<div class="barline"><div class="period">${fmtPeriod(la)}</div><div class="track"><div class="fill prevPeriod" style="width:${Math.abs(a[i]) / max * 100}%"></div></div><div class="barDeltaSlot">${delta}</div><div class="value">${fmt(a[i], type)}</div></div>` +
     `</div></div>`;
   }).join('') + `</div>`;
 }
@@ -3928,14 +4008,14 @@ function groupContext(cat, rows, prevP, currP) {
   };
 }
 function metricHtml(title, valueHtml, delta = '') {
-  return `<div class="metric"><b>${title}</b><span class="metric-val">${valueHtml}</span>${delta}</div>`;
+  return `<div class="metric"><b>${fmtPeriod(title)}</b><span class="metric-val">${valueHtml}</span>${delta}</div>`;
 }
 function miniCardHtml(title, body, extraClass = '') {
   const cls = extraClass ? ` ${extraClass}` : '';
   return `<div class="miniCard${cls}"><h3>${title}</h3>${body}</div>`;
 }
 function categoryBlockHtml(cat, periodHtml, bodyHtml) {
-  return `<div class="cat" data-category-key="${esc(cat)}"><div class="catHead exportableBlockHeader"><div class="catTitle">${catTitleHtml(cat)}</div><div class="small">${periodHtml}</div>${productBlockExportActionsHtml()}</div><div class="p-18">${bodyHtml}</div></div>`;
+  return `<div class="cat" data-category-key="${esc(cat)}"><div class="catHead exportableBlockHeader"><div class="catTitle">${catTitleHtml(cat)}</div><div class="small">${fmtPeriod(periodHtml)}</div>${productBlockExportActionsHtml()}</div><div class="p-18">${bodyHtml}</div></div>`;
 }
 function renderProductionGroup(cat, rows, prevP, currP, data) {
   const { ordered, labels, vals, head, prevHead } = groupContext(cat, rows, prevP, currP);
@@ -3951,7 +4031,8 @@ function renderProductionGroup(cat, rows, prevP, currP, data) {
     miniCardHtml(msg('productiepremie'), barCompareHtmlWithPreviousYears(labels, vals(cols.prodPremie, prevP), vals(cols.prodPremie, currP), prevP, currP, 'money', 'blue', '', { showDelta: true }, prodHistory)) +
     miniCardHtml(msg('aantalProductiezaken'), barCompareHtmlWithPreviousYears(labels, vals(cols.prodAantal, prevP), vals(cols.prodAantal, currP), prevP, currP, 'num', 'blue', '', { showDelta: true }, countHistory)) +
     `</div>`;
-  return categoryBlockHtml(cat, `${prevP} → ${currP}`, metrics + cards);
+  const hasSubcategories = ordered.some(sub => sub !== cat);
+  return categoryBlockHtml(cat, `${prevP} → ${currP}`, metrics + cards + subcategoryToggleHtml(hasSubcategories));
 }
 
 function earnedPremiumForVervalRatio(data, key, period) {
@@ -3976,8 +4057,8 @@ function vervalRatioText(vervalPremie, verdiendePremie, period) {
   const earned = n(verdiendePremie);
   if (!earned) return '';
   const ratio = n(vervalPremie) / earned * 100;
-  if (currentLang === 'fr') return `<span class="claimAvgNote">(ratio chute ${pct.format(ratio)}% vs prime acquise ultimo ${esc(period)})</span>`;
-  return `<span class="claimAvgNote">(vervalratio ${pct.format(ratio)}% tov verd.premie ${euro.format(earned)} - ult. ${esc(period)})</span>`;
+  if (currentLang === 'fr') return `<span class="claimAvgNote">(ratio chute ${pct.format(ratio)}% vs prime acquise ultimo ${esc(fmtPeriod(period))})</span>`;
+  return `<span class="claimAvgNote">(vervalratio ${pct.format(ratio)}% tov verd.premie ${euro.format(earned)} - ult. ${esc(fmtPeriod(period))})</span>`;
 }
 function vervalRatioFullPeriods(data, currentPeriod) {
   const currentKey = pkey(currentPeriod);
@@ -4015,7 +4096,7 @@ function vervalRatioBarsHtml(data, key, currentPeriod) {
   if (!items.length) return `<div class="portfolioNoData">${msg('portefeuilleEmpty')}</div>`;
   return `<div class="vervalRatioBars">` + [...items].sort((a, b) => pkey(b.period) - pkey(a.period)).map(x => {
     const width = Math.max(2, Math.min(100, Math.abs(x.ratio)));
-    return `<div class="vervalRatioLine"><div class="vervalRatioPeriod">${esc(x.period)}</div><div class="vervalRatioTrack"><div class="vervalRatioFill" style="width:${width}%"></div><div class="vervalRatioValue">${pct.format(x.ratio)}% <span class="ratioAmounts">(${euro.format(x.vervalPremie)} vs ${euro.format(x.verdiendePremie)})</span></div></div></div>`;
+    return `<div class="vervalRatioLine"><div class="vervalRatioPeriod">${esc(fmtPeriod(x.period))}</div><div class="vervalRatioTrack"><div class="vervalRatioFill" style="width:${width}%"></div><div class="vervalRatioValue">${pct.format(x.ratio)}% <span class="ratioAmounts">(${euro.format(x.vervalPremie)} vs ${euro.format(x.verdiendePremie)})</span></div></div></div>`;
   }).join('') + `</div>`;
 }
 function vervalRatioGroupHtml(data, ordered, cat, currentPeriod) {
@@ -4055,7 +4136,7 @@ function renderVervalGroup(cat, rows, prevP, currP, data) {
     miniCardHtml(msg('aantalVervallenZaken'), barCompareHtmlWithPreviousYears(labels, vals(cols.vervalAantal, prevP), vals(cols.vervalAantal, currP), prevP, currP, 'num', 'orange', '', { showDelta: true, invertDelta: true }, vervalAantalHistory)) +
     extraCards +
     `</div>`;
-  return categoryBlockHtml(cat, `${prevP} → ${currP}`, metrics + cards);
+  return categoryBlockHtml(cat, `${prevP} → ${currP}`, metrics + cards + subcategoryToggleHtml(ordered.some(sub => sub !== cat)));
 }
 
 function progressionCompositionBars(data, cat, ordered, labels, vals, prevP, currP, counts = false) {
@@ -4148,7 +4229,7 @@ function renderProgressieGroup(cat, rows, prevP, currP, data) {
     miniCardHtml(msg('progressiepremie'), progressionCompositionBars(data, cat, ordered, labels, vals, prevP, currP)) +
     miniCardHtml(msg('aantalProgressiezaken'), progressionCompositionBars(data, cat, ordered, labels, vals, prevP, currP, true)) +
     '</div>';
-  return categoryBlockHtml(cat, prevP + ' → ' + currP, equationCards() + equationCards(true) + cards);
+  return categoryBlockHtml(cat, prevP + ' → ' + currP, equationCards() + equationCards(true) + cards + subcategoryToggleHtml(ordered.some(sub => sub !== cat)));
 }
 
 function renderSchadeGrouped(data, prevP, currP) {
@@ -4206,7 +4287,7 @@ function renderSchadeGroup(cat, rows, prevP, currP, data) {
     miniCardHtml(msg('aantalSchadegevallen'), barCompareHtmlWithPreviousYears(labelHtml, vals(cols.schadeAantal, prevP), vals(cols.schadeAantal, currP), prevP, currP, 'num', 'red', '', { showDelta: true, invertDelta: true }, schadeAantalHistory)) +
     miniCardHtml(msg('verdiendePremie'), barCompareHtmlWithPreviousYears(labelHtml, vals(cols.verdiend, prevP), vals(cols.verdiend, currP), prevP, currP, 'money', 'blue', '', { showDelta: true }, verdiendHistory)) +
     `</div>`;
-  return categoryBlockHtml(cat, headRight, metrics + cards);
+  return categoryBlockHtml(cat, headRight, metrics + cards + subcategoryToggleHtml(hasSubs));
 }
 
 
@@ -4301,13 +4382,13 @@ function portfolioPeriodComparisonBars(data, key, prevP, currP) {
     const overlayH = isLastFull && x.value ? Math.min(100, Math.max(0, Math.abs(prevVal) / Math.abs(x.value) * 100)) : 0;
     const small = '';
     return `<div class="portfolioCompareBarCol">
-      <div class="portfolioBarValue">${euro.format(x.value)}<small>${esc(x.period || '')}</small></div>
+      <div class="portfolioBarValue">${euro.format(x.value)}<small>${esc(fmtPeriod(x.period || ''))}</small></div>
       <div class="portfolioBarStack">
-        <div class="portfolioBarShell fullYear" style="--bar-h:${h}%" data-tip-label="${esc(x.period || '')}" data-tip-value="${euro.format(x.value)}">
-          ${isLastFull ? `<div class="portfolioPeriodOverlay" style="--overlay-h:${overlayH}%" data-tip-label="${esc(prevP)}" data-tip-value="${euro.format(prevVal)}"></div>` : ''}
+        <div class="portfolioBarShell fullYear" style="--bar-h:${h}%" data-tip-label="${esc(fmtPeriod(x.period || ''))}" data-tip-value="${euro.format(x.value)}">
+          ${isLastFull ? `<div class="portfolioPeriodOverlay" style="--overlay-h:${overlayH}%" data-tip-label="${esc(fmtPeriod(prevP))}" data-tip-value="${euro.format(prevVal)}"></div>` : ''}
         </div>
       </div>
-      <div class="portfolioBarLabel">${esc(x.period || '')}</div>
+      <div class="portfolioBarLabel">${esc(fmtPeriod(x.period || ''))}</div>
     </div>`;
   });
 
@@ -4329,11 +4410,11 @@ function portfolioPeriodComparisonBars(data, key, prevP, currP) {
     barsWithDeltas.push(`<div class="portfolioCompareDelta periodComparisonDelta ${cls(periodDelta)}" style="--period-delta-y:${periodDeltaY}px"><span>${periodDelta >= 0 ? '+' : ''}${pct.format(periodDelta)}%</span><small>€ ${amountDelta >= 0 ? '+' : ''}${num.format(amountDelta)}</small></div>`);
   }
   barsWithDeltas.push(`<div class="portfolioCompareBarCol">
-    <div class="portfolioBarValue">${euro.format(currVal)}<small>${esc(currP)}</small></div>
+    <div class="portfolioBarValue">${euro.format(currVal)}<small>${esc(fmtPeriod(currP))}</small></div>
     <div class="portfolioBarStack">
-      <div class="portfolioBarShell currentPeriod" style="--bar-h:${currH}%" data-tip-label="${esc(currP)}" data-tip-value="${euro.format(currVal)}"></div>
+      <div class="portfolioBarShell currentPeriod" style="--bar-h:${currH}%" data-tip-label="${esc(fmtPeriod(currP))}" data-tip-value="${euro.format(currVal)}"></div>
     </div>
-    <div class="portfolioBarLabel">${esc(currP)}</div>
+    <div class="portfolioBarLabel">${esc(fmtPeriod(currP))}</div>
   </div>`);
 
   return `<div class="portfolioPeriodBars">${barsWithDeltas.join('')}</div>`;
@@ -4342,13 +4423,21 @@ function signedEuroValue(value) {
   const sign = value >= 0 ? '+' : '-';
   return sign + euro.format(Math.abs(value));
 }
+function portfolioYearsPeriodTitle(prevP, currP) {
+  const prefix = currentLang === 'fr' ? 'Années précédentes' : 'Vorige jaren';
+  return `${prefix} + ${kpiComparisonPeriod(prevP)} vs ${kpiComparisonPeriod(currP)}`;
+}
+function portfolioPeriodTitle(prevP, currP) {
+  const prefix = currentLang === 'fr' ? 'Période' : 'Periode';
+  return `${prefix} ${kpiComparisonPeriod(prevP)} vs ${kpiComparisonPeriod(currP)}`;
+}
 function portfolioAmountSummary(prevP, currP, prevVal, currVal) {
   const delta = currVal - prevVal;
   const d = yoy(prevVal, currVal);
   const bubbleClass = delta > 0 ? 'positive' : (delta < 0 ? 'negative' : 'neutral');
   return `<div class="portfolioAmounts">
-    <div class="portfolioAmountItem"><b>${msg('vorigJaar')} · ${esc(prevP)}</b><span>${euro.format(prevVal)}</span></div>
-    <div class="portfolioAmountItem"><b>${msg('huidigJaar')} · ${esc(currP)}</b><span>${euro.format(currVal)}</span></div>
+    <div class="portfolioAmountItem"><b>${esc(kpiComparisonPeriod(prevP))}</b><span>${euro.format(prevVal)}</span></div>
+    <div class="portfolioAmountItem"><b>${esc(kpiComparisonPeriod(currP))}</b><span>${euro.format(currVal)}</span></div>
     <div class="portfolioDeltaBubble ${bubbleClass}"><b>Delta</b><span>${signedEuroValue(delta)} (${d >= 0 ? '+' : ''}${pct.format(d)}%)</span></div>
   </div>`;
 }
@@ -4379,13 +4468,13 @@ function attachPortfolioBarHover(root = $('portefeuilleCharts')) {
   });
   root.addEventListener('mouseleave', hide);
 }
-function renderPortfolioBlock(data, key, prevP, currP, isTotal = false, isSub = false) {
+function renderPortfolioBlock(data, key, prevP, currP, isTotal = false, isSub = false, hasSubcategories = false) {
   const prevVal = getPortfolioValue(data, key, prevP);
   const currVal = getPortfolioValue(data, key, currP);
   const hasCompare = prevVal !== 0 || currVal !== 0;
   const title = portfolioCategoryTitleHtml(key, isTotal);
-  const leftTitle = currentLang === 'fr' ? 'Année complète + période' : 'Vorig volledig jaar + periode';
-  return `<div data-category-key="${esc(key)}" class="portfolioCategoryBlock ${isTotal ? 'portfolioTotalBlock' : ''} ${isSub ? 'portfolioSubBlock' : ''}"><div class="portfolioCategoryHead exportableBlockHeader"><div class="catTitle">${title}</div><div class="small">${esc(prevP)} &rarr; ${esc(currP)}</div>${productBlockExportActionsHtml()}</div><div class="portfolioGrid"><div class="portfolioChartCard"><h3>${leftTitle}</h3>${portfolioPeriodComparisonBars(data, key, prevP, currP)}</div><div class="portfolioChartCard"><h3>${msg('portefeuilleComparison')}</h3>${hasCompare ? portfolioAmountSummary(prevP, currP, prevVal, currVal) : `<div class="portfolioNoData">${msg('portefeuilleEmpty')}</div>`}</div></div></div>`;
+  const leftTitle = portfolioYearsPeriodTitle(prevP, currP);
+  return `<div data-category-key="${esc(key)}" data-parent-category="${esc(SUBCATEGORY_PARENT[key] || '')}" class="portfolioCategoryBlock ${isTotal ? 'portfolioTotalBlock' : ''} ${isSub ? 'portfolioSubBlock' : ''}"><div class="portfolioCategoryHead exportableBlockHeader"><div class="catTitle">${title}</div><div class="small">${esc(fmtPeriod(prevP))} &rarr; ${esc(fmtPeriod(currP))}</div>${productBlockExportActionsHtml()}</div><div class="portfolioGrid"><div class="portfolioChartCard"><h3>${esc(leftTitle)}</h3>${portfolioPeriodComparisonBars(data, key, prevP, currP)}</div><div class="portfolioChartCard"><h3>${esc(portfolioPeriodTitle(prevP, currP))}</h3>${hasCompare ? portfolioAmountSummary(prevP, currP, prevVal, currVal) : `<div class="portfolioNoData">${msg('portefeuilleEmpty')}</div>`}</div></div>${subcategoryToggleHtml(hasSubcategories)}</div>`;
 }
 function getPortfolioPieItems(data, period) {
   const keys = ['Auto Vloten','Auto Niet Vloten','Particulieren Brand','Particulieren BA','Particulieren Overige','Ondernemingen Brand','Ondernemingen BA','Ondernemingen Overige','Arbeidsongevallen','Rechtsbijstand'];
@@ -4421,7 +4510,7 @@ function drawPortfolioPie(canvas, period, items, hoverIndex = -1, centerText = n
     const seg = segments[hoverIndex];
     drawGradientPieSegment(ctx, cx, cy, radius, seg.start, seg.end, seg.color, { offset: 8, strokeWidth: 4 });
   }
-  drawPieCenter(ctx, cx, cy, radius, centerText || msg('verdiendePremie'), period, .92);
+  drawPieCenter(ctx, cx, cy, radius, centerText || msg('verdiendePremie'), fmtPeriod(period), .92);
   canvas._portfolioPieState = { segments, total, cx, cy, radius, period, hoverIndex, centerText: centerText || msg('verdiendePremie') };
 }
 function renderPortfolioPieLegend(el, items) {
@@ -4557,8 +4646,8 @@ function renderPortfolioPies(data, currP) {
   card.classList.remove('hidden');
   setText('portfolioPieTitle', currentLang === 'fr' ? 'Répartition prime acquise' : 'Verdeling verdiende premie');
   setText('portfolioPieSub', '');
-  setText('portfolioPiePrevTitle', (currentLang === 'fr' ? 'Année complète précédente · ' : 'Volledig voorgaand jaar · ') + prevFullPeriod);
-  setText('portfolioPieCurrTitle', (currentLang === 'fr' ? 'Dernière période · ' : 'Laatste periode · ') + currP);
+  setText('portfolioPiePrevTitle', (currentLang === 'fr' ? 'Année complète précédente · ' : 'Volledig voorgaand jaar · ') + fmtPeriod(prevFullPeriod));
+  setText('portfolioPieCurrTitle', (currentLang === 'fr' ? 'Dernière période · ' : 'Laatste periode · ') + fmtPeriod(currP));
   const prevTotal = prevItems.reduce((sum, x) => sum + x.value, 0);
   const currTotal = currItems.reduce((sum, x) => sum + x.value, 0);
   const totalLabel = currentLang === 'fr' ? 'Total prime acquise' : 'Totale verdiende premie';
@@ -4587,11 +4676,10 @@ function renderPortefeuille(data, prevP, currP) {
     { main: 'Rechtsbijstand', subs: [] }
   ];
   const blocks = groups.flatMap(group => {
-    if (viewMode === 'main') return [{ key: group.main, isSub: false }];
     if (viewMode === 'sub') return group.subs.map(key => ({ key, isSub: true }));
-    return [{ key: group.main, isSub: false }, ...group.subs.map(key => ({ key, isSub: true }))];
+    return [{ key: group.main, isSub: false, hasSubcategories: group.subs.length > 0 }, ...group.subs.map(key => ({ key, isSub: true }))];
   });
-  $('portefeuilleCharts').innerHTML = renderPortfolioBlock(data, 'TOTAAL NON LIFE', prevP, currP, true) + blocks.map(x => renderPortfolioBlock(data, x.key, prevP, currP, false, x.isSub)).join('');
+  $('portefeuilleCharts').innerHTML = renderPortfolioBlock(data, 'TOTAAL NON LIFE', prevP, currP, true) + blocks.map(x => renderPortfolioBlock(data, x.key, prevP, currP, false, x.isSub, x.hasSubcategories)).join('');
   attachPortfolioBarHover();
   renderPortfolioPies(data, currP);
 }
@@ -4777,8 +4865,8 @@ function getPreviousFullYearPeriodForPie(data, currP, mode = 'productie') {
 }
 function pieComparisonPanelTitle(kind, period) {
   if (!period) return '';
-  if (kind === 'prevFull') return (currentLang === 'fr' ? 'Année complète précédente · ' : 'Volledig voorgaand jaar · ') + period;
-  return (currentLang === 'fr' ? 'Dernière période · ' : 'Laatste periode · ') + period;
+  if (kind === 'prevFull') return (currentLang === 'fr' ? 'Année complète précédente · ' : 'Volledig voorgaand jaar · ') + fmtPeriod(period);
+  return (currentLang === 'fr' ? 'Dernière période · ' : 'Laatste periode · ') + fmtPeriod(period);
 }
 function ensureProductionPieLayout(mode, prevP, currP) {
   const card = $('productionPieCard');
@@ -5024,12 +5112,12 @@ function renderProgressWaterfall(data, currP, prevP = '') {
     const d = yoy(prevRaw, currRaw);
     const diff = currRaw - prevRaw;
     const c = invert ? cls(-diff) : cls(diff);
-    return `<div class="pieLegendItem"><span class="pieSwatch" style="background:${color}"></span><div class="pieLegendName">${esc(label)}<span class="pieLegendPct">${esc(prevP)} → ${esc(currP)} · ${d >= 0 ? '+' : ''}${pct.format(d)}%</span></div><div class="pieLegendValue"><span>${signedEuro(currDisplay)}</span><br><span class="${c}">${diff >= 0 ? '+' : '-'}${euro.format(Math.abs(diff))}</span></div></div>`;
+    return `<div class="pieLegendItem"><span class="pieSwatch" style="background:${color}"></span><div class="pieLegendName">${esc(label)}<span class="pieLegendPct">${esc(fmtPeriod(prevP))} → ${esc(fmtPeriod(currP))} · ${d >= 0 ? '+' : ''}${pct.format(d)}%</span></div><div class="pieLegendValue"><span>${signedEuro(currDisplay)}</span><br><span class="${c}">${diff >= 0 ? '+' : '-'}${euro.format(Math.abs(diff))}</span></div></div>`;
   };
   const periodItem = (label, color, periodLabel, value) => {
-    return `<div class="pieLegendItem"><span class="pieSwatch" style="background:${color}"></span><div class="pieLegendName">${esc(label)}<span class="pieLegendPct">${esc(periodLabel)}</span></div><div class="pieLegendValue">${signedEuro(value)}</div></div>`;
+    return `<div class="pieLegendItem"><span class="pieSwatch" style="background:${color}"></span><div class="pieLegendName">${esc(label)}<span class="pieLegendPct">${esc(fmtPeriod(periodLabel))}</span></div><div class="pieLegendValue">${signedEuro(value)}</div></div>`;
   };
-  if (legend) legend.innerHTML = `<div class="netProgressBlock"><div class="netProgressHead"><div>${currentLang === 'fr' ? 'Calcul progression' : 'Berekening progressie'} <span>${esc(currP)}</span></div><div class="netProgressValue ${values.progressie >= 0 ? 'pos' : 'neg'}">${euro.format(values.progressie)}</div></div><div class="note" style="margin:0">${calc}</div></div>` +
+  if (legend) legend.innerHTML = `<div class="netProgressBlock"><div class="netProgressHead"><div>${currentLang === 'fr' ? 'Calcul progression' : 'Berekening progressie'} <span>${esc(fmtPeriod(currP))}</span></div><div class="netProgressValue ${values.progressie >= 0 ? 'pos' : 'neg'}">${euro.format(values.progressie)}</div></div><div class="note" style="margin:0">${calc}</div></div>` +
     (prevValues
       ? currentItem(msg('productie'), progressWaterfallColors.productie, values.productie, prevValues.productie, values.productie) +
         currentItem(msg('verval'), progressWaterfallColors.verval, -values.verval, prevValues.verval, values.verval, true) +
@@ -5089,7 +5177,7 @@ function catContainer(cat, headRight, bodyHtml) {
     `<div class="cat" data-category-key="${esc(cat)}">`,
       `<div class="catHead exportableBlockHeader">`,
         `<div class="catTitle">${catTitleHtml(cat)}</div>`,
-        `<div class="small">${headRight}</div>`,
+        `<div class="small">${fmtPeriod(headRight)}</div>`,
         productBlockExportActionsHtml(),
       `</div>`,
       `<div class="p-18">${bodyHtml}</div>`,

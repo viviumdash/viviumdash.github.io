@@ -42,13 +42,13 @@
           <div id="pdfOptionsMenu" class="pdfOptionsMenu" role="dialog" aria-label="PDF secties">
             <div id="pdfOptionsTitle" class="pdfOptionsTitle">PDF secties</div>
             <div class="pdfSelectionActions"><button type="button" id="pdfSelectAll" onclick="selectAllPdfSections(true)">Alles selecteren</button><button type="button" id="pdfSelectNone" onclick="selectAllPdfSections(false)">Niets selecteren</button></div>
-            <label class="pdfOption"><input type="checkbox" class="pdfSectionCheck" value="summary" checked><span id="pdfOptSummary">Samenvatting</span></label>
-            <label class="pdfOption"><input type="checkbox" class="pdfSectionCheck" value="productie" checked><span id="pdfOptProductie">Productie</span></label>
-            <label class="pdfOption"><input type="checkbox" class="pdfSectionCheck" value="verval" checked><span id="pdfOptVerval">Verval</span></label>
-            <label class="pdfOption"><input type="checkbox" class="pdfSectionCheck" value="schade" checked><span id="pdfOptSchade">Schade</span></label>
-            <label class="pdfOption"><input type="checkbox" class="pdfSectionCheck" value="distributions" checked><span id="pdfOptDistributions">Verdelingen</span></label>
-            <label class="pdfOption"><input type="checkbox" class="pdfSectionCheck" value="detail" checked><span id="pdfOptDetail">Detail</span></label>
-            <label class="pdfOption"><input type="checkbox" class="pdfSectionCheck" value="view360" checked><span id="pdfOpt360">360-view</span></label>
+            <label class="pdfOption"><input type="checkbox" class="pdfSectionCheck" value="summary"><span id="pdfOptSummary">Samenvatting</span></label>
+            <label class="pdfOption"><input type="checkbox" class="pdfSectionCheck" value="productie"><span id="pdfOptProductie">Productie</span></label>
+            <label class="pdfOption"><input type="checkbox" class="pdfSectionCheck" value="verval"><span id="pdfOptVerval">Verval</span></label>
+            <label class="pdfOption"><input type="checkbox" class="pdfSectionCheck" value="schade"><span id="pdfOptSchade">Schade</span></label>
+            <label class="pdfOption"><input type="checkbox" class="pdfSectionCheck" value="distributions"><span id="pdfOptDistributions">Verdelingen</span></label>
+            <label class="pdfOption"><input type="checkbox" class="pdfSectionCheck" value="detail"><span id="pdfOptDetail">Detail</span></label>
+            <label class="pdfOption"><input type="checkbox" class="pdfSectionCheck" value="view360"><span id="pdfOpt360">360-view</span></label>
             <div class="pdfOutputActions"><button type="button" id="printPdfBtn">Print to PDF</button><button type="button" id="pdfExportConfirmBtn">Export</button></div>
           </div>
         </div>
@@ -101,9 +101,9 @@
         <div class="viewDropdownWrap" id="viewDropdownWrap">
           <span class="toolbarLabel" id="viewModeLabel">Weergave</span>
           <div class="view360AnalysisToggle viewModeSegmented" id="viewModeControls" role="group" aria-label="Weergave">
-              <button type="button" class="active" data-view="all" id="viewAllBtn">Hoofd- en subcategorieën</button>
-              <button type="button" data-view="main" id="viewMainBtn">Hoofdcategorieën</button>
+              <button type="button" class="active" data-view="main" id="viewMainBtn">Hoofdcategorieën</button>
               <button type="button" data-view="sub" id="viewSubBtn">Subcategorieën</button>
+              <button type="button" data-view="all" id="viewAllBtn">Hoofd- en subcategorieën</button>
           </div>
         </div>
         <label class="previousYearsControl" id="previousYearsControl"><input type="checkbox" id="previousYearsToggle"><span id="previousYearsToggleLabel">Vorige jaren</span></label>
@@ -146,7 +146,7 @@
 
     <section id="view360" class="section">
       <div class="card full">
-        <div class="titleExportRow"><div class="sectionTitleWrap"><h2 id="view360Title">360-view</h2><span class="sectionBrokerInline" id="view360BrokerInline"></span><span class="sectionPeriodInline" id="view360PeriodInline"></span></div><div class="sectionToolbarSlot"></div><div class="view360AnalysisToggle view360GlobalToggle" role="group" aria-label="Analyseweergave"><button type="button" class="active" data-view360-analysis="all" id="view360AllBtn">Hoofd- en subcategorieën</button><button type="button" data-view360-analysis="main" id="view360MainBtn">Hoofdcategorieën</button><button type="button" data-view360-analysis="sub" id="view360SubBtn">Subcategorieën</button></div><div class="blockExportActions" data-export-target="view360All" aria-label="360-view exporteren"><button type="button" class="blockExportBtn blockExportDownload" title="Download 360-view als PNG"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button><button type="button" class="blockExportBtn blockExportCopy" title="Kopieer 360-view als afbeelding"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><span style="font-size:11px;font-weight:950;padding-left:4px">Kopieer</span></button></div></div>
+        <div class="titleExportRow"><div class="sectionTitleWrap"><h2 id="view360Title">360-view</h2><span class="sectionBrokerInline" id="view360BrokerInline"></span><span class="sectionPeriodInline" id="view360PeriodInline"></span></div><div class="sectionToolbarSlot"></div><div class="view360AnalysisToggle view360GlobalToggle" role="group" aria-label="Analyseweergave"><button type="button" class="active" data-view360-analysis="main" id="view360MainBtn">Hoofdcategorieën</button><button type="button" data-view360-analysis="sub" id="view360SubBtn">Subcategorieën</button><button type="button" data-view360-analysis="all" id="view360AllBtn">Hoofd- en subcategorieën</button></div><div class="blockExportActions" data-export-target="view360All" aria-label="360-view exporteren"><button type="button" class="blockExportBtn blockExportDownload" title="Download 360-view als PNG"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button><button type="button" class="blockExportBtn blockExportCopy" title="Kopieer 360-view als afbeelding"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><span style="font-size:11px;font-weight:950;padding-left:4px">Kopieer</span></button></div></div>
         <div id="view360Content" class="view360Stack"></div>
       </div>
     </section>
@@ -382,6 +382,9 @@ Bij portefeuille extra delta-informatie tussen de balken toegevoegd.
 In de Detail-tab delta's voor S/P en S/P afgetopt toegevoegd.
 Bij Exporteer PDF is "Print to PDF" toegevoegd. Naast de bestaande export op basis van schermafbeeldingen kun je via "Opslaan als PDF" in het afdrukvenster een lichtere PDF maken. Deze nieuwe optie houdt rekening met de actieve weergave-instellingen en exporteert alleen de secties die je in de dropdown selecteert.
 Exporteer PDF knop aangepast, zodat je altijd eerst secties moet kiezen en onderaan dan keuze kan maken tussen Print to PDF en Export.
+Datumnotaties overal gelijkgetrokken: MM JJJJ wordt nu consequent als MM/JJJJ getoond.
+De 360-view is logischer ingedeeld; dubbele of irrelevante informatie is weggelaten.
+De weergave start nu met alleen hoofdcategorieën. Bovenaan kun je ook alleen subcategorieën of beide kiezen. Bij de hoofdcategorieën kun je per blok via de link onderaan subcategorieën tonen of verbergen. Opnieuw op 'Hoofdcategorieën' klikken sluit alle afzonderlijk geopende subcategorieën.
 </script>
 <script src="dashboard.js"></script>
 

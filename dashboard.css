@@ -294,10 +294,26 @@ th{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--mute
   .dashboardToolbar.contextualToolbar.kpiToolbar .drillBtn{display:none}
   .dashboardToolbar.contextualToolbar.hideViewDropdown.hidePreviousYears.hideDrillButton{display:flex;visibility:hidden;pointer-events:none;min-height:43px}
 }
-#dashboard.view-main-only .barrow:has(.catSubText){display:none!important}
-#dashboard.view-sub-only .barrow:has(.catMainText.hasSubs){display:none!important}
+#dashboard.view-main-only :is(#productie,#verval,#progressie,#schade) .barrow:has(.catSubText){display:none!important}
+#dashboard.view-main-only :is(#productie,#verval,#progressie,#schade) .cat.subcategoriesOpen .barrow:has(.catSubText){display:block!important}
+#dashboard.view-sub-only :is(#productie,#verval,#progressie,#schade) .barrow:has(.catMainText.hasSubs){display:none!important}
+.categorySubcategoryToggle{display:none;margin:14px 0 0;padding:0;border:0;background:none;color:var(--blue);font:inherit;font-size:13px;font-weight:700;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+#dashboard.view-main-only .categorySubcategoryToggle{display:inline-flex;align-items:center}
+.categorySubcategoryToggle:hover{color:var(--orange)}
+.categorySubcategoryToggle:focus-visible{outline:2px solid var(--orange);outline-offset:4px;border-radius:2px}
+.pdfExportRoot .categorySubcategoryToggle{display:none!important}
+.view360SubcategoryToggle{display:inline-flex;margin:12px 16px 16px;padding:0;border:0;background:none;color:var(--blue);font:inherit;font-size:13px;font-weight:700;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.view360SubcategoryToggle:hover{color:var(--orange)}
+.view360SubcategoryToggle:focus-visible{outline:2px solid var(--orange);outline-offset:4px;border-radius:2px}
+.pdfExportRoot .view360SubcategoryToggle{display:none!important}
 #dashboard.view-main-only .vervalRatioSection.subRatioSection{display:none!important}
+#dashboard.view-main-only .cat.subcategoriesOpen .vervalRatioSection.subRatioSection{display:block!important}
 #dashboard.view-sub-only .vervalRatioSection.mainRatioSection.hasSubs{display:none!important}
+#dashboard.view-main-only #portefeuille .portfolioSubBlock{display:none!important}
+#dashboard.view-main-only #portefeuille .portfolioSubBlock.subcategoriesFromMain{display:block!important}
+#portefeuille .portfolioCategoryBlock>.categorySubcategoryToggle{margin:0 18px 16px}
+#dashboard.drillMode #portefeuille .portfolioCategoryBlock:not(.drillOpen)>.categorySubcategoryToggle,
+#dashboard:not(.drillMode) #portefeuille .portfolioCategoryBlock.manualClosed>.categorySubcategoryToggle{display:none!important}
 /* Ook in weergave 'Subcategorieën' moeten categorieën zonder subrijen volledig zichtbaar blijven.
    Dit geldt o.a. voor TOTAAL NON LIFE, Arbeidsongevallen en Rechtsbijstand: hun hoofdrij bevat net de relevante bedragen/grafieken. */
 #dashboard.view-sub-only .cat.totalNonLife .barrow:has(.catMainText){display:block!important}
@@ -737,6 +753,7 @@ th{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--mute
 .pdfExportRoot .pdfTest360Page .view360AnalysisSpark svg{height:96px!important}
 .pdfExportRoot .pdfTest360Page .view360AnalysisDetails{display:none!important}
 .pdfExportRoot .pdfTest360Page .kpis{grid-template-columns:repeat(5,1fr)!important;gap:10px!important;margin:0!important}
+.pdfExportRoot .pdfTest360Page .view360ProductionSummaryKpis{grid-template-columns:repeat(3,minmax(0,1fr))!important}
 .pdfExportRoot .pdfTest360Page .kpi{height:118px!important;min-height:118px!important;padding:12px!important;overflow:hidden!important}
 .pdfExportRoot .pdfTest360Page .kpi .label{font-size:9.5px!important}
 .pdfExportRoot .pdfTest360Page .kpi .value{font-size:21px!important}
@@ -1055,6 +1072,8 @@ th{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--mute
 .view360Block{border:1px solid var(--line);border-radius:18px;background:#fff;padding:18px;box-shadow:0 8px 18px rgba(15,23,42,.045)}
 .view360Block h3{margin:0 0 14px;color:var(--blue);font-size:18px;font-weight:700;letter-spacing:-.01em}
 .view360Block .kpis{margin:0}
+.view360Block .view360ProductionSummaryKpis{grid-template-columns:repeat(3,minmax(0,1fr))}
+@media(max-width:680px){.view360Block .view360ProductionSummaryKpis{grid-template-columns:1fr}}
 .view360Block .kpi{height:auto;min-height:142px;overflow:visible}
 .view360History{margin-top:12px;border-top:1px solid #e6eef7;padding-top:10px;display:grid;gap:6px}
 .view360HistoryTitle{font-size:10.5px;text-transform:uppercase;letter-spacing:.055em;font-weight:700;color:var(--muted);opacity:.85}
