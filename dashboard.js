@@ -3131,11 +3131,6 @@ function renderKpiOverview() {
   const currP = dashboardCurrentPeriod;
   const configs = kpiOverviewTabConfigs().filter(cfg => kpiOverviewVisibility[cfg.id] !== false);
   target.classList.toggle('previousYearsVisible', previousYearsMode);
-  if (!configs.length) {
-    target.innerHTML = `<div class="kpiOverviewEmpty">${esc(msg('kpiOverviewEmpty'))}</div>`;
-    updateKpiSelectorLabel();
-    return;
-  }
   target.innerHTML = configs.map(cfg => {
     const items = cfg.id === 'samenvatting' ? lastKpiContext.summary : (categoryKpiItems(lastData, cfg.id, prevP, currP) || lastKpiContext.summary);
     const visibleItems = items && items.length ? items : lastKpiContext.summary;
@@ -3148,6 +3143,14 @@ function renderKpiOverview() {
     });
     return `<div class="kpiOverviewBlock">${actions}<div class="kpiOverviewHead"><h3>${esc(cfg.label)}</h3><span class="small">${esc(fmtPeriod(prevP))} vs ${esc(fmtPeriod(currP))}</span></div><div class="kpis kpiOverviewGrid">${html}</div></div>`;
   }).join('');
+  const summaryHtml = previousYearsMode
+    ? kpiOverviewCardsWithHistoryHtml(lastData, lastKpiContext.summary, prevP, currP, (item, index) => kpiOverviewHistoryConfig('samenvatting', item, index))
+    : kpiCardsHtml(lastKpiContext.summary, prevP, currP, { interactive: false, allowSpToggle: false });
+  const combinedTitle = currentLang === 'fr' ? 'Résumé production/chute/SP' : 'Samenvatting productie/verval/SP';
+  const portfolioTitle = currentLang === 'fr' ? 'Infos portefeuille' : 'Portefeuille-info';
+  const combinedActions = exportActionsHtml({ label: combinedTitle, downloadTitle: `Download ${combinedTitle} als PNG` });
+  target.innerHTML += `<div class="kpiOverviewBlock">${combinedActions}<div class="kpiOverviewHead"><h3>${esc(combinedTitle)}</h3><span class="small">${esc(fmtPeriod(prevP))} vs ${esc(fmtPeriod(currP))}</span></div><div class="kpis kpiOverviewGrid">${summaryHtml}</div>${renderPortfolioBlock(lastData, 'TOTAAL NON LIFE', prevP, currP, true, false, false, { title: portfolioTitle, hideExportActions: true })}</div>`;
+  attachPortfolioBarHover(target);
   updateKpiSelectorLabel();
   scheduleKpiLabelAlignment();
 }
@@ -4392,7 +4395,7 @@ function portfolioCategoryLabel(key) {
   return (currentLang === 'fr' ? fr : nl)[key] || displayLabel(key);
 }
 function portfolioCategoryTitleHtml(key, isTotal = false) {
-  const title = isTotal ? 'TOTAAL NON LIFE' : portfolioCategoryLabel(key);
+  const title = `Portefeuille ${isTotal ? 'TOTAAL NON LIFE' : portfolioCategoryLabel(key)}`;
   if (isTotal) return esc(title);
   let iconKey = '';
   if (String(key).startsWith('Auto')) iconKey = 'auto';
@@ -4534,13 +4537,13 @@ function attachPortfolioBarHover(root = $('portefeuilleCharts')) {
   });
   root.addEventListener('mouseleave', hide);
 }
-function renderPortfolioBlock(data, key, prevP, currP, isTotal = false, isSub = false, hasSubcategories = false) {
+function renderPortfolioBlock(data, key, prevP, currP, isTotal = false, isSub = false, hasSubcategories = false, options = {}) {
   const prevVal = getPortfolioValue(data, key, prevP);
   const currVal = getPortfolioValue(data, key, currP);
   const hasCompare = prevVal !== 0 || currVal !== 0;
-  const title = portfolioCategoryTitleHtml(key, isTotal);
+  const title = options.title ? esc(options.title) : portfolioCategoryTitleHtml(key, isTotal);
   const leftTitle = portfolioYearsPeriodTitle(prevP, currP);
-  return `<div data-category-key="${esc(key)}" data-parent-category="${esc(SUBCATEGORY_PARENT[key] || '')}" class="portfolioCategoryBlock ${isTotal ? 'portfolioTotalBlock' : ''} ${isSub ? 'portfolioSubBlock' : ''}"><div class="portfolioCategoryHead exportableBlockHeader"><div class="catTitle">${title}</div><div class="small">${esc(fmtPeriod(prevP))} &rarr; ${esc(fmtPeriod(currP))}</div>${productBlockExportActionsHtml()}</div><div class="portfolioGrid"><div class="portfolioChartCard"><h3>${esc(leftTitle)}</h3>${portfolioPeriodComparisonBars(data, key, prevP, currP)}</div><div class="portfolioChartCard"><h3>${esc(portfolioPeriodTitle(prevP, currP))}</h3>${hasCompare ? portfolioAmountSummary(prevP, currP, prevVal, currVal) : `<div class="portfolioNoData">${msg('portefeuilleEmpty')}</div>`}</div></div>${subcategoryToggleHtml(hasSubcategories)}</div>`;
+  return `<div data-category-key="${esc(key)}" data-parent-category="${esc(SUBCATEGORY_PARENT[key] || '')}" class="portfolioCategoryBlock ${isTotal ? 'portfolioTotalBlock' : ''} ${isSub ? 'portfolioSubBlock' : ''}"><div class="portfolioCategoryHead exportableBlockHeader"><div class="catTitle">${title}</div><div class="small">${esc(fmtPeriod(prevP))} &rarr; ${esc(fmtPeriod(currP))}</div>${options.hideExportActions ? '' : productBlockExportActionsHtml()}</div><div class="portfolioGrid"><div class="portfolioChartCard"><h3>${esc(leftTitle)}</h3>${portfolioPeriodComparisonBars(data, key, prevP, currP)}</div><div class="portfolioChartCard"><h3>${esc(portfolioPeriodTitle(prevP, currP))}</h3>${hasCompare ? portfolioAmountSummary(prevP, currP, prevVal, currVal) : `<div class="portfolioNoData">${msg('portefeuilleEmpty')}</div>`}</div></div>${subcategoryToggleHtml(hasSubcategories)}</div>`;
 }
 function getPortfolioPieItems(data, period) {
   const keys = ['Auto Vloten','Auto Niet Vloten','Particulieren Brand','Particulieren BA','Particulieren Overige','Ondernemingen Brand','Ondernemingen BA','Ondernemingen Overige','Arbeidsongevallen','Rechtsbijstand'];
