@@ -99,7 +99,7 @@ function renderReleaseNotes(rawText) {
   String(rawText || '').split(/\r?\n/).forEach(rawLine => {
     const line = rawLine.trim();
     if (!line) { list = null; return; }
-    if (/^v\d{1,2}\.\d{1,2}\.(?:\d{2}|\d{4})$/i.test(line)) {
+    if (/^v\d{1,2}\.\d{1,2}[.,](?:\d{2}|\d{4})$/i.test(line)) {
       const title = document.createElement('h3');
       title.className = 'releaseNotesVersion';
       title.textContent = line;
@@ -248,9 +248,10 @@ function setText(id, text) { const el = $(id); if (el) el.textContent = text; }
 function setHtml(id, html) { const el = $(id); if (el) el.innerHTML = html; }
 function exportCopyLabel() { return currentLang === 'fr' ? 'Copier' : 'Kopiëren'; }
 function updateStaticLanguage() {
+  updateMultiImportLanguage();
   document.documentElement.lang = currentLang; document.title = 'Dashboard Vivium Non-Life';
-  setText('languageLabel', currentLang === 'fr' ? 'Langue' : 'Taal / Langue'); setText('pageTitle', msg('pageTitle')); setHtml('pageLead', msg('pageLead')); setText('uploadTitle', msg('uploadTitle')); setText('uploadHint', msg('uploadHint')); setText('downloadCsvBtn', msg('downloadCsv')); setText('exportPdfLabel', msg('exportPdf')); setText('pdfExportConfirmBtn', msg('pdfExportAction'));
-  setText('heroEyebrow', currentLang === 'fr' ? 'Chiffres clés non-vie' : 'Kerncijfers non-life'); setText('heroBenefitAnalysis', currentLang === 'fr' ? 'Analyse automatique' : 'Automatische analyse'); setText('heroBenefitCompare', currentLang === 'fr' ? 'Comparaison directe' : 'Direct vergelijkbaar'); setText('heroBenefitSafe', currentLang === 'fr' ? 'Sécurisé' : 'Veilig'); setText('heroUploadButton', currentLang === 'fr' ? 'Sélectionner le PDF' : 'PDF selecteren'); setText('heroUploadMeta', 'PDF · NL of FR');
+  setText('languageLabel', currentLang === 'fr' ? 'Langue' : 'Taal / Langue'); setText('pageTitle', msg('pageTitle')); setHtml('pageLead', msg('pageLead')); setText('uploadTitle', multiText('Sleep je PDF’s hierheen', 'Déposez vos PDF ici')); setText('uploadHint', multiText('of klik om één of meerdere bestanden te kiezen', 'ou sélectionnez un ou plusieurs fichiers')); setText('downloadCsvBtn', msg('downloadCsv')); setText('exportPdfLabel', msg('exportPdf')); setText('pdfExportConfirmBtn', msg('pdfExportAction'));
+  setText('heroEyebrow', currentLang === 'fr' ? 'Chiffres clés non-vie' : 'Kerncijfers non-life'); setText('heroBenefitAnalysis', currentLang === 'fr' ? 'Analyse automatique' : 'Automatische analyse'); setText('heroBenefitCompare', currentLang === 'fr' ? 'Comparaison directe' : 'Direct vergelijkbaar'); setText('heroBenefitSafe', currentLang === 'fr' ? 'Sécurisé' : 'Veilig'); setText('heroUploadButton', currentLang === 'fr' ? 'Sélectionner des PDF' : 'PDF’s selecteren'); setText('heroUploadMeta', 'PDF · NL of FR');
   setText('pdfSelectAll', currentLang === 'fr' ? 'Tout sélectionner' : 'Alles selecteren');
   setText('pdfSelectNone', currentLang === 'fr' ? 'Tout désélectionner' : 'Niets selecteren');
   setText('printPdfBtn', msg('printPdf'));
@@ -827,50 +828,248 @@ function setStatus(msg, warn = false) {
 
 // ─── PDF verwerking ───────────────────────────────────────────────────────────
 let pdfImportGeneration = 0;
+let pendingPdfSources = [];
+let reportSources = [];
+let pendingPdfBusy = false;
+let pendingPdfSingleImport = false;
+const multiText = (nl, fr) => currentLang === 'fr' ? fr : nl;
+const sourcePeriods = source => [...new Set(source.data.map(r => r[cols.periode]))].sort((a,b) => pkey(a)-pkey(b));
+function sourceLatest(source) {
+  const periods = sourcePeriods(source);
+  return periods[periods.length - 1];
+}
+function sharedSourcePeriods(sources) {
+  return sourcePeriods(sources[0]).filter(p => sources.every(s => sourcePeriods(s).includes(p)));
+}
+function sourceReportType(source) {
+  const broker = source.broker || {};
+  if (broker.reportType) return broker.reportType;
+  if (['groepsnummer', 'koepelnummer'].includes(broker.label)) return broker.label;
+  return broker.label === 'functionName' ? (String(broker.name || '').match(/^(CDR|CD|AM)\//)?.[1] || '') : '';
+}
+function sourceReportTypeLabel(source) {
+  const type = sourceReportType(source);
+  if (type === 'groepsnummer') return multiText('Groepsnummer', 'N° groupe');
+  if (type === 'koepelnummer') return multiText('Koepelnummer', 'N° coupole');
+  return type ? multiText('TOTAAL ', 'TOTAL ') + type : multiText('Type niet herkend', 'Type non reconnu');
+}
+function mixedSourceWarning(sources) {
+  const types = [...new Set(sources.map(sourceReportType).filter(Boolean).map(type => ['AM', 'CD', 'CDR'].includes(type) ? 'total' : type))];
+  return types.length > 1 ? multiText('Verschillende rapporttypes gecombineerd. De portefeuilles kunnen overlappen, waardoor de opgetelde totalen mogelijk niet kloppen.', 'Plusieurs types de rapports sont combinés. Les portefeuilles peuvent se chevaucher ; les totaux additionnés pourraient être incorrects.') : '';
+}
+function sourceReportRows(source) {
+  // A PDF can repeat a table row (for example in a repeated total block).
+  // Resolve these inside each source before adding different sources together.
+  // Match the existing report: first category row, last populated total row.
+  const groups = new Map();
+  source.data.forEach(row => {
+    const key = JSON.stringify([row[cols.type], normKey(row[cols.hoofd]), normKey(row[cols.sub]), row[cols.periode]]);
+    if (!groups.has(key)) groups.set(key, row);
+    else if (isTotalNonLife(row)) groups.set(key, totalRow(source.data, row[cols.type], row[cols.periode]));
+  });
+  return [...groups.values()];
+}
+function validatePdfSources(sources) {
+  if (!sources.length) throw new Error(multiText('Selecteer minstens één PDF.', 'Sélectionnez au moins un PDF.'));
+  const failed = sources.filter(s => s.error || !s.data);
+  if (failed.length) throw new Error(multiText('Verwijder of vervang de bestanden met een fout.', 'Supprimez ou remplacez les fichiers en erreur.'));
+  if (sources.some((s,i) => sources.slice(0,i).some(other => s.bytes.length === other.bytes.length && s.bytes.every((b,j) => b === other.bytes[j])))) throw new Error(multiText('Hetzelfde PDF-bestand is meerdere keren geselecteerd. Verwijder de dubbels.', 'Le même PDF est sélectionné plusieurs fois. Supprimez les doublons.'));
+  if (sources.length === 1) return sourcePeriods(sources[0]);
+  if (new Set(sources.map(sourceLatest)).size !== 1) throw new Error(multiText('De PDF’s hebben een verschillende actuele rapportperiode. Selecteer rapporten met dezelfde rapportstand.', 'Les PDF ont des périodes actuelles différentes. Sélectionnez la même date de situation.'));
+  const identities = sources.map(s => s.broker.number ? `${s.broker.label}:${s.broker.number}` : s.broker.name ? `name:${normKey(s.broker.name)}` : '').filter(Boolean);
+  if (new Set(identities).size !== identities.length) throw new Error(multiText('Meerdere rapporten voor dezelfde bron herkend. Verwijder het overlappende rapport.', 'Plusieurs rapports pour la même source ont été détectés. Supprimez le rapport en double.'));
+  const periods = sharedSourcePeriods(sources);
+  latestMonthPair(periods.map(p => ({ [cols.periode]: p })));
+  sources.forEach(source => periods.forEach(period => {
+    ['PRODUCTIE', 'SCHADE'].forEach(type => {
+      if (!totalRow(source.data, type, period)[cols.hoofd]) throw new Error(`${source.name}: ${multiText('totaal ontbreekt voor', 'total manquant pour')} ${type} ${fmtPeriod(period)}`);
+    });
+  }));
+  const rowKey = row => JSON.stringify([row[cols.type], normKey(row[cols.hoofd]), normKey(row[cols.sub]), row[cols.periode]]);
+  const reference = sourceReportRows(sources[0]).filter(row => periods.includes(row[cols.periode]));
+  sources.slice(1).forEach(source => {
+    const rows = sourceReportRows(source).filter(row => periods.includes(row[cols.periode]));
+    const indexed = new Map(rows.map(row => [rowKey(row), row]));
+    if (indexed.size !== reference.length) throw new Error(`${source.name}: ${multiText('de categorieën komen niet overeen. Samenvoegen zou onvolledige cijfers geven.', 'les catégories diffèrent. Le total serait incomplet.')}`);
+    reference.forEach(row => {
+      const other = indexed.get(rowKey(row));
+      // The extra production portfolio column is present on some total reports
+      // and absent on group reports. It is not needed by the dashboard (which
+      // uses earned premium from the damage table for portfolio charts).
+      const fields = row[cols.type] === 'SCHADE' ? Object.values(cols).slice(14).filter(h => h !== cols.sp && h !== cols.spCap) : Object.values(cols).slice(4,13);
+      if (!other || fields.some(h => (row[h] === '') !== (other[h] === ''))) throw new Error(`${source.name}: ${multiText('ontbrekende categorie of cijfergegevens voor', 'catégorie ou valeurs manquantes pour')} ${row[cols.hoofd]} / ${row[cols.sub]} ${fmtPeriod(row[cols.periode])}`);
+    });
+  });
+  return periods;
+}
+function serializeReportCsv(data, sources) {
+  const headers = Object.values(cols);
+  const quote = v => '"' + String(v ?? '').replace(/"/g, '""') + '"';
+  const provenance = sources.map(s => `${s.name} — ${sourceReportTypeLabel(s)} — ${s.broker.name || ''}${s.broker.number ? ' (' + s.broker.number + ')' : ''}`).join(' | ');
+  return [headers.concat('Bronbestanden').map(quote).join(','), ...data.map(row => headers.map(h => quote(row[h])).concat(quote(provenance)).join(','))].join('\n');
+}
+function aggregatePdfSources(sources, periods) {
+  const headers = Object.values(cols);
+  const groups = new Map();
+  const incompletePortfolio = new Set();
+  sources.forEach(source => sourceReportRows(source).filter(row => periods.includes(row[cols.periode])).forEach(row => {
+    const key = JSON.stringify([row[cols.type], normKey(row[cols.hoofd]), normKey(row[cols.sub]), row[cols.periode]]);
+    if (!groups.has(key)) groups.set(key, Object.fromEntries(headers.map((h,i) => [h, i < 4 ? row[h] : ''])));
+    if (row[cols.type] === 'PRODUCTIE' && !String(row[cols.portefeuille] ?? '').trim()) incompletePortfolio.add(key);
+    const target = groups.get(key);
+    const fields = row[cols.type] === 'SCHADE' ? headers.slice(14).filter(h => h !== cols.sp && h !== cols.spCap) : headers.slice(4,14);
+    fields.forEach(field => {
+      if (row[field] !== '') target[field] = String(Math.round((n(target[field]) + n(row[field])) * 100) / 100);
+    });
+  }));
+  return [...groups.entries()].map(([key, row]) => {
+    // Do not present a partial sum of an optional column as a complete total.
+    if (incompletePortfolio.has(key)) row[cols.portefeuille] = '';
+    if (row[cols.type] === 'SCHADE') {
+      [[cols.sp, cols.schadelast], [cols.spCap, cols.schadeCap]].forEach(([ratio, amount]) => {
+        row[ratio] = n(row[cols.verdiend]) && row[amount] !== '' ? String(Math.round(n(row[amount]) / n(row[cols.verdiend]) * 10000) / 100) : '';
+      });
+    }
+    row._cells = headers.map(h => row[h]);
+    return row;
+  });
+}
+function updateMultiImportLanguage() {
+  const labels = {
+    multiImportTitle: ['Controleer je PDF’s', 'Vérifiez vos PDF'],
+    multiImportNameLabel: ['Naam gezamenlijk rapport (optioneel)', 'Nom du rapport commun (facultatif)'],
+    multiImportBuild: ['Rapport tonen', 'Afficher le rapport'], multiImportCancel: ['Annuleren', 'Annuler']
+  };
+  Object.entries(labels).forEach(([id, values]) => { if ($(id)) $(id).textContent = multiText(...values); });
+  if (pendingPdfSources.length) renderPendingPdfSources();
+  renderReportSources();
+}
+function renderReportSources() {
+  const el = $('reportSources');
+  if (!el) return;
+  el.classList.toggle('hidden', reportSources.length < 2);
+  el.innerHTML = reportSources.length > 1 ? `<strong>${esc(multiText('Bronbestanden', 'Fichiers sources'))} (${reportSources.length} PDF’s)</strong><ul>${reportSources.map(s => `<li>${esc(s.name)} · ${esc(sourceReportTypeLabel(s))} · ${esc(s.broker.name || '—')}${s.broker.number ? ' (' + esc(s.broker.number) + ')' : ''} · ${esc(fmtPeriod(sourceLatest(s)))}</li>`).join('')}</ul>${mixedSourceWarning(reportSources) ? `<p class="importTypeWarning">${esc(mixedSourceWarning(reportSources))}</p>` : ''}` : '';
+}
+function renderPendingPdfSources() {
+  if (pendingPdfSingleImport) {
+    $('multiImportPanel').classList.add('hidden');
+    return;
+  }
+  $('multiImportPanel').classList.remove('hidden');
+  $('multiImportPanel').setAttribute('aria-busy', String(pendingPdfBusy));
+  $('multiImportFiles').innerHTML = pendingPdfSources.map((s,i) => `<div class="multiImportFile"><div><strong>${esc(s.name)}</strong><div>${esc(s.error || (s.data ? `${sourceReportTypeLabel(s)} · ${s.broker.name || '—'}${s.broker.number ? ' (' + s.broker.number + ')' : ''} · ${fmtPeriod(sourceLatest(s))} · ${sourcePeriods(s).length} ${multiText('periodes', 'périodes')}` : multiText('Wordt ingelezen…', 'Lecture en cours…')))}</div></div><button type="button" data-remove-source="${i}" ${pendingPdfBusy ? 'disabled' : ''}>${multiText('Verwijderen', 'Supprimer')}</button></div>`).join('');
+  const multiple = pendingPdfSources.length > 1;
+  $('multiImportName').closest('label').classList.toggle('hidden', !multiple);
+  const warning = !pendingPdfBusy ? mixedSourceWarning(pendingPdfSources) : '';
+  $('multiImportTypeWarning').textContent = warning;
+  $('multiImportTypeWarning').classList.toggle('hidden', !warning);
+  let error = '';
+  let periods = [];
+  if (!pendingPdfBusy) try { periods = validatePdfSources(pendingPdfSources); } catch (err) { error = err.message; }
+  const excluded = !pendingPdfBusy && !error && multiple ? [...new Set(pendingPdfSources.flatMap(sourcePeriods))].filter(p => !periods.includes(p)) : [];
+  $('multiImportMessage').textContent = pendingPdfBusy ? multiText('PDF’s worden één voor één gecontroleerd…', 'Vérification des PDF un par un…') : error || (excluded.length ? multiText('Niet in alle bestanden aanwezig en uitgesloten: ', 'Absentes de certains fichiers et exclues : ') + excluded.map(fmtPeriod).join(', ') : multiText('Alle bestanden zijn klaar voor verwerking.', 'Tous les fichiers sont prêts.'));
+  $('multiImportBuild').disabled = pendingPdfBusy || !!error;
+}
+$('multiImportFiles').addEventListener('click', event => {
+  const button = event.target.closest('[data-remove-source]');
+  if (!button || pendingPdfBusy) return;
+  pendingPdfSources.splice(Number(button.dataset.removeSource), 1);
+  renderPendingPdfSources();
+});
+$('multiImportCancel').addEventListener('click', () => {
+  ++pdfImportGeneration;
+  pendingPdfBusy = false;
+  pendingPdfSources = [];
+  $('multiImportPanel').classList.add('hidden');
+  setStatus(lastData ? msg('success', lastData.length) : msg('noPdf'));
+});
 $('pdfFile').addEventListener('change', async e => {
-  const file = e.target.files[0];
-  if (!file) return;
+  const files = Array.from(e.target.files || []);
+  if (!files.length) return;
   const generation = ++pdfImportGeneration;
-  pendingCategoryExpansion.clear();
-  viewMode = 'main';
-  view360AnalysisMode = 'main';
-  view360OpenSubcategories.clear();
-  csvResult = '';
-  $('fileName').textContent = file.name;
-  $('dashboard').classList.add('hidden');
-  $('brokerInfo').classList.add('hidden');
-  $('importControl')?.classList.add('hidden');
-  $('topCompactBar')?.classList.add('hidden');
-  document.body.classList.remove('topInfoReady','topInfoCollapsed');
+  pendingPdfSources = files.map(file => ({ name: file.name, file }));
+  pendingPdfSingleImport = files.length === 1;
+  pendingPdfBusy = true;
+  $('multiImportName').value = '';
+  document.body.classList.remove('topInfoCollapsed');
   topInfoCollapsed = false;
-  brokerInfo = { label: "koepelnummer", number: "", name: "" };
-  updateView360BrokerInline();
-  lastData = null;
-  $('downloadCsvBtn').classList.add('hidden');
-  $('exportPdfWrap')?.classList.add('hidden');
   setStatus(msg('processing'));
-  try {
-    const csv = await pdfToCsv(file, generation);
+  renderPendingPdfSources();
+  if (files.length > 1) $('multiImportPanel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  for (const source of pendingPdfSources) {
+    try {
+      if (!(source.file.type === 'application/pdf' || /\.pdf$/i.test(source.name))) throw new Error(multiText('Dit is geen PDF-bestand.', 'Ce fichier n’est pas un PDF.'));
+      const bytes = await source.file.arrayBuffer();
+      // Compare exact bytes as well as metadata, including in local-file browsers without Web Crypto.
+      source.bytes = new Uint8Array(bytes);
+      const parsed = await pdfToCsv(source.file, generation);
+      if (generation !== pdfImportGeneration) return;
+      source.data = parseCSV(parsed.csv);
+      source.broker = parsed.broker;
+      source.data.forEach(row => {
+        row[cols.periode] = String(row[cols.periode]).replace(/(\d{2})-(20\d{2})/, '$1 $2');
+        if (files.length === 1) return;
+        if (!pkey(row[cols.periode])) throw new Error(multiText('Ongeldige rapportperiode.', 'Période invalide.'));
+        Object.values(cols).slice(4).forEach(h => {
+          if (row[h] && !/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)$/.test(row[h])) throw new Error(`${multiText('Onleesbaar cijfer', 'Valeur illisible')}: ${h}`);
+        });
+      });
+      const pair = latestMonthPair(mainRows(source.data, 'PRODUCTIE'));
+      if (!totalRow(source.data, 'PRODUCTIE', pair[1])[cols.hoofd]) throw new Error(multiText('Productietotaal ontbreekt.', 'Total production manquant.'));
+      delete source.file;
+    } catch (err) {
+      if (generation !== pdfImportGeneration) return;
+      source.error = err.message;
+    }
     if (generation !== pdfImportGeneration) return;
-    csvResult = csv;
-    const data = parseCSV(csvResult);
+    renderPendingPdfSources();
+  }
+  pendingPdfBusy = false;
+  renderPendingPdfSources();
+  if (pendingPdfSources.length === 1) {
+    if (pendingPdfSources[0].error) setStatus(msg('error') + pendingPdfSources[0].error, true);
+    else commitPendingPdfSources();
+  } else {
+    setStatus(multiText('Controleer de geselecteerde PDF’s hieronder.', 'Vérifiez les PDF sélectionnés ci-dessous.'));
+  }
+});
+function commitPendingPdfSources() {
+  if (pendingPdfBusy) return;
+  const previous = { lastData, csvResult, brokerInfo, reportSources, dashboardCurrentPeriod, dashboardPreviousPeriod, fileName: $('fileName').textContent };
+  try {
+    const periods = validatePdfSources(pendingPdfSources);
+    const sources = pendingPdfSources;
+    const data = sources.length > 1 ? aggregatePdfSources(sources, periods) : sources[0].data;
+    reportSources = sources.map(({bytes, file, ...source}) => source);
+    brokerInfo = sources.length > 1 ? { label: 'functionName', number: '', name: $('multiImportName').value.trim() || multiText('Gezamenlijk rapport', 'Rapport commun') + ` — ${sources.length} PDF’s` } : sources[0].broker;
+    csvResult = serializeReportCsv(data, sources);
+    pendingCategoryExpansion.clear();
+    viewMode = 'main';
+    view360AnalysisMode = 'main';
+    view360OpenSubcategories.clear();
     lastData = data;
+    $('fileName').textContent = sources.map(s => s.name).join(' · ');
     build(data);
     setStatus(msg('success', data.length));
     setTopInfoCollapsed(true);
     $('downloadCsvBtn').classList.remove('hidden');
-    $('exportPdfWrap')?.classList.remove('hidden');
-    // Na import terug naar helemaal bovenaan. De importblokken zijn dan ingeklapt.
-    window.setTimeout(() => { if (generation === pdfImportGeneration) window.scrollTo({ top: 0, behavior: 'smooth' }); }, 180);
+    $('exportPdfWrap').classList.remove('hidden');
+    $('multiImportPanel').classList.add('hidden');
+    pendingPdfSources = [];
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   } catch (err) {
-    if (generation !== pdfImportGeneration) return;
-    console.error(err);
-    $('topCompactBar')?.classList.add('hidden');
-    $('exportPdfWrap')?.classList.add('hidden');
-    document.body.classList.remove('topInfoReady','topInfoCollapsed');
-    setStatus(msg('error') + err.message, true);
+    ({ lastData, csvResult, brokerInfo, reportSources, dashboardCurrentPeriod, dashboardPreviousPeriod } = previous);
+    $('fileName').textContent = previous.fileName;
+    if (lastData) {
+      try { build(lastData); } catch (restoreError) { console.error(restoreError); }
+    } else {
+      $('dashboard').classList.add('hidden');
+    }
+    $('multiImportMessage').textContent = err.message;
+    if (pendingPdfSources.length === 1) setStatus(msg('error') + err.message, true);
   }
-});
+}
+$('multiImportBuild').addEventListener('click', commitPendingPdfSources);
 
 
 function cleanBrokerName(name) {
@@ -897,30 +1096,34 @@ function formatPersonNameFromPdf(name) {
 }
 
 function extractTotalRoleInfoFromRows(texts) {
-  // Fallback voor CDR/AM-rapporten zonder makelaar/groeps- of koepelnummer.
-  // Bovenaan staat bv. "Totaal AM" of "Total CDR"; de naam staat op de volgende regel.
+  // Total reports identify the role in the heading, rather than the ordinary
+  // CDR/AM contact labels that also appear on group and umbrella reports.
   const skipName = /^(Kerncijfers|Gegevens|Données|Aantal|Nombre|Productie|Premie|Verval|Progressie|Transformatie|Portefeuille|Verdiende|Uitgegeven|Auto|Particulieren|Ondernemingen|TOTAAL\s+NON\s+LIFE|Bedragen)/i;
   for (let i = 0; i < texts.length; i++) {
     const rowText = texts[i];
-    const roleMatch = rowText.match(/\b(?:Totaal|Total)\s+(CDR|AM)\b/i) || rowText.match(/\b(CDR|AM)\s+(?:Totaal|Total)\b/i);
+    const roleMatch = rowText.match(/\b(?:Totaal|Total)\s+(CDR|CD|AM)\b/i) || rowText.match(/\b(CDR|CD|AM)\s+(?:Totaal|Total)\b/i);
     if (!roleMatch) continue;
     const role = (roleMatch[1] || '').toUpperCase();
-    for (let j = i + 1; j < Math.min(texts.length, i + 5); j++) {
-      let name = cleanBrokerName(texts[j])
-        .replace(/\b(?:Totaal|Total)\s+(?:CDR|AM)\b/ig, '')
-        .replace(/\b(?:CDR|AM)\s+(?:Totaal|Total)\b/ig, '')
+    const candidates = [rowText.slice(roleMatch.index + roleMatch[0].length), ...texts.slice(i + 1, i + 5)];
+    for (const candidate of candidates) {
+      let name = cleanBrokerName(candidate)
+        .replace(/\b(?:Totaal|Total)\s+(?:CDR|CD|AM)\b/ig, '')
+        .replace(/\b(?:CDR|CD|AM)\s+(?:Totaal|Total)\b/ig, '')
         .replace(/\s+/g, ' ')
         .trim();
       if (!name || skipName.test(name) || /\d{2}\s+20\d{2}/.test(name)) continue;
       name = formatPersonNameFromPdf(name);
-      return { label: 'functionName', number: '', name: `${role}/${name}` };
+      return { label: 'functionName', reportType: role, number: '', name: `${role}/${name}` };
     }
+    return { label: 'functionName', reportType: role, number: '', name: '' };
   }
   return { label: '', number: '', name: '' };
 }
 
-function extractBrokerInfoFromRows(pageRows) {
-  if ((brokerInfo.number && brokerInfo.name) || (brokerInfo.label === 'functionName' && brokerInfo.name)) return;
+function extractBrokerInfoFromRows(pageRows, initial) {
+  let brokerInfo = initial;
+  function extract() {
+  if ((brokerInfo.number && brokerInfo.name) || (brokerInfo.label === 'functionName' && (brokerInfo.name || brokerInfo.reportType))) return;
 
   const sortedRows = pageRows.slice().sort((a, b) => b.y - a.y).slice(0, 22);
   const texts = sortedRows
@@ -937,7 +1140,7 @@ function extractBrokerInfoFromRows(pageRows) {
 
   if (!labelMatch || !label) {
     const roleInfo = extractTotalRoleInfoFromRows(texts);
-    brokerInfo = roleInfo.name ? roleInfo : { label: '', number: '', name: '' };
+    brokerInfo = roleInfo.reportType ? roleInfo : { label: '', number: '', name: '' };
     return;
   }
 
@@ -958,7 +1161,7 @@ function extractBrokerInfoFromRows(pageRows) {
       .trim();
 
     if (number && name && !/^(Kerncijfers|Gegevens|Aantal|Productie|Premie|Verval|Progressie|Transformatie)$/i.test(name)) {
-      brokerInfo = { label, number, name };
+      brokerInfo = { label, reportType: label, number, name };
       return true;
     }
     return false;
@@ -970,8 +1173,12 @@ function extractBrokerInfoFromRows(pageRows) {
 
   const afterLabel = labelMatch ? topText.slice(labelMatch.index + labelMatch[0].length) : topText;
   if (!tryCandidate(afterLabel)) {
-    brokerInfo = { label: '', number: '', name: '' };
+    brokerInfo = { label, reportType: label, number: '', name: '' };
   }
+  }
+
+  extract();
+  return brokerInfo;
 }
 
 function brokerDisplayName() {
@@ -1009,10 +1216,12 @@ function renderBrokerInfo() {
     $('brokerInfo').classList.add('hidden');
     $('importControl')?.classList.add('hidden');
   }
+  renderReportSources();
   updateView360BrokerInline();
 }
 
 async function pdfToCsv(file, generation = pdfImportGeneration) {
+  let sourceBroker = { label: '', number: '', name: '' };
   const buffer = await file.arrayBuffer();
   const pdf = await pdfjsLib.getDocument(new Uint8Array(buffer)).promise;
   let fullCsvRows = [];
@@ -1021,6 +1230,7 @@ async function pdfToCsv(file, generation = pdfImportGeneration) {
   let currentCategory = "";
   let currentSubCategory = "";
 
+  try {
   for (let p = 1; p <= pdf.numPages; p++) {
     const page = await pdf.getPage(p);
     const textContent = await page.getTextContent();
@@ -1030,12 +1240,16 @@ async function pdfToCsv(file, generation = pdfImportGeneration) {
       let y = Math.round(item.transform[5]), x = item.transform[4], text = item.str.trim();
       if (!text) return;
       let foundRow = pageRows.find(r => Math.abs(r.y - y) < 7);
-      if (foundRow) foundRow.items.push({ x, text });
-      else pageRows.push({ y, items: [{ x, text }] });
+      if (foundRow) foundRow.items.push({ x, text, width: item.width || 0 });
+      else pageRows.push({ y, items: [{ x, text, width: item.width || 0 }] });
     });
 
-    if (generation !== pdfImportGeneration) { await pdf.destroy(); return ''; }
-    extractBrokerInfoFromRows(pageRows);
+    if (generation !== pdfImportGeneration) return null;
+    sourceBroker = extractBrokerInfoFromRows(pageRows, sourceBroker);
+
+    // Numeric cells are right-aligned. A complete damage row supplies the
+    // column ends, so an omitted S/P cell does not shift the capped loss left.
+    const damageColumnEnds = damageColumnPositions(pageRows);
 
     pageRows.sort((a, b) => b.y - a.y).forEach(row => {
       row.items.sort((a, b) => a.x - b.x);
@@ -1065,16 +1279,36 @@ async function pdfToCsv(file, generation = pdfImportGeneration) {
           let offset = 4;
           for (let i = 1; i < cells.length; i++) if (i + offset - 1 < 14) finalRow[i + offset - 1] = `"${cells[i]}"`;
         } else {
-          let offset = 14;
-          for (let i = 1; i < cells.length; i++) if (i + offset - 1 < 21) finalRow[i + offset - 1] = `"${cells[i]}"`;
+          const values = row.items.slice(dateIndex + 1);
+          if (damageColumnEnds && values.length < 7) {
+            values.forEach(item => {
+              const end = item.x + (item.width || 0);
+              const column = damageColumnEnds.reduce((best, x, i) => Math.abs(x - end) < Math.abs(damageColumnEnds[best] - end) ? i : best, 0);
+              finalRow[14 + column] = `"${item.text.replace(/\./g, '').replace(/,/g, '.').replace('%', '').trim()}"`;
+            });
+          } else {
+            let offset = 14;
+            for (let i = 1; i < cells.length; i++) if (i + offset - 1 < 21) finalRow[i + offset - 1] = `"${cells[i]}"`;
+          }
         }
         fullCsvRows.push(finalRow.join(","));
       }
     });
   }
-  await pdf.destroy();
+  } finally { await pdf.destroy(); }
   if (fullCsvRows.length < 2) throw new Error(currentLang === 'fr' ? 'PDF ne contient pas de couche de texte. Utilisez uniquement les chiffres clés téléchargés depuis Salesforce.' : 'PDF bevat geen tekstlaag. Gebruik enkel de kerncijfers gedownload vanuit salesforce.');
-  return fullCsvRows.join("\n");
+  return { csv: fullCsvRows.join("\n"), broker: sourceBroker };
+}
+
+function damageColumnPositions(pageRows) {
+  for (const row of pageRows) {
+    const items = row.items.slice().sort((a,b) => a.x - b.x);
+    const dateIndex = items.findIndex(i => /^(0[1-9]|1[0-2])[- ]20\d{2}$/.test(i.text));
+    if (dateIndex < 0) continue;
+    const values = items.slice(dateIndex + 1);
+    if (values.length === 7 && values[4].text.includes('%') && values[6].text.includes('%')) return values.map(i => i.x + (i.width || 0));
+  }
+  return null;
 }
 
 // ─── CSV download ─────────────────────────────────────────────────────────────
@@ -1430,6 +1664,20 @@ function appendPrintPiePage(root, mode) {
 
 // Beide PDF-opties gebruiken exact dezelfde secties, volgorde en paginering.
 async function buildSelectedPdfPages(root, selected, items) {
+  // A source page also accompanies exports that omit the summary. Keep the
+  // existing chart pages at their measured height and paginate long source lists.
+  if (reportSources.length > 1) {
+    for (let offset = 0; offset < reportSources.length; offset += 12) {
+      const page = document.createElement('div');
+      page.className = 'pdfExportPage pdfTestPage pdfSourcesPage';
+      page.appendChild(buildPdfHeader());
+      const sources = document.createElement('div');
+      sources.className = 'reportSources';
+      sources.innerHTML = `<h2>${esc(multiText('Bronbestanden', 'Fichiers sources'))} (${reportSources.length} PDF’s)</h2><ul>${reportSources.slice(offset, offset + 12).map(s => `<li>${esc(s.name)} · ${esc(sourceReportTypeLabel(s))} · ${esc(s.broker.name || '—')}${s.broker.number ? ' (' + esc(s.broker.number) + ')' : ''}</li>`).join('')}</ul><p>${esc(multiText('Opgeteld per categorie en periode; S/P herberekend uit schadelast en verdiende premie. Alleen periodes aanwezig in alle bestanden zijn opgenomen.', 'Totaux par catégorie et période ; S/P recalculé à partir des charges sinistres et primes acquises. Seules les périodes présentes dans tous les fichiers sont incluses.'))}</p>${mixedSourceWarning(reportSources) ? `<p class="importTypeWarning">${esc(mixedSourceWarning(reportSources))}</p>` : ''}`;
+      page.appendChild(sources);
+      root.appendChild(page);
+    }
+  }
   if (selected.has('summary')) {
     root.appendChild(buildPdfTestPage(items.slice(0, 2), true, true));
     root.appendChild(buildPdfTestPage(items.slice(2, 4)));
@@ -5383,15 +5631,14 @@ function renderSchadeCat(cat, rows, prevP, currP) {
         zone.classList.remove('dragging');
         var files=e.dataTransfer && e.dataTransfer.files;
         if(!files || !files.length) return;
-        var file=files[0];
-        var isPdf=file && (file.type === 'application/pdf' || /\.pdf$/i.test(file.name || ''));
+        var isPdf=Array.from(files).every(file => file.type === 'application/pdf' || /\.pdf$/i.test(file.name || ''));
         if(!isPdf){
           setStatus(currentLang === 'fr' ? 'Veuillez sélectionner un fichier PDF.' : 'Selecteer een PDF-bestand.',true);
           return;
         }
         try{
           var dt=new DataTransfer();
-          dt.items.add(file);
+          Array.from(files).forEach(file => dt.items.add(file));
           input.files=dt.files;
           input.dispatchEvent(new Event('change',{bubbles:true}));
         }catch(err){

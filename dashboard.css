@@ -1832,3 +1832,22 @@ body.pdfPrintPreparing .pdfExportRoot .portfolioBarShell,
 body.pdfPrintPreparing .pdfExportRoot .portfolioBarFill{border-radius:0!important;box-shadow:none!important}
 @media(max-width:980px){body:not(.topInfoReady) .hero{grid-template-columns:1fr;min-height:0}body:not(.topInfoReady) .hero .panel{border-right:0;border-bottom:1px solid rgba(214,228,242,.72)}body:not(.topInfoReady) .upload-zone{min-height:390px}}
 @media(max-width:640px){body:not(.topInfoReady) .hero .panel{padding:34px 24px}body:not(.topInfoReady) .upload{padding:24px}body:not(.topInfoReady) .hero #pageTitle{font-size:24px!important}.heroBenefits{grid-template-columns:1fr}.heroBenefit{white-space:normal}body:not(.topInfoReady) .upload-zone{min-height:350px;padding:24px}.heroUploadButton{min-width:0;width:100%}}
+/* Multiple PDF import review and report provenance. */
+.multiImportPanel{margin:22px 0;padding:24px;border:1px solid #cbdff2;border-radius:18px;background:#fff;box-shadow:0 8px 24px rgba(13,20,115,.08);scroll-margin-top:24px}
+.multiImportPanel h2{margin:0 0 14px;color:var(--blue)}
+.multiImportFile{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:12px 0;border-bottom:1px solid #e2e8f0;overflow-wrap:anywhere}
+.multiImportFile div div{font-size:13px;margin-top:4px;color:#526580}
+.multiImportPanel button{border:1px solid #cbdff2;border-radius:9px;padding:9px 14px;background:#f5f9fd;color:#0d1473;font:inherit;cursor:pointer}
+.multiImportPanel button:disabled{opacity:.5;cursor:default}
+.multiImportName{display:grid;gap:8px;margin:18px 0;max-width:560px}
+.multiImportName input{font:inherit;border:1px solid #cbdff2;border-radius:8px;padding:10px;width:100%;box-sizing:border-box}
+.importTypeWarning{padding:12px 14px;background:#fff4e8;border:1px solid #edc89d;border-radius:9px;color:#80400b;line-height:1.5}
+.multiImportActions{display:flex;gap:10px;flex-wrap:wrap}
+#multiImportBuild{background:#0d1473;color:white}
+.reportSources{padding:12px 18px;margin:12px 0;border:1px solid #cbdff2;border-radius:12px;background:#f5f9fd;font-size:12px;overflow-wrap:anywhere}
+.reportSources ul{margin:6px 0 0;padding-left:18px}
+.pdfExportHeader:has(.reportSources){flex-wrap:wrap}
+.pdfExportHeader .reportSources{flex-basis:100%;margin:0;font-size:12px}
+.pdfSourcesPage .reportSources{font-size:20px;line-height:1.5;padding:24px}
+.pdfSourcesPage .reportSources li{margin:12px 0}
+@media print{.multiImportPanel{display:none!important}.reportSources{break-inside:avoid}}
