@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dashboard Vivium Life</title>
+  <link rel="stylesheet" href="dashboardlife-base.css?v=20261104-layout4">
+  <link rel="stylesheet" href="dashboardlife.css?v=20261104-layout4">
+  <script defer src="libs/xlsx.full.min.js"></script>
+  <script defer src="libs/html2canvas.min.js"></script>
+  <script defer src="libs/jspdf.umd.min.js"></script>
+  <script defer src="dashboardlife-core.js?v=20261104-layout4"></script>
+  <script defer src="dashboardlife.js?v=20261104-layout4"></script>
+</head>
+<body>
+  <button class="appVersion" id="version">Life v04.11.2026.4</button>
+  <div class="wrap">
+    <div class="languageSwitch life-language" id="languageSwitch"><label for="language">Taal / Langue</label><select id="language"><option value="nl">NL</option><option value="fr">FR</option></select></div>
+    <div id="intro" class="hero">
+      <div class="panel">
+        <img src="libs/vivium-logo.png" alt="VIVIUM" class="upload-logo" width="178" height="103">
+        <div class="heroEyebrow" id="heroEyebrow">Kerncijfers life</div>
+        <h1 id="pageTitle"></h1><p class="lead" id="lead"></p>
+        <div class="heroBenefits">
+          <div class="heroBenefit"><span class="heroBenefitIcon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19V10M10 19V5M16 19v-7M22 19H2"/></svg></span><span id="benefit1"></span></div>
+          <div class="heroBenefit"><span class="heroBenefitIcon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 7h11l-3-3M17 17H6l3 3M18 7l-3 3M6 17l3-3"/></svg></span><span id="benefit2"></span></div>
+          <div class="heroBenefit"><span class="heroBenefitIcon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg></span><span id="benefit3"></span></div>
+        </div>
+        <div id="introStatus" class="status" role="status" aria-live="polite"></div>
+      </div>
+      <div class="upload">
+        <div class="upload-zone" id="dropzone" role="button" tabindex="0" aria-label="Importeer Excel">
+          <span class="heroUploadIcon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M12 18v-6m-3 3 3-3 3 3"/></svg></span>
+          <strong id="uploadTitle"></strong><span class="hint" id="uploadHint"></span><button type="button" class="heroUploadButton" id="pick"></button><span class="heroUploadMeta">Excel · .xls / .xlsx</span>
+        </div>
+      </div>
+    </div>
+    <input type="file" id="file" accept=".xls,.xlsx">
+    <div id="notice" class="status" role="status" aria-live="polite"></div>
+    <section id="importPreview" class="panel hidden" aria-labelledby="previewTitle"><h2 id="previewTitle"></h2><div id="previewContent"></div><label id="sheetWrap" class="hidden"><span id="sheetLabel"></span> <select id="sheet"></select></label><div class="life-actions"><button class="btn" id="commit"></button><button class="life-button" id="cancel"></button></div></section>
+    <div id="empty" class="hidden"></div>
+    <main id="dashboard" class="hidden">
+      <div class="topCompactBar">
+        <div class="topCompactMain"><span class="topCompactTitle" id="sourceTitle"></span><span class="topCompactSummary" id="source"></span></div>
+        <div class="topCompactActions" id="topActions">
+          <button class="btn-csv" id="csv"></button>
+          <details id="pdfMenu"><summary class="life-pdf-toggle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M12 18v-6m-3 3 3-3 3 3"/></svg><span id="pdfLabel"></span><svg class="life-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="m7 10 5 5 5-5"/></svg></summary><div class="life-pdf-options"><strong id="pdfSections"></strong><div id="pdfChecks"></div><button class="life-button" id="print"></button></div></details>
+          <button class="topInfoToggleBtn" id="replace"></button>
+        </div>
+      </div>
+      <label class="life-display-options"><input type="checkbox" id="showWeighted"> <span id="showWeightedLabel">Toon premie na weging</span></label>
+      <div class="life-filters panel" id="filters"></div>
+      <div id="headline" class="kpiExportWrap exportable"></div>
+      <nav class="tabs" id="tabs" aria-label="Dashboard"></nav>
+      <section id="summary" class="life-view"></section>
+      <section id="groups" class="life-view hidden"></section>
+      <section id="detail" class="life-view hidden"></section>
+    </main>
+    <button id="lifeTop" class="floatingKpiScrollBtn hidden" type="button" title="Ga naar boven" aria-label="Ga naar boven" data-html2canvas-ignore><svg style="width:13px;height:13px;flex:0 0 auto" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="18 15 12 9 6 15"/></svg>TOP</button>
+    <footer class="small life-footer" id="footer"></footer>
+  </div>
+  <div id="chartTooltip" class="life-chart-tooltip hidden" role="tooltip" data-html2canvas-ignore></div>
+  <dialog id="release"><h2>Life v04.11.2026.4</h2><p id="releaseText"></p><form method="dialog"><button class="life-button">OK</button></form></dialog>
+</body>
+</html>
