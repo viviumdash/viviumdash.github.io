@@ -65,9 +65,9 @@ const C = typeof module !== 'undefined' && module.exports ? module.exports : Lif
 const $ = id => document.getElementById(id);
 const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const words = {
-  title:['Dashboard kerncijfers life VIVIUM','Tableau de bord chiffres clés vie VIVIUM'],
+  title:['Dashboard life VIVIUM','Tableau de bord chiffres clés vie VIVIUM'],
   lead:['Importeer je Excel-detailrapport <strong>Detail rappel sparen</strong> (onder "Reporting") uit SalesForce (op koepelniveau). Bekijk productie, premies en de bijdrage van elke groep, voor NZ, VH, KP en NK.','Importez votre rapport Excel détaillé <strong>Detail rappel sparen</strong> (sous « Reporting ») depuis SalesForce (au niveau de la coupole). Analysez la production, les primes et la contribution de chaque groupe pour NZ, VH, KP et NK.'],
-  benefit1:['Automatische analyse','Analyse automatique'],benefit2:['Productie & premies','Production et primes'],benefit3:['Lokaal verwerkt','Traitement local'],eyebrow:['Kerncijfers life','Chiffres clés vie'],
+  benefit1:['Automatische analyse','Analyse automatique'],benefit2:['Productie & premies','Production et primes'],benefit3:['Lokaal verwerkt','Traitement local'],eyebrow:['Cijfers life','Chiffres clés vie'],
   upload:['Sleep je Excel hierheen','Déposez votre Excel ici'],uploadHint:['of klik om één .xls- of .xlsx-bestand te kiezen','ou cliquez pour choisir un fichier .xls ou .xlsx'],
   pick:['Importeer Excel','Importer Excel'],ready:['Klaar om je Life-rapport te verwerken','Prêt à analyser votre rapport Vie'],empty:['Importeer een Excel-bestand om het dashboard te openen.','Importez un fichier Excel pour ouvrir le tableau de bord.'],
   preview:['Import controleren','Vérifier l’import'],commit:['Import bevestigen','Confirmer l’import'],cancel:['Annuleren','Annuler'],sheet:['Werkblad','Feuille'],source:['Excel import & controle','Import Excel et contrôle'],importAction:['Importeer','Importer'],importOk:['Importcontrole OK','Contrôle d’import OK'],
