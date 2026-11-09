@@ -563,7 +563,7 @@ async function exportBlockAsImage(button, mode) {
   if (!block) return;
   const cleanup = targetInfo.before ? targetInfo.before() : null;
   try {
-    const canvas = await renderBlockToCanvas(block, mode === 'copy' ? 1.3 : 2);
+    const canvas = await renderBlockToCanvas(block);
     const filename = `dashboard_${safeFilePart(targetInfo.title)}.png`;
     if (mode === 'copy') {
       if (!navigator.clipboard || !window.ClipboardItem) {
