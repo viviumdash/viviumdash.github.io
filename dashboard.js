@@ -505,12 +505,12 @@ function productBlockExportActionsHtml() {
 function safeFilePart(v) {
   return String(v || 'blok').replace(/<[^>]*>/g, '').replace(/[^a-z0-9_\-]+/gi, '_').replace(/^_+|_+$/g, '').slice(0, 80) || 'blok';
 }
-async function renderBlockToCanvas(block) {
+async function renderBlockToCanvas(block, scale = 2) {
   if (!window.html2canvas) throw new Error('html2canvas niet beschikbaar');
   block.classList.add('exportingBlock');
   await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
   try {
-    return await html2canvas(block, { backgroundColor: '#ffffff', scale: 2, useCORS: true, allowTaint: true, logging: false });
+    return await html2canvas(block, { backgroundColor: '#ffffff', scale, useCORS: true, allowTaint: true, logging: false });
   } finally {
     block.classList.remove('exportingBlock');
   }
@@ -554,7 +554,7 @@ function resolveBlockExportTarget(button) {
     const block = $('portfolioPieCard');
     return { block, title: $('portfolioPieTitle')?.innerText || 'Verdeling verdiende premie' };
   }
-  const block = button.closest('.cat') || button.closest('.portfolioCategoryBlock') || button.closest('.insightItem') || button.closest('.portfolioPieCard') || button.closest('.view360AnalysisBlock') || button.closest('.kpiOverviewBlock');
+  const block = button.closest('.cat') || button.closest('.portfolioCategoryBlock') || button.closest('.insightItem') || button.closest('.portfolioPieCard') || button.closest('.view360AnalysisBlock, .view360GroupedBlock') || button.closest('.kpiOverviewBlock');
   return { block, title: block?.querySelector('.catTitle,h3,h2,.view360AnalysisTitle h3')?.innerText || 'dashboard_blok' };
 }
 async function exportBlockAsImage(button, mode) {
@@ -563,7 +563,7 @@ async function exportBlockAsImage(button, mode) {
   if (!block) return;
   const cleanup = targetInfo.before ? targetInfo.before() : null;
   try {
-    const canvas = await renderBlockToCanvas(block);
+    const canvas = await renderBlockToCanvas(block, mode === 'copy' ? 1.3 : 2);
     const filename = `dashboard_${safeFilePart(targetInfo.title)}.png`;
     if (mode === 'copy') {
       if (!navigator.clipboard || !window.ClipboardItem) {
@@ -3841,15 +3841,15 @@ const view360ClosedBlocks = new Set();
 function setupView360Collapse(target) {
   const originalBlocks = Array.from(target.children);
   const groups = [
-    { start: 3, end: 8, title: currentLang === 'fr' ? 'Production/Chute' : 'Productie/verval' },
+    { start: 3, end: 8, title: currentLang === 'fr' ? 'Production/Chute' : 'Productie/verval', exportable: true },
     { start: 8, end: 10, title: msg('tabPortefeuille') },
     { start: 10, end: 13, title: msg('tabSchade') }
   ];
-  groups.forEach(({ start, end, title }) => {
+  groups.forEach(({ start, end, title, exportable }) => {
     const children = originalBlocks.slice(start, end);
     const group = document.createElement('div');
     group.className = 'view360Block view360GroupedBlock';
-    group.innerHTML = `<h3>${esc(title)}</h3>`;
+    group.innerHTML = `<h3>${esc(title)}</h3>${exportable ? exportActionsHtml({ label: title }) : ''}`;
     target.insertBefore(group, children[0]);
     children.forEach(block => group.appendChild(block));
   });

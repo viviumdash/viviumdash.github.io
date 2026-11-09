@@ -1140,7 +1140,8 @@ body.pdfPrintPreparing .pdfExportRoot .pdfTest360Page .pdf360PortfolioGroup .pie
 .view360PieCard .portfolioPieHeader{display:block;margin-bottom:10px}
 .view360PieCard .portfolioPieHeader .sub{display:none}
 .view360AnalysisBlock{position:relative;border:1px solid #cfe0f0;border-radius:20px;background:linear-gradient(180deg,#fff,#f8fbff);padding:18px;box-shadow:0 10px 26px rgba(13,20,115,.06)}
-.view360AnalysisBlock>.blockExportActions{position:absolute!important;right:16px!important;top:0!important;transform:none!important;margin:0!important;z-index:7}
+.view360GroupedBlock{position:relative}
+.view360AnalysisBlock>.blockExportActions,.view360GroupedBlock>.blockExportActions{position:absolute!important;right:16px!important;top:0!important;transform:none!important;margin:0!important;z-index:7}
 .view360AnalysisHead{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:14px;padding-right:94px}
 .view360AnalysisTitle h3{margin:0;color:var(--blue);font-size:20px;font-weight:700;line-height:1.1}
 .view360AnalysisTitle p{margin:5px 0 0;color:var(--muted);font-size:12px;font-weight:700;line-height:1.35}
