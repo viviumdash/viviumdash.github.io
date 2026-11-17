@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Dashboard kerncijfers life</title>
+<script src="libs/pdf.min.js"></script>
+<script src="libs/html2canvas.min.js"></script>
+<script src="libs/jspdf.umd.min.js"></script>
+<link rel="stylesheet" href="dashboardlifekern.css?v=20261117-intro-alignment">
+</head>
+<body>
+<svg width="0" height="0" aria-hidden="true" style="position:absolute;pointer-events:none"><defs><filter id="viviumLogoTransparent" color-interpolation-filters="sRGB" x="0" y="0" width="100%" height="100%"><feColorMatrix in="SourceGraphic" type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  1.18605 0 0 0 -0.18605"/></filter></defs></svg>
+<div class="appVersion" aria-hidden="true">(beta)</div>
+<div class="wrap">
+  <div class="languageSwitch"><label for="languageSelect" id="languageLabel">Taal / Langue</label><select id="languageSelect"><option value="nl">NL</option><option value="fr">FR</option></select></div>
+  <div id="topCompactBar" class="topCompactBar hidden">
+    <div class="topCompactMain">
+      <span id="topCompactTitle" class="topCompactTitle">PDF import & controle</span>
+      <span id="topCompactSummary" class="topCompactSummary"></span>
+    </div>
+    <div class="topCompactActions">
+      <button type="button" id="downloadCsvBtn" class="btn-csv hidden"><svg class="actionIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M12 3v12m-5-5 5 5 5-5"/></svg><span id="downloadCsvLabel">Download CSV</span></button>
+      <div id="exportPdfWrap" class="pdfExportWrap hidden">
+        <div id="pdfOptionsWrap" class="pdfOptionsWrap">
+          <button id="exportPdfBtn" class="btn-pdf pdfDropdownTrigger" type="button" aria-haspopup="dialog" aria-controls="pdfOptionsMenu" aria-expanded="false"><svg class="actionIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM14 2v6h6m-8 4v6m-3-3 3 3 3-3"/></svg><span id="exportPdfLabel">Exporteer PDF</span><svg class="pdfDropdownChevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
+          <div id="pdfOptionsMenu" class="pdfOptionsMenu" role="dialog" aria-labelledby="pdfOptionsTitle">
+            <div id="pdfOptionsTitle" class="pdfOptionsTitle">PDF secties</div>
+            <div class="pdfSelectionActions">
+              <button type="button" id="pdfSelectAll">Alles selecteren</button>
+              <button type="button" id="pdfSelectNone">Niets selecteren</button>
+            </div>
+            <label class="pdfOption"><input type="checkbox" class="pdfSectionCheck" value="summary" checked><span id="pdfOptSummary">Samenvatting</span></label>
+            <label class="pdfOption"><input type="checkbox" class="pdfSectionCheck" value="productie" checked><span id="pdfOptProductie">Productie</span></label>
+            <label class="pdfOption"><input type="checkbox" class="pdfSectionCheck" value="verval" checked><span id="pdfOptVerval">Verval</span></label>
+            <label class="pdfOption"><input type="checkbox" class="pdfSectionCheck" value="transformatie" checked><span id="pdfOptTransformatie">Transformatie</span></label>
+            <label class="pdfOption"><input type="checkbox" class="pdfSectionCheck" value="detail" checked><span id="pdfOptDetail">Detail per categorie</span></label>
+            <div class="pdfOutputActions"><button type="button" id="pdfExportConfirmBtn">Download PDF</button></div>
+          </div>
+        </div>
+      </div>
+      <button type="button" id="topInfoToggleBtn" class="topInfoToggleBtn" onclick="toggleTopInfo()" title="Toon importinformatie" aria-label="Toon importinformatie">Importeer</button>
+    </div>
+  </div>
+  <div class="hero">
+    <div class="panel">
+      <img src="libs/vivium-logo.png" alt="Vivium" class="upload-logo" id="uploadLogo">
+      <div class="heroEyebrow" id="heroEyebrow">Kerncijfers life</div>
+      <h1 id="pageTitle">Van PDF naar helder inzicht</h1>
+      <p class="lead" id="pageLead">Upload je <strong>kerncijfers life PDF</strong>. Het dashboard zet de gegevens automatisch om in een duidelijke analyse van productie, koopsommen, verhogingen enz. Dit dashboard werkt met de PDF kerncijfers life die je hebt gedownload vanuit Salesforce (je moet de PDF effectief downloaden als bestand, afdrukken als PDF werkt niet), zowel op groepsniveau, koepelniveau alsook voor de kerncijfers AM, CDR of CD.</p>
+      <div class="heroBenefits">
+        <div class="heroBenefit"><span class="heroBenefitIcon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19V10M10 19V5M16 19v-7M22 19H2"/></svg></span><span id="heroBenefitAnalysis">Automatische analyse</span></div>
+        <div class="heroBenefit"><span class="heroBenefitIcon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 7h11l-3-3M17 17H6l3 3M18 7l-3 3M6 17l3-3"/></svg></span><span id="heroBenefitCompare">Direct vergelijkbaar</span></div>
+        <div class="heroBenefit"><span class="heroBenefitIcon" style="color:var(--green);background:#e5f6f7"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg></span><span id="heroBenefitSafe">Lokaal verwerkt</span></div>
+      </div>
+      <div id="status" class="status" role="status">Klaar om je kerncijfers te verwerken</div>
+    </div>
+    <div class="upload">
+      <div class="upload-zone">
+        <input type="file" id="pdfFile" accept="application/pdf,.pdf" />
+        <span class="heroUploadIcon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M12 18v-6m-3 3 3-3 3 3"/></svg></span>
+        <strong id="uploadTitle">Sleep je PDF's hierheen</strong>
+        <span id="uploadHint" class="hint">of klik om één of meerdere bestanden te kiezen</span>
+        <button type="button" class="heroUploadButton" id="heroUploadButton">PDF's selecteren</button>
+        <span class="heroUploadMeta" id="heroUploadMeta">PDF · NL of FR</span>
+      </div>
+      <div id="fileName" class="upload-filename">Geen bestand geselecteerd</div>
+    </div>
+  </div>
+
+  <div id="dashboard" class="hidden">
+    <div id="importControl" class="importControl hidden"></div>
+    <div id="brokerInfo" class="brokerInfo hidden">
+      <div class="brokerTextBlock">
+        <div id="brokerInfoLabel" class="label">Makelaar / koepelnummer</div>
+        <div id="brokerName" class="brokerName"></div>
+      </div>
+      <img src="libs/vivium-logo-dark.png" alt="Vivium" class="brokerLogo" id="brokerLogoImg">
+    </div>
+    <div class="kpiExportWrap" id="lifeKpiBlock">
+      <div id="lifeKpiActions"></div>
+      <div id="kpis" class="kpis"></div>
+    </div>
+    <div class="dashboardToolbarHome" id="dashboardToolbarHome">
+      <div class="dashboardToolbar" id="dashboardToolbar">
+        <div class="viewDropdownWrap" id="viewDropdownWrap">
+          <div class="viewModeSegmented" id="viewModeControls" role="group" aria-label="Weergave">
+            <button type="button" class="viewBtn active" data-view="main" id="viewMainBtn" aria-pressed="true">Hoofdcategorieën</button>
+            <button type="button" class="viewBtn" data-view="sub" id="viewSubBtn" aria-pressed="false">Subcategorieën</button>
+            <button type="button" class="viewBtn" data-view="all" id="viewAllBtn" aria-pressed="false">Hoofd- en subcategorieën</button>
+          </div>
+        </div>
+        <label class="previousYearsControl" id="previousYearsControl"><input type="checkbox" id="previousYearsToggle"><span id="previousYearsToggleLabel">Vorige jaren</span></label>
+        <button type="button" class="drillBtn active" id="drillToggleBtn">Alles uitklappen</button>
+      </div>
+    </div>
+    <div class="tabs">
+      <button class="tab active" data-tab="samenvatting" id="tabSamenvatting">Samenvatting</button>
+      <button class="tab" data-tab="productie" id="tabProductie">Productie</button>
+      <button class="tab" data-tab="verval" id="tabVerval">Verval</button>
+      <button class="tab" data-tab="transformatie" id="tabTransformatie">Transformatie</button>
+      <button class="tab" data-tab="progressie" id="tabProgressie">Progressie</button>
+      <button class="tab" data-tab="portefeuille" id="tabPortefeuille">Portefeuille</button>
+      <button class="tab" data-tab="detail" id="tabDetail">Detail</button>
+    </div>
+
+    <section id="samenvatting" class="section active">
+      <div class="card full">
+        <div class="titleExportRow">
+          <div class="sectionTitleWrap"><h2 id="summaryTitle">Samenvatting</h2><span class="sectionPeriodInline" id="summaryPeriodInline"></span></div>
+          <div class="sectionToolbarSlot"></div>
+          <div class="blockExportActions" data-export-target="summaryAll" data-static-export></div>
+        </div>
+        <div id="insightSummary" class="insightSummary hidden"></div>
+      </div>
+      <div id="prodBarTooltip" class="prodBarTooltip"></div>
+    </section>
+
+    <section id="productie" class="section">
+      <div class="card full">
+        <div class="titleExportRow"><div class="sectionTitleWrap"><h2 id="prodTitle">Productie</h2><span class="sectionPeriodInline" id="prodPeriodInline"></span></div><div class="sectionToolbarSlot"></div><div class="blockExportActions" data-export-target="productieAll" aria-label="Productie exporteren" data-static-export></div></div>
+        <p class="sub" id="prodSub"></p>
+        <div class="note" id="prodNote">De gegevens hieronder tonen per hoofdcategorie eerst de hoofdrij en daaronder alle subcategorieën uit de CSV.</div>
+        <div id="prodGrouped"></div>
+      </div>
+    </section>
+
+    <section id="verval" class="section">
+      <div class="card full">
+        <div class="titleExportRow"><div class="sectionTitleWrap"><h2 id="vervalTitle">Verval</h2><span class="sectionPeriodInline" id="vervalPeriodInline"></span></div><div class="sectionToolbarSlot"></div><div class="blockExportActions" data-export-target="vervalAll" aria-label="Verval exporteren" data-static-export></div></div>
+        <p class="sub" id="vervalSub"></p>
+        <div class="note" id="vervalNote">De gegevens hieronder tonen per hoofdcategorie eerst de hoofdrij en daaronder alle subcategorieën uit de CSV, inclusief verval door klant en maatschappij.</div>
+        <div id="vervalGrouped"></div>
+      </div>
+    </section>
+
+    <section id="transformatie" class="section">
+      <div class="card full">
+        <div class="titleExportRow"><div class="sectionTitleWrap"><h2 id="transTitle">Transformatie</h2><span class="sectionPeriodInline" id="transPeriodInline"></span></div><div class="sectionToolbarSlot"></div><div class="blockExportActions" data-export-target="transformatieAll" aria-label="Transformatie exporteren" data-static-export></div></div>
+        <p class="sub" id="transSub"></p>
+        <div class="note" id="transNote">Transformatie toont premie transformatie, premie verhoging en premie verlaging per hoofdcategorie en subcategorie.</div>
+        <div id="transGrouped"></div>
+      </div>
+    </section>
+
+    <section id="progressie" class="section">
+      <div class="card full">
+        <div class="titleExportRow"><div class="sectionTitleWrap"><h2 id="progTitle">Progressie</h2><span class="sectionPeriodInline" id="progPeriodInline"></span></div><div class="sectionToolbarSlot"></div><div class="blockExportActions" data-export-target="progressieAll" aria-label="Progressie exporteren" data-static-export></div></div>
+        <p class="sub" id="progSub"></p>
+        <div class="note" id="progNote">Progressie wordt getoond als aantal progressie en premie progressie per hoofdcategorie en subcategorie.</div>
+        <div id="progGrouped"></div>
+      </div>
+    </section>
+
+    <section id="portefeuille" class="section">
+      <div class="card full">
+        <div class="titleExportRow"><div class="sectionTitleWrap"><h2 id="portefeuilleTitle">Portefeuille</h2><span class="sectionPeriodInline" id="portefeuillePeriodInline"></span></div><div class="sectionToolbarSlot"></div><div class="blockExportActions" data-export-target="portefeuilleAll" aria-label="Portefeuille exporteren" data-static-export></div></div>
+        <p class="sub" id="portefeuilleSub"></p>
+        <div class="note" id="portefeuilleNote">Portefeuille toont portefeuillepremie, aantal polissen in portefeuille en reserves per hoofdcategorie en subcategorie.</div>
+        <div id="portefeuilleCharts"></div>
+        <div id="portfolioPieCard" class="portfolioPieCard hidden">
+          <div class="portfolioPieHeader">
+            <div class="titleExportRow"><h2 id="portfolioPieTitle">Verdeling verdiende premie</h2><div class="blockExportActions" data-export-target="portfolioPie" aria-label="Verdeling verdiende premie exporteren" data-static-export></div></div>
+            <p class="sub" id="portfolioPieSub"></p>
+          </div>
+          <div class="portfolioPiePair">
+            <div class="portfolioPiePanel" id="portfolioPiePrevPanel">
+              <h3 id="portfolioPiePrevTitle"></h3>
+              <div class="productionPieGrid portfolioPieGrid">
+                <div class="pieWrap">
+                  <canvas id="portfolioPiePrevCanvas" width="990" height="645"></canvas>
+                  <div id="portfolioPiePrevTotal" class="portfolioPieTotal"></div>
+                </div>
+                <div id="portfolioPiePrevLegend" class="pieLegend"></div>
+              </div>
+            </div>
+            <div class="portfolioPiePanel" id="portfolioPieCurrPanel">
+              <h3 id="portfolioPieCurrTitle"></h3>
+              <div class="productionPieGrid portfolioPieGrid">
+                <div class="pieWrap">
+                  <canvas id="portfolioPieCurrCanvas" width="990" height="645"></canvas>
+                  <div id="portfolioPieCurrTotal" class="portfolioPieTotal"></div>
+                </div>
+                <div id="portfolioPieCurrLegend" class="pieLegend"></div>
+              </div>
+            </div>
+          </div>
+          <div id="portfolioPieTooltip" class="pieTooltip portfolioPieTooltip"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="detail" class="section">
+      <div class="card">
+        <div class="titleExportRow"><div class="sectionTitleWrap"><h2 id="detailTitle">Hoofd- en subcategorieën</h2><span class="sectionPeriodInline" id="detailPeriodInline"></span></div><div class="sectionToolbarSlot"></div><div class="blockExportActions" data-export-target="detailAll" aria-label="Detail exporteren" data-static-export></div></div>
+        <p class="sub" id="detailSub"></p>
+        <div id="categoryDetails"></div>
+      </div>
+    </section>
+    <button id="floatingKpiScrollBtn" class="floatingKpiScrollBtn" type="button" onclick="scrollToKpiStart()" title="Ga naar boven" aria-label="Ga naar boven"><span>↑</span> TOP</button>
+
+    <div class="card full" id="productionPieCard">
+      <div class="titleExportRow"><h2 id="productionPieTitle">Verdeling productie</h2><div class="blockExportActions" data-export-target="productionPie" aria-label="Verdeling exporteren" data-static-export></div></div>
+      <p class="sub" id="productionPieSub"></p>
+      <div class="productionPieGrid">
+        <div class="pieWrap">
+          <canvas id="productionPieCanvas" width="460" height="360"></canvas>
+          <div id="productionPieTooltip" class="pieTooltip"></div>
+        </div>
+        <div id="productionPieLegend" class="pieLegend"></div>
+      </div>
+    </div>
+
+  </div>
+  <footer class="dashboard-footer">Ontwikkeld door Hans von der Crone - data wordt niet online bewaard</footer>
+
+</div>
+
+<script src="dashboardlifekern.js?v=20261117-browser-title"></script>
+</body>
+</html>

@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Vivium dashboards</title>
+  <link rel="stylesheet" href="dashboard.css?v=20261117-intro-alignment">
+  <link rel="stylesheet" href="index.css?v=20261117-language">
+  <script defer src="index.js"></script>
+</head>
+<body class="dashboard-index">
+  <main class="wrap">
+    <div class="languageSwitch">
+      <label for="languageSelect" id="languageLabel">Taal / Langue</label>
+      <select id="languageSelect">
+        <option value="nl">NL</option>
+        <option value="fr">FR</option>
+      </select>
+    </div>
+    <div class="hero">
+      <div class="panel">
+        <img src="libs/vivium-logo.png" alt="VIVIUM" class="upload-logo" width="178" height="103">
+        <div class="heroEyebrow" id="introLabel">Vivium dashboards</div>
+        <h1 id="pageTitle">Van cijfers naar helder inzicht</h1>
+        <p class="lead" id="introText">Kies het dashboard dat je wilt openen.</p>
+      </div>
+      <nav class="upload" id="dashboardNavigation" aria-label="Dashboards">
+        <div class="dashboard-choices">
+          <a class="dashboard-choice" href="dashboard.html">
+            <span id="nonLifeLabel">Dashboard kerncijfers non-life</span>
+            <span class="choice-arrow" aria-hidden="true">→</span>
+          </a>
+          <a class="dashboard-choice" href="dashboardlifekern.html">
+            <span id="lifeLabel">Dashboard kerncijfers life</span>
+            <span class="choice-arrow" aria-hidden="true">→</span>
+          </a>
+          <a class="dashboard-choice" href="dashboardliferappel.html">
+            <span id="rappelLabel">Dashboard rappelcijfers life</span>
+            <span class="choice-arrow" aria-hidden="true">→</span>
+          </a>
+        </div>
+      </nav>
+    </div>
+    <footer class="dashboard-footer" id="footerText">Ontwikkeld door Hans von der Crone - data wordt niet online bewaard</footer>
+  </main>
+</body>
+</html>

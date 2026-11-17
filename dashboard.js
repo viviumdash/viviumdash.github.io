@@ -249,7 +249,7 @@ function setHtml(id, html) { const el = $(id); if (el) el.innerHTML = html; }
 function exportCopyLabel() { return currentLang === 'fr' ? 'Copier' : 'Kopiëren'; }
 function updateStaticLanguage() {
   updateMultiImportLanguage();
-  document.documentElement.lang = currentLang; document.title = 'Dashboard Vivium Non-Life';
+  document.documentElement.lang = currentLang; document.title = 'Dashboard kerncijfers non-life';
   setText('languageLabel', currentLang === 'fr' ? 'Langue' : 'Taal / Langue'); setText('pageTitle', msg('pageTitle')); setHtml('pageLead', msg('pageLead')); setText('uploadTitle', multiText('Sleep je PDF’s hierheen', 'Déposez vos PDF ici')); setText('uploadHint', multiText('of klik om één of meerdere bestanden te kiezen', 'ou sélectionnez un ou plusieurs fichiers')); setText('downloadCsvBtn', msg('downloadCsv')); setText('exportPdfLabel', msg('exportPdf')); setText('pdfExportConfirmBtn', msg('pdfExportAction'));
   setText('heroEyebrow', currentLang === 'fr' ? 'Chiffres clés non-vie' : 'Kerncijfers non-life'); setText('heroBenefitAnalysis', currentLang === 'fr' ? 'Analyse automatique' : 'Automatische analyse'); setText('heroBenefitCompare', currentLang === 'fr' ? 'Comparaison directe' : 'Direct vergelijkbaar'); setText('heroBenefitSafe', currentLang === 'fr' ? 'Sécurisé' : 'Veilig'); setText('heroUploadButton', currentLang === 'fr' ? 'Sélectionner des PDF' : 'PDF’s selecteren'); setText('heroUploadMeta', 'PDF · NL of FR');
   setText('pdfSelectAll', currentLang === 'fr' ? 'Tout sélectionner' : 'Alles selecteren');
