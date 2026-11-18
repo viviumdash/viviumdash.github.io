@@ -6,12 +6,17 @@
 <title>Dashboard kerncijfers life</title>
 <script src="libs/pdf.min.js"></script>
 <script src="libs/html2canvas.min.js"></script>
-<script src="libs/jspdf.umd.min.js"></script>
-<link rel="stylesheet" href="dashboardlifekern.css?v=20261118-version-date">
+<link rel="stylesheet" href="dashboardlifekern.css?v=20261118-life-release-notes">
 </head>
 <body>
 <svg width="0" height="0" aria-hidden="true" style="position:absolute;pointer-events:none"><defs><filter id="viviumLogoTransparent" color-interpolation-filters="sRGB" x="0" y="0" width="100%" height="100%"><feColorMatrix in="SourceGraphic" type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  1.18605 0 0 0 -0.18605"/></filter></defs></svg>
-<div class="appVersion">v18.11.2026</div>
+<button type="button" class="appVersion" id="appVersionBtn" aria-haspopup="dialog" aria-controls="releaseNotesModal" aria-expanded="false">v18.11.2026</button>
+<div class="releaseNotesModal hidden" id="releaseNotesModal" role="dialog" aria-modal="true" aria-labelledby="releaseNotesTitle">
+  <div class="releaseNotesDialog">
+    <div class="releaseNotesHead"><h2 id="releaseNotesTitle">Release notes</h2><button type="button" class="releaseNotesClose" id="releaseNotesCloseBtn" aria-label="Sluiten">×</button></div>
+    <div class="releaseNotesContent hidden" id="releaseNotesContent" tabindex="0"></div>
+  </div>
+</div>
 <div class="wrap">
   <div class="languageSwitch"><label for="languageSelect" id="languageLabel">Taal / Langue</label><select id="languageSelect"><option value="nl">NL</option><option value="fr">FR</option></select></div>
   <div id="topCompactBar" class="topCompactBar hidden">
@@ -30,12 +35,13 @@
               <button type="button" id="pdfSelectAll">Alles selecteren</button>
               <button type="button" id="pdfSelectNone">Niets selecteren</button>
             </div>
-            <label class="pdfOption"><input type="checkbox" class="pdfSectionCheck" value="summary" checked><span id="pdfOptSummary">Samenvatting</span></label>
-            <label class="pdfOption"><input type="checkbox" class="pdfSectionCheck" value="productie" checked><span id="pdfOptProductie">Productie</span></label>
-            <label class="pdfOption"><input type="checkbox" class="pdfSectionCheck" value="verval" checked><span id="pdfOptVerval">Verval</span></label>
-            <label class="pdfOption"><input type="checkbox" class="pdfSectionCheck" value="transformatie" checked><span id="pdfOptTransformatie">Transformatie</span></label>
-            <label class="pdfOption"><input type="checkbox" class="pdfSectionCheck" value="detail" checked><span id="pdfOptDetail">Detail per categorie</span></label>
-            <div class="pdfOutputActions"><button type="button" id="pdfExportConfirmBtn">Download PDF</button></div>
+            <label class="pdfOption"><input type="checkbox" class="pdfSectionCheck" value="summary"><span id="pdfOptSummary">Samenvatting</span></label>
+            <label class="pdfOption"><input type="checkbox" class="pdfSectionCheck" value="productie"><span id="pdfOptProductie">Productie</span></label>
+            <label class="pdfOption"><input type="checkbox" class="pdfSectionCheck" value="verval"><span id="pdfOptVerval">Koopsommen</span></label>
+            <label class="pdfOption"><input type="checkbox" class="pdfSectionCheck" value="transformatie"><span id="pdfOptTransformatie">Verhogingen</span></label>
+            <label class="pdfOption"><input type="checkbox" class="pdfSectionCheck" value="portefeuille"><span id="pdfOptPortefeuille">Portefeuille</span></label>
+            <label class="pdfOption"><input type="checkbox" class="pdfSectionCheck" value="detail"><span id="pdfOptDetail">Detail</span></label>
+            <div class="pdfOutputActions"><button type="button" id="printPdfBtn">Print to PDF</button><div id="pdfPrintDestinationHint" class="pdfPrintDestinationHint">Kies in het afdrukvenster ‘Opslaan als PDF’ als bestemming/printer.</div></div>
           </div>
         </div>
       </div>
@@ -216,6 +222,17 @@
 
 </div>
 
-<script src="dashboardlifekern.js?v=20261118-version-date"></script>
+<!-- Release notes: voeg nieuwe versies onderaan toe, met één wijziging per regel. -->
+<script type="text/plain" id="releaseNotesSource">
+v18.11.2026
+Lay-out, lettertypes, kleuren en openingspagina gelijkgetrokken met kerncijfers non-life.
+KPI’s voorzien van vergelijkingsbalkjes en delta’s; pijlernamen in de KPI’s afgekort naar 2e, 3e en 4e pijler.
+Vorige jaren beschikbaar in de grafieken en op Samenvatting. Bij productie worden ook de aantallen zaken getoond.
+Op Samenvatting is het blok Reserves vervangen door APE: productie + verhogingen + 10% van de koopsom.
+Detailtabellen voorzien van verticale kolomlijnen en duidelijkere onderverdelingen.
+PDF-sectiekeuze gelijkgetrokken met de zes Life-tabbladen. PDF opslaan via Print to PDF; afzonderlijke Export-knop verwijderd.
+Versienummer aanklikbaar gemaakt om de release notes te openen.
+</script>
+<script src="dashboardlifekern.js?v=20261118-life-release-notes"></script>
 </body>
 </html>

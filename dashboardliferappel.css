@@ -1857,7 +1857,7 @@ body.pdfPrintPreparing .pdfExportRoot .portfolioBarFill{border-radius:0!importan
 @media(min-width:1500px){.wrap{max-width:1500px}body:has(#intro:not(.hidden)) .wrap{max-width:1380px}.life-chart-body{grid-template-columns:215px 1fr}.life-donut{width:215px;height:215px}}
 @media(max-width:1050px){.life-kpis{grid-template-columns:repeat(3,minmax(0,1fr))}.life-type-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.life-chart-body{grid-template-columns:1fr}.life-donut{margin:0 auto}.topCompactActions{flex-wrap:wrap}.life-chart-grid{gap:12px}}
 @media(max-width:640px){.wrap{padding:16px}.life-kpis,.life-type-kpis,.life-chart-grid{grid-template-columns:1fr}.life-top>strong{font-size:21px}.life-view>.card{padding:17px}.topCompactBar{align-items:stretch}.topCompactActions{display:flex}.life-kpis .kpi{min-height:120px}.life-chart-body{grid-template-columns:1fr}.tabs{display:flex;overflow-x:auto;position:static}.tab{width:auto;flex:0 0 auto}.life-pdf-options{right:auto;left:0}.hero{margin-bottom:14px}}
-@media print{@page{size:A4 landscape;margin:12mm}body{background:white!important}.life-top,.hero,#notice,#empty,#importPreview,.topCompactBar,.life-filters,.tabs,.life-export,.life-chart-controls,.life-pagination,.appVersion,.life-footer{display:none!important}.wrap{padding:0;max-width:none}#dashboard{display:block!important}.life-view{display:grid!important;break-before:page}.life-view.print-exclude,#headline.print-exclude{display:none!important}.card,.kpiOverviewBlock{box-shadow:none!important;break-inside:avoid}.life-table-wrap{overflow:visible}.life-table{white-space:normal;font-size:9px}.life-table th,.life-table td{padding:5px}.life-chart-grid{display:block}.life-chart-grid>.card{break-inside:avoid;margin-bottom:15px}.life-chart-body{grid-template-columns:190px 1fr}.life-view>h2{margin-top:0}.life-context{display:block}}
+@media print{@page{size:A4 portrait;margin:12mm}body{background:white!important}.life-top,.hero,#notice,#empty,#importPreview,.topCompactBar,.life-filters,.tabs,.life-export,.life-chart-controls,.life-pagination,.appVersion,.life-footer{display:none!important}.wrap{padding:0;max-width:none}#dashboard{display:block!important}.life-view{display:grid!important;break-before:page}.life-view.print-exclude,#headline.print-exclude{display:none!important}.card,.kpiOverviewBlock{box-shadow:none!important;break-inside:avoid}.life-table-wrap{overflow:visible}.life-table{white-space:normal;font-size:9px}.life-table th,.life-table td{padding:5px}.life-chart-grid{display:block}.life-chart-grid>.card{break-inside:avoid;margin-bottom:15px}.life-chart-body{grid-template-columns:190px 1fr}.life-view>h2{margin-top:0}.life-context{display:block}}
 .life-top>strong{display:flex;align-items:center}.life-top>strong img{width:130px;height:60px;object-fit:contain;mix-blend-mode:multiply}
 .life-display-options{display:flex;align-items:center;gap:8px;margin:0 0 16px;font-size:13px;font-weight:700}.life-display-options input{accent-color:var(--blue);width:16px;height:16px}.life-kpis-unweighted{grid-template-columns:repeat(4,minmax(0,1fr))}@media(max-width:1050px){.life-kpis-unweighted{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:640px){.life-kpis-unweighted{grid-template-columns:1fr}}@media print{.life-display-options{display:none!important}}
 .life-chart-tooltip{position:fixed;z-index:12000;max-width:min(350px,calc(100vw - 16px));padding:11px 14px;border:1px solid #c5d6e5;border-radius:11px;background:#0d1473;color:white;box-shadow:0 8px 25px #0d147333;font-size:13px;line-height:1.5;pointer-events:none}.life-donut [data-chart-tooltip]{cursor:help;transition:filter .15s}.life-donut [data-chart-tooltip]:hover,.life-donut [data-chart-tooltip]:focus{filter:brightness(1.12);outline:none}.life-summary-charts .life-donut{width:220px;height:220px}.life-summary-charts .life-chart-body{grid-template-columns:220px 1fr;align-items:center}@media(max-width:1150px){.life-summary-charts .life-chart-body{grid-template-columns:1fr}}@media print{.life-chart-tooltip{display:none!important}}
@@ -2181,3 +2181,61 @@ body:not(.topInfoReady) .hero .panel .lead {
 #groups-table .life-table:not(:has(.life-group-label)) :is(th,td):first-child { min-width:110px; width:130px; white-space:normal; }
 #groups-table .life-table :is(th,td) { padding:10px 8px; }
 #groups-table .life-table th { white-space:normal; }
+
+/* Rappel PDF selection and measured A4 portrait pages. */
+.life-pdf-options .pdfSelectionActions { display:flex; gap:6px; width:100%; margin:4px 0; padding-bottom:10px; border-bottom:1px solid var(--line); }
+.life-pdf-options .pdfSelectionActions button { flex:1; padding:7px 5px; border:1px solid var(--line); border-radius:8px; background:#f5f9fd; color:var(--blue); font:700 11px/1.3 Lato,Arial,sans-serif; cursor:pointer; }
+.life-pdf-options .pdfSelectionActions button:hover { background:#e6f0fa; }
+.rappelPrintRoot { position:absolute; left:-10000px; top:0; width:794px; color:var(--ink); background:#fff; font-family:Lato,Arial,sans-serif; }
+.rappelPrintRoot * { box-sizing:border-box; }
+.rappelPrintPage { display:flex; flex-direction:column; gap:16px; position:relative; width:794px; height:1122px; padding:32px 32px 38px; background:#fff; }
+.rappelPrintPage > h1 { flex:none; margin:0; color:var(--blue); font:700 18px/1.3 Lato,Arial,sans-serif; letter-spacing:0; }
+.rappelPrintFrame { flex:1; min-height:0; position:relative; }
+.rappelPrintFit { position:relative; width:100%; }
+.rappelPrintPageNumber { position:absolute; right:32px; bottom:14px; font:700 10px Lato,Arial,sans-serif; color:var(--muted); }
+.rappelPrintRoot .rappelPrintBlock { display:block; width:100%; min-width:0; max-width:none; margin:0!important; padding:16px!important; border:1px solid var(--line); border-radius:16px; background:#fff; box-shadow:none; }
+.rappelPrintRoot .rappelPrintBlock > .life-section-head { margin:-16px -16px 16px; padding:12px 16px; border-radius:15px 15px 0 0; }
+.rappelPrintRoot .life-section-head h2 { font-size:17px; }
+.rappelPrintRoot .life-kpis { display:grid!important; grid-template-columns:repeat(2,minmax(0,1fr))!important; gap:12px; }
+.rappelPrintRoot .life-kpis .kpi { min-height:0!important; height:auto!important; padding:12px!important; box-shadow:none!important; }
+.rappelPrintRoot .life-kpis .kpi .value { font-size:22px!important; }
+.rappelPrintRoot .life-kpi-contributions { gap:9px; margin-top:14px; }
+.rappelPrintRoot .life-kpi-contribution-label { font-size:10px; }
+.rappelPrintRoot .life-kpi-contribution-label > span:last-child { font-size:10px; }
+.rappelPrintRoot .life-chart-body { display:grid!important; grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important; gap:18px!important; align-items:center; }
+.rappelPrintRoot .life-chart-body.life-bar-full { display:block!important; }
+.rappelPrintRoot .life-chart-body .life-donut { display:block; width:100%!important; max-width:320px!important; height:auto!important; margin:auto; }
+.rappelPrintRoot .life-legend { width:100%; min-width:0; font-size:11px!important; table-layout:fixed; }
+.rappelPrintRoot .life-legend :is(th,td) { padding:8px 4px; overflow-wrap:anywhere; }
+.rappelPrintRoot .life-legend small { font-size:10px; }
+.rappelPrintRoot .life-group-bar-row { margin-bottom:14px; }
+.rappelPrintRoot .life-group-bars .life-bar-label { font-size:12px; }
+.rappelPrintRoot .life-table-wrap { width:100%; overflow:visible; }
+.rappelPrintRoot .life-table { width:100%; min-width:0; table-layout:fixed; white-space:normal; font-size:9px!important; line-height:1.3; }
+.rappelPrintRoot .life-table :is(th,td) { min-width:0!important; padding:6px 4px!important; overflow-wrap:anywhere; }
+.rappelPrintRoot .life-table th { font-size:8px!important; white-space:normal; }
+.rappelPrintRoot .life-table th + th,.rappelPrintRoot .life-table td + td { border-inline-start:1px dashed rgba(13,20,115,.24); }
+.rappelPrintRoot .life-table .text { text-align:left; }
+.rappelPrintRoot .life-group-label { display:block; }
+.rappelPrintRoot .life-group-code { display:block; white-space:normal; }
+.rappelPrintRoot .life-group-name { display:block; }
+.rappelPrintRoot .small { font-size:10px; line-height:1.35; }
+@media print {
+  @page { size:A4 portrait; margin:0; }
+  html:has(body.rappelPrinting),body.rappelPrinting { width:210mm!important; margin:0!important; padding:0!important; background:#fff!important; }
+  body.rappelPrinting > :not(.rappelPrintRoot) { display:none!important; }
+  body.rappelPrinting .rappelPrintRoot { position:static!important; left:auto!important; top:auto!important; width:210mm!important; margin:0!important; }
+  body.rappelPrinting .rappelPrintRoot,body.rappelPrinting .rappelPrintRoot * { print-color-adjust:exact!important; -webkit-print-color-adjust:exact!important; }
+  body.rappelPrinting .rappelPrintPage { width:210mm!important; height:296.8mm!important; min-height:0!important; margin:0!important; break-inside:avoid-page; page-break-inside:avoid; }
+  body.rappelPrinting .rappelPrintPage:not(:last-child) { break-after:page; page-break-after:always; }
+  body.rappelPrinting .rappelPrintPage:last-child { break-after:auto; page-break-after:auto; }
+}
+
+/* Long group legends use the page width instead of shrinking a tall side column. */
+.rappelPrintRoot [data-print-source^="group-chart-"] .life-chart-body.life-pie-split { display:flex!important; flex-direction:column; gap:12px!important; }
+.rappelPrintRoot [data-print-source^="group-chart-"] .life-donut { width:240px!important; height:240px!important; }
+.rappelPrintRoot [data-print-source^="group-chart-"] .life-legend tbody { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px 14px; }
+.rappelPrintRoot [data-print-source^="group-chart-"] .life-legend tr { display:grid; grid-template-columns:minmax(0,1fr) 110px; align-items:start; gap:6px; border-bottom:1px solid var(--line); }
+.rappelPrintRoot [data-print-source^="group-chart-"] .life-legend td { display:block; padding:4px 0; border:0; font-size:10px; line-height:1.25; }
+.rappelPrintRoot [data-print-source^="group-chart-"] .life-legend-group { gap:4px; }
+.rappelPrintRoot [data-print-source^="group-chart-"] .life-legend caption { display:block; margin-bottom:8px; }

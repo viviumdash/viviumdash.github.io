@@ -1719,12 +1719,10 @@ body:not(.topInfoReady) .hero .lead{color:#4d4d4d;font-family:'Open Sans',Arial,
 /* Detailkoppen gebruiken dezelfde icoonkleuren als de samenvatting. */
 .detailSectionBlock.productionDetail .detailSectionTitleRow .detailSectionIcon{color:#009b77!important;background:rgba(0,155,119,.12)!important;border-color:transparent}
 .detailSectionBlock.schadeDetail .detailSectionTitleRow .detailSectionIcon{color:#c0392b!important;background:rgba(192,57,43,.12)!important;border-color:transparent}
-.pdfOutputActions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:9px;padding-top:10px;border-top:1px solid var(--line)}
+.pdfOutputActions{display:grid;grid-template-columns:1fr;gap:8px;margin-top:9px;padding-top:10px;border-top:1px solid var(--line)}
 .pdfOutputActions button{border:1px solid var(--blue);border-radius:9px;padding:10px 6px;font:700 12px Lato,Arial,sans-serif;cursor:pointer}
 #printPdfBtn{background:#fff;color:var(--blue)}
 #printPdfBtn:hover{background:#edf5fc}
-#pdfExportConfirmBtn{background:var(--blue);color:#fff}
-#pdfExportConfirmBtn:hover{background:var(--blue3)}
 .pdfOutputActions button:disabled{opacity:.62;cursor:wait}
 .pdfPrintDestinationHint{grid-column:1/-1;color:var(--muted);font-size:11px;line-height:1.25;text-align:center}
 #kpiSelectorControls .viewDropdownBtn{background:var(--blue);color:#fff}

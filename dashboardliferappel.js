@@ -71,7 +71,7 @@ const words = {
   upload:['Sleep je Excel hierheen','Déposez votre Excel ici'],uploadHint:['of klik om één .xls- of .xlsx-bestand te kiezen','ou cliquez pour choisir un fichier .xls ou .xlsx'],
   pick:['Importeer Excel','Importer Excel'],ready:['Klaar om je Life-rapport te verwerken','Prêt à analyser votre rapport Vie'],empty:['Importeer een Excel-bestand om het dashboard te openen.','Importez un fichier Excel pour ouvrir le tableau de bord.'],
   preview:['Import controleren','Vérifier l’import'],commit:['Import bevestigen','Confirmer l’import'],cancel:['Annuleren','Annuler'],sheet:['Werkblad','Feuille'],source:['Excel import & controle','Import Excel et contrôle'],importAction:['Importeer','Importer'],importOk:['Importcontrole OK','Contrôle d’import OK'],
-  csv:['Download CSV','Télécharger CSV'],pdf:['Exporteer PDF','Exporter PDF'],pdfSections:['PDF-secties','Sections PDF'],allSelect:['Alles selecteren','Tout sélectionner'],noneSelect:['Niets selecteren','Tout désélectionner'],print:['Print naar PDF','Imprimer en PDF'],export:['Exporteren','Exporter'],
+  csv:['Download CSV','Télécharger CSV'],pdf:['Exporteer PDF','Exporter PDF'],pdfSections:['PDF-secties','Sections PDF'],allSelect:['Alles selecteren','Tout sélectionner'],noneSelect:['Niets selecteren','Tout désélectionner'],print:['Print naar PDF','Imprimer en PDF'],
   dashboardView:['Dashboardweergave','Vue du tableau de bord'],
   summary:['Samenvatting','Résumé'],groups:['Verdelingen','Répartitions'],detail:['Detail','Détail'],
   count:['Aantal productieregels','Nombre de lignes de production'],shortCount:['Aantal','Nombre'],unweighted:['Premie voor weging','Prime avant pondération'],weighted:['Premie na weging','Prime après pondération'],commission:['Rappelcommissie','Commission de rappel'],policies:['Aantal unieke polissen','Nombre de polices distinctes'],clients:['Aantal unieke klanten','Nombre de clients distincts'],
@@ -329,7 +329,7 @@ function renderStatic() {
   $('lifeTop').setAttribute('title',lang==='fr'?'Retour en haut':'Ga naar boven');
   if (state.records.length) $('source').textContent = `Excel: ${state.source} · ${fmt(state.records.length)} ${t('count').toLowerCase()} · ${singleGroupFile()?'A–M · ':''}${t('importOk')}`;
   $('showWeighted').checked = state.showWeighted;
-  const labels = {pageTitle:'title',lead:'lead',benefit1:'benefit1',benefit2:'benefit2',benefit3:'benefit3',uploadTitle:'upload',uploadHint:'uploadHint',pick:'pick',previewTitle:'preview',commit:'commit',cancel:'cancel',sheetLabel:'sheet',sourceTitle:'source',csv:'csv',pdfLabel:'pdf',pdfSections:'pdfSections',print:'print',empty:'empty',footer:'footer',releaseText:'release'};
+  const labels = {pageTitle:'title',lead:'lead',benefit1:'benefit1',benefit2:'benefit2',benefit3:'benefit3',uploadTitle:'upload',uploadHint:'uploadHint',pick:'pick',previewTitle:'preview',commit:'commit',cancel:'cancel',sheetLabel:'sheet',sourceTitle:'source',csv:'csv',pdfLabel:'pdf',pdfSections:'pdfSections',pdfSelectAll:'allSelect',pdfSelectNone:'noneSelect',print:'print',empty:'empty',footer:'footer',releaseText:'release'};
   Object.entries(labels).forEach(([id,key]) => {if(id==='lead')$(id).innerHTML=t(key);else $(id).textContent=t(key);});
   $('dropzone').setAttribute('aria-label',t('pick'));
   const tabIcons={summary:'<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>',groups:'<path d="M21 12a9 9 0 1 1-9-9v9z"/><path d="M15 3.5a9 9 0 0 1 5.5 5.5H15z"/>',detail:'<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M3 14h18M9 4v16"/>'};
@@ -463,35 +463,134 @@ async function exportImage(id,copy) {
     saveBlob(blob,`life-${id}.png`); message(copy ? t('savedInstead') : 'PNG ✓');
   } catch(e) { message(e.message,true); }
 }
-function pdfSelection() { return [...document.querySelectorAll('[data-section]:checked')].map(x => x.dataset.section); }
-function exportTargets(selection) {
-  return selection.flatMap(id => id === 'headline' ? ['headline'] : [...$(id).querySelectorAll('.exportable')].map(x => x.id));
+function pdfSelection() { return [...document.querySelectorAll('#pdfChecks [data-section]:checked')].map(x => x.dataset.section); }
+function selectPdfSections(checked) {
+  document.querySelectorAll('#pdfChecks [data-section]').forEach(input => input.checked = checked);
 }
-async function exportPdf() {
-  const selection = pdfSelection(); if (!selection.length) {message(t('noSections'),true);return;}
-  if (!window.jspdf) {message('jsPDF ontbreekt in libs.',true);return;}
-  $('pdf').disabled = true; message(t('busy'));
+function prepareRappelPrintBlock(source) {
+  const block = source.cloneNode(true);
+  block.dataset.printSource = source.id;
+  block.classList.add('rappelPrintBlock');
+  block.removeAttribute('id');
+  block.querySelectorAll('[data-html2canvas-ignore],.life-export,.life-pagination').forEach(node => node.remove());
+  block.querySelectorAll('[id]').forEach(node => node.removeAttribute('id'));
+  block.querySelectorAll('.life-sort-button').forEach(button => button.replaceWith(document.createTextNode(button.firstChild.textContent)));
+  // Print every filtered detail record, independently of the on-screen page of 50 rows.
+  if (source.id === 'detail-table') {
+    const columns = detailColumns();
+    block.querySelector('tbody').innerHTML = sortedRows(filterDetailRows(selected()),'detail').map(row => '<tr>' + columns.map(key => {
+      const value = key === 'type' ? typeLabel(row.type) : key === 'groupNo' ? row.groupId : ['unweighted','weighted','commission'].includes(key) ? money(row[key]) : key === 'rate' ? pct(row.rate) : row[key];
+      return '<td' + (['client','type','groupNo','groupName','product'].includes(key) ? ' class="text"' : '') + '>' + esc(value) + '</td>';
+    }).join('') + '</tr>').join('');
+  }
+  return block;
+}
+function rappelPrintPage(root, section) {
+  const page = document.createElement('section');
+  page.className = 'rappelPrintPage';
+  page.dataset.section = section;
+  const title = document.createElement('h1');
+  title.textContent = (lang === 'fr' ? 'Chiffres de rappel vie' : 'Rappelcijfers life') + ' · ' + t(section === 'headline' ? 'total' : section);
+  const frame = document.createElement('div'); frame.className = 'rappelPrintFrame';
+  const footer = document.createElement('div'); footer.className = 'rappelPrintPageNumber';
+  page.append(title,frame,footer); root.appendChild(page);
+  return {page,frame};
+}
+function fitRappelPrintBlock(frame, block) {
+  const bounds = block.getBoundingClientRect();
+  let scale = Math.min(1, (frame.clientHeight - 6) / bounds.height, frame.clientWidth / Math.max(bounds.width, block.scrollWidth));
+  if (!(scale > 0)) throw new Error('PDF: onvoldoende ruimte voor het blok.');
+  if (scale < 1) {
+    const fit = document.createElement('div');
+    fit.className = 'rappelPrintFit';
+    fit.style.height = bounds.height * scale + 'px';
+    block.replaceWith(fit); fit.appendChild(block);
+    block.style.cssText += ';position:absolute;left:0;top:0;width:' + bounds.width + 'px;zoom:' + scale + ';margin:0!important';
+    for (let attempt = 0; attempt < 4; attempt++) {
+      const actual = block.getBoundingClientRect();
+      if (actual.height <= frame.clientHeight - 6 && actual.width <= frame.clientWidth) break;
+      scale *= Math.min((frame.clientHeight - 6) / actual.height, frame.clientWidth / actual.width) * .995;
+      block.style.zoom = scale;
+    }
+    fit.style.height = block.getBoundingClientRect().height + 'px';
+  }
+}
+function appendRappelPrintTable(root, section, template) {
+  const table = template.querySelector('.life-table');
+  const rows = Array.from(table.tBodies[0].rows);
+  const footer = table.tFoot?.cloneNode(true);
+  table.tBodies[0].replaceChildren(); table.tFoot?.remove();
+  let current, block, body, count;
+  const startPage = () => {
+    current = rappelPrintPage(root,section);
+    block = template.cloneNode(true);
+    body = block.querySelector('tbody');
+    current.frame.appendChild(block); count = 0;
+  };
+  const overflow = () => block.getBoundingClientRect().bottom > current.frame.getBoundingClientRect().bottom - 2;
+  startPage();
+  for (const row of rows) {
+    body.appendChild(row);
+    if (overflow() && count) {
+      row.remove(); startPage(); body.appendChild(row);
+    }
+    count++;
+    if (overflow()) {
+      fitRappelPrintBlock(current.frame,block);
+      // Exceptionally tall individual rows remain intact on their own page.
+      current = null;
+    }
+    if (!current && row !== rows[rows.length - 1]) startPage();
+  }
+  if (footer) {
+    if (!current) startPage();
+    block.querySelector('table').appendChild(footer);
+    if (overflow() && count) {
+      footer.remove(); startPage(); block.querySelector('table').appendChild(footer);
+    }
+  }
+  if (current) fitRappelPrintBlock(current.frame,block);
+}
+let rappelPrinting = false;
+async function printPdf() {
+  if (rappelPrinting || !state.records.length) return;
+  const selection = pdfSelection();
+  if (!selection.length) { message(t('noSections'),true); return; }
+  rappelPrinting = true;
+  const originalTitle = document.title;
+  let root;
+  const finish = () => {
+    window.removeEventListener('afterprint',finish);
+    root?.remove(); document.title = originalTitle;
+    document.body.classList.remove('rappelPrinting');
+    $('print').disabled = false; rappelPrinting = false;
+  };
   try {
-    const pdf = new jspdf.jsPDF({orientation:'landscape',unit:'mm',format:'a4',compress:true}); let page=0;
-    for (const id of exportTargets(selection)) {
-      const canvas = await canvasFor(id);
-      const width=273, maxHeight=176, sliceHeight=Math.floor(maxHeight/width*canvas.width);
-      for (let offset=0; offset<canvas.height; offset+=sliceHeight) {
-        if (page++) pdf.addPage();
-        pdf.setFontSize(10);pdf.text('VIVIUM Life',12,9);
-        const piece=document.createElement('canvas');piece.width=canvas.width;piece.height=Math.min(sliceHeight,canvas.height-offset);
-        piece.getContext('2d').drawImage(canvas,0,offset,piece.width,piece.height,0,0,piece.width,piece.height);
-        pdf.addImage(piece.toDataURL('image/jpeg',.92),'JPEG',12,15,width,piece.height*width/piece.width);
-        pdf.setFontSize(8);pdf.text(`${page}`,280,202);
+    $('pdfMenu').open = false; $('print').disabled = true;
+    if (document.fonts?.ready) await document.fonts.ready;
+    root = document.createElement('div'); root.className = 'rappelPrintRoot';
+    document.body.appendChild(root);
+    for (const section of selection) {
+      const sources = section === 'headline' ? [$('headline')] : [...$(section).querySelectorAll('.exportable')];
+      for (const source of sources) {
+        const block = prepareRappelPrintBlock(source);
+        if (block.querySelector('.life-table')) appendRappelPrintTable(root,section,block);
+        else {
+          const {frame} = rappelPrintPage(root,section);
+          frame.appendChild(block); fitRappelPrintBlock(frame,block);
+        }
       }
     }
-    pdf.save('dashboardliferappel.pdf');message('PDF ✓');$('pdfMenu').open=false;
-  } catch(e) {message(e.message,true);} finally {$('pdf').disabled=false;}
-}
-function printPdf() {
-  const selection=pdfSelection();if(!selection.length){message(t('noSections'),true);return;}
-  ['headline',...sections].forEach(id=>$(id).classList.toggle('print-exclude',!selection.includes(id)));
-  $('pdfMenu').open=false;window.print();
+    const pages = [...root.querySelectorAll('.rappelPrintPage')];
+    if (!pages.length) throw new Error('PDF: geen pagina’s aangemaakt.');
+    pages.forEach((page,index) => page.querySelector('.rappelPrintPageNumber').textContent = (index + 1) + ' / ' + pages.length);
+    document.body.classList.add('rappelPrinting');
+    document.title = lang === 'fr' ? 'Dashboard chiffres de rappel vie' : 'Dashboard rappelcijfers life';
+    window.addEventListener('afterprint',finish,{once:true});
+    window.print();
+  } catch (error) {
+    finish(); message((lang === 'fr' ? 'Impossible de préparer le PDF : ' : 'PDF kon niet worden voorbereid: ') + error.message,true);
+  }
 }
 function showChartTooltip(event) {
   const segment=event.target.closest?.('[data-chart-tooltip]');
@@ -536,6 +635,8 @@ function init() {
   $('groups').addEventListener('click',e=>{if(e.target.closest('#resetGroupFilters')){state.groupProducts=[];state.groupProductionTypes=[];renderData();}});
   $('detail').addEventListener('click',e=>{if(e.target.closest('#resetDetailFilters')){state.detailProducts=[];state.detailProductionTypes=[];state.page=0;renderData();}});
   $('csv').addEventListener('click',csvExport);$('print').addEventListener('click',printPdf);
+  $('pdfSelectAll').addEventListener('click',()=>selectPdfSections(true));
+  $('pdfSelectNone').addEventListener('click',()=>selectPdfSections(false));
   $('version').addEventListener('click',()=>$('release').showModal());
   $('lifeTop').addEventListener('click',()=>window.scrollTo({top:0,behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'}));
   window.addEventListener('scroll',()=>$('lifeTop').classList.toggle('hidden',window.scrollY<250),{passive:true});

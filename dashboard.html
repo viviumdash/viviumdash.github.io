@@ -15,8 +15,7 @@
 <title>Dashboard kerncijfers non-life</title>
 <script src="libs/pdf.min.js"></script>
 <script src="libs/html2canvas.min.js"></script>
-<script src="libs/jspdf.umd.min.js"></script>
-<link rel="stylesheet" href="dashboard.css?v=20261118-version-date">
+<link rel="stylesheet" href="dashboard.css?v=20261118-print-only-cleanup">
 </head>
 <body>
 <svg width="0" height="0" aria-hidden="true" style="position:absolute;pointer-events:none"><defs><filter id="viviumLogoTransparent" color-interpolation-filters="sRGB" x="0" y="0" width="100%" height="100%"><feColorMatrix in="SourceGraphic" type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  1.18605 0 0 0 -0.18605"/></filter></defs></svg>
@@ -49,7 +48,7 @@
             <label class="pdfOption"><input type="checkbox" class="pdfSectionCheck" value="distributions"><span id="pdfOptDistributions">Verdelingen</span></label>
             <label class="pdfOption"><input type="checkbox" class="pdfSectionCheck" value="detail"><span id="pdfOptDetail">Detail</span></label>
             <label class="pdfOption"><input type="checkbox" class="pdfSectionCheck" value="view360"><span id="pdfOpt360">360-view</span></label>
-            <div class="pdfOutputActions"><button type="button" id="printPdfBtn">Print to PDF</button><button type="button" id="pdfExportConfirmBtn">Export</button><div id="pdfPrintDestinationHint" class="pdfPrintDestinationHint">Kies in het afdrukvenster ‘Opslaan als PDF’ als bestemming/printer.</div></div>
+            <div class="pdfOutputActions"><button type="button" id="printPdfBtn">Print to PDF</button><div id="pdfPrintDestinationHint" class="pdfPrintDestinationHint">Kies in het afdrukvenster ‘Opslaan als PDF’ als bestemming/printer.</div></div>
           </div>
         </div>
       </div>
@@ -402,8 +401,9 @@ mogelijkheid om meerdere PDFs in te lezen en te combineren in één rapport
 v18.11.2026
 Mogelijkheid om in Samenvatting te wisselen tussen verticale en horizontale grafieken.
 Bij Detail verticale randlijnen voorzien voor betere leesbaarheid.
+PDF opslaan via Print to PDF; afzonderlijke Export-knop verwijderd.
 </script>
-<script src="dashboard.js?v=20261118-version-date"></script>
+<script src="dashboard.js?v=20261118-print-only-cleanup"></script>
 
 
 

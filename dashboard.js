@@ -203,7 +203,7 @@ const I18N = {
     pageTitle: 'Van PDF naar helder inzicht',
     pageLead: 'Upload je <strong>kerncijfers non-life PDF</strong>. Het dashboard zet de gegevens automatisch om in een duidelijke analyse van productie, verval, progressie en schade. Dit dashboard werkt met de PDF kerncijfers nonlife die je hebt gedownload vanuit Salesforce (je moet de PDF effectief downloaden als bestand, afdrukken als PDF werkt niet), zowel op groepsniveau, koepelniveau alsook voor de kerncijfers AM, CDR of CD.',
     printPdf: 'Print to PDF', printPdfBusy: 'Afdrukweergave voorbereiden…', printPdfError: 'Afdrukweergave kon niet worden gemaakt: ', printPdfDestinationHint: 'Kies in het afdrukvenster ‘Opslaan als PDF’ als bestemming/printer.',
-    uploadTitle: 'Sleep je PDF hierheen', uploadHint: 'of klik om een bestand te kiezen', importPdf: 'Importeer', downloadCsv: 'Download CSV', exportPdf: 'Exporteer PDF', pdfExportAction: 'Export', pdfBusy: 'PDF wordt gemaakt…', pdfOptionsTitle: 'PDF secties', pdfNoSections: 'Selecteer minstens één PDF-sectie.', noPdf: 'Klaar om je kerncijfers te verwerken', processing: '⏳ PDF verwerken…',
+    uploadTitle: 'Sleep je PDF hierheen', uploadHint: 'of klik om een bestand te kiezen', importPdf: 'Importeer', downloadCsv: 'Download CSV', exportPdf: 'Exporteer PDF', pdfBusy: 'PDF wordt gemaakt…', pdfOptionsTitle: 'PDF secties', pdfNoSections: 'Selecteer minstens één PDF-sectie.', noPdf: 'Klaar om je kerncijfers te verwerken', processing: '⏳ PDF verwerken…',
     success: n => '✅ PDF geladen & verwerkt: ' + n + ' datarijen. Percentages en schade-totalen komen rechtstreeks uit de PDF.', error: '❌ Fout bij verwerken PDF: ',
     broker: 'Makelaar', koepelnummer: 'koepelnummer', groepsnummer: 'groepsnummer', vs: 'vs', main: 'Hoofd', sub: 'Sub', lowerPositive: 'daling is positief', lowerBetter: 'schade: lager is beter', viewModeLabel: 'Weergave', viewAll: 'Hoofd- en subcategorieën', viewMainOnly: 'Hoofdcategorieën', viewSubOnly: 'Subcategorieën', previousYears: 'Vorige jaren', drillDown: 'Alles inklappen', drillDownActive: 'Alles uitklappen', importControlTitle: 'Importcontrole', importControlSub: 'Snelle controle of de PDF correct werd geïnterpreteerd', importPeriods: 'Aantal periodes gevonden', importLatestPeriod: 'Laatste periode gevonden', importTotalProd: 'TOTAAL NON LIFE productie', importTotalSchade: 'TOTAAL NON LIFE schade', importSpPct: 'S/P % correct gelezen', importBroker: 'Makelaar/koepelnummer', yes: 'Ja', no: 'Nee', topCompactTitle: 'PDF import & controle', topShow: 'Toon importinformatie', topHide: 'Verberg importinformatie', topOk: 'Importcontrole OK', topAttention: n => n + ' aandachtspunt' + (n === 1 ? '' : 'en'), topPeriodsShort: 'periodes', topLatestShort: 'laatste',
     tabSamenvatting: 'Samenvatting', tab360: '360-view', tabProductie: 'Productie', tabVerval: 'Verval', tabProgressie: 'Progressie', tabSchade: 'Schade', tabPortefeuille: 'Portefeuille', tabKpis: "KPI's", tabDetail: 'Detail', kpiSelectorLabel: "KPI's", kpiSelectorAll: "Alle KPI's", kpiSelectorCount: n => n + " KPI-sectie" + (n === 1 ? '' : 's'), kpiOverviewEmpty: 'Selecteer minstens één KPI-sectie.',
@@ -218,7 +218,7 @@ const I18N = {
     printPdf: 'Imprimer en PDF', printPdfBusy: 'Préparation de l’impression…', printPdfError: 'Impossible de préparer l’impression : ', printPdfDestinationHint: 'Choisissez « Enregistrer au format PDF » comme destination/imprimante dans la fenêtre d’impression.',
     pageTitle: 'Du PDF à une vision claire',
     pageLead: 'Téléchargez votre <strong>PDF chiffres clés non-vie</strong>. Le tableau de bord transforme automatiquement les données en une analyse claire de la production, de la chute, de la progression et des sinistres. Ce tableau de bord utilise le PDF des chiffres clés non-vie téléchargé depuis Salesforce (vous devez effectivement télécharger le PDF en tant que fichier ; l’impression au format PDF ne fonctionne pas), tant au niveau du groupe et de la coupole que pour les chiffres clés AM, CDR ou CD.',
-    uploadTitle: 'Glissez votre PDF ici', uploadHint: 'ou cliquez pour choisir un fichier', importPdf: 'Importer', downloadCsv: 'Télécharger CSV', exportPdf: 'Exporter PDF', pdfExportAction: 'Exporter', pdfBusy: 'Création du PDF…', pdfOptionsTitle: 'Sections PDF', pdfNoSections: 'Sélectionnez au moins une section PDF.', noPdf: 'Prêt à traiter vos chiffres clés', processing: '⏳ Traitement du PDF…',
+    uploadTitle: 'Glissez votre PDF ici', uploadHint: 'ou cliquez pour choisir un fichier', importPdf: 'Importer', downloadCsv: 'Télécharger CSV', exportPdf: 'Exporter PDF', pdfBusy: 'Création du PDF…', pdfOptionsTitle: 'Sections PDF', pdfNoSections: 'Sélectionnez au moins une section PDF.', noPdf: 'Prêt à traiter vos chiffres clés', processing: '⏳ Traitement du PDF…',
     success: n => '✅ PDF chargé & traité : ' + n + ' lignes de données. Les pourcentages et totaux sinistres proviennent directement du PDF.', error: '❌ Erreur lors du traitement du PDF : ',
     broker: 'Courtier', koepelnummer: 'n° coupole', groepsnummer: 'n° groupe', vs: 'vs', main: 'Principal', sub: 'Sous-cat.', lowerPositive: 'baisse positive', lowerBetter: 'sinistres : plus bas est meilleur', viewModeLabel: 'Affichage', viewAll: 'Tout', viewMainOnly: 'Catégories principales', viewSubOnly: 'Sous-catégories', previousYears: 'Années précédentes', drillDown: 'Tout replier', drillDownActive: 'Tout déplier', importControlTitle: 'Contrôle import', importControlSub: 'Contrôle rapide de l’interprétation du PDF', importPeriods: 'Nombre de périodes', importLatestPeriod: 'Dernière période trouvée', importTotalProd: 'TOTAL NON VIE production', importTotalSchade: 'TOTAL NON VIE sinistres', importSpPct: 'S/P % lu correctement', importBroker: 'Courtier/n° coupole', yes: 'Oui', no: 'Non', topCompactTitle: 'Import PDF & contrôle', topShow: 'Afficher les informations import', topHide: 'Masquer les informations import', topOk: 'Contrôle import OK', topAttention: n => n + ' point' + (n === 1 ? '' : 's') + ' d’attention', topPeriodsShort: 'périodes', topLatestShort: 'dernière',
     tabSamenvatting: 'Résumé', tab360: 'Vue 360', tabProductie: 'Production', tabVerval: 'Chute', tabProgressie: 'Progression', tabSchade: 'Sinistres', tabPortefeuille: 'Portefeuille', tabKpis: 'KPI', tabDetail: 'Détail', kpiSelectorLabel: 'KPI', kpiSelectorAll: 'Tous les KPI', kpiSelectorCount: n => n + ' section' + (n === 1 ? '' : 's') + ' KPI', kpiOverviewEmpty: 'Sélectionnez au moins une section KPI.',
@@ -251,7 +251,7 @@ function exportCopyLabel() { return currentLang === 'fr' ? 'Copier' : 'Kopiëren
 function updateStaticLanguage() {
   updateMultiImportLanguage();
   document.documentElement.lang = currentLang; document.title = 'Dashboard kerncijfers non-life';
-  setText('languageLabel', currentLang === 'fr' ? 'Langue' : 'Taal / Langue'); setText('pageTitle', msg('pageTitle')); setHtml('pageLead', msg('pageLead')); setText('uploadTitle', multiText('Sleep je PDF’s hierheen', 'Déposez vos PDF ici')); setText('uploadHint', multiText('of klik om één of meerdere bestanden te kiezen', 'ou sélectionnez un ou plusieurs fichiers')); setText('downloadCsvBtn', msg('downloadCsv')); setText('exportPdfLabel', msg('exportPdf')); setText('pdfExportConfirmBtn', msg('pdfExportAction'));
+  setText('languageLabel', currentLang === 'fr' ? 'Langue' : 'Taal / Langue'); setText('pageTitle', msg('pageTitle')); setHtml('pageLead', msg('pageLead')); setText('uploadTitle', multiText('Sleep je PDF’s hierheen', 'Déposez vos PDF ici')); setText('uploadHint', multiText('of klik om één of meerdere bestanden te kiezen', 'ou sélectionnez un ou plusieurs fichiers')); setText('downloadCsvBtn', msg('downloadCsv')); setText('exportPdfLabel', msg('exportPdf'));
   setText('heroEyebrow', currentLang === 'fr' ? 'Chiffres clés non-vie' : 'Kerncijfers non-life'); setText('heroBenefitAnalysis', currentLang === 'fr' ? 'Analyse automatique' : 'Automatische analyse'); setText('heroBenefitCompare', currentLang === 'fr' ? 'Comparaison directe' : 'Direct vergelijkbaar'); setText('heroBenefitSafe', currentLang === 'fr' ? 'Sécurisé' : 'Veilig'); setText('heroUploadButton', currentLang === 'fr' ? 'Sélectionner des PDF' : 'PDF’s selecteren'); setText('heroUploadMeta', 'PDF · NL of FR');
   setText('pdfSelectAll', currentLang === 'fr' ? 'Tout sélectionner' : 'Alles selecteren');
   setText('pdfSelectNone', currentLang === 'fr' ? 'Tout désélectionner' : 'Niets selecteren');
@@ -1909,78 +1909,6 @@ function setPdfOptionsOpen(open) {
   if (open) $('pdfOptionsMenu')?.querySelector('.pdfSectionCheck')?.focus();
 }
 
-async function exportSummaryPdf() {
-  if (!lastData || document.body.classList.contains('pdfExportBusy')) return;
-  const mainBtn = $('exportPdfBtn');
-  const mainLabel = $('exportPdfLabel');
-  const exportBtn = $('pdfExportConfirmBtn');
-  const printBtn = $('printPdfBtn');
-  try {
-    const selected = selectedPdfSections();
-    if (!selected.size) {
-      alert(msg('pdfNoSections'));
-      return;
-    }
-    setPdfOptionsOpen(false);
-    if (mainBtn) mainBtn.disabled = true;
-    if (exportBtn) exportBtn.disabled = true;
-    if (printBtn) printBtn.disabled = true;
-    if (mainLabel) mainLabel.textContent = msg('pdfBusy');
-    document.body.classList.add('pdfExportBusy', 'pdfPrintPreparing');
-
-    if (selected.has('summary')) renderDashboardSection('samenvatting');
-    if (selected.has('view360')) renderDashboardSection('view360');
-    if (selected.has('productie')) renderDashboardSection('productie');
-    if (selected.has('verval')) renderDashboardSection('verval');
-    if (selected.has('schade')) renderDashboardSection('schade');
-    if (selected.has('detail')) renderDashboardSection('detail');
-    const summary = $('insightSummary');
-    const items = summary ? Array.from(summary.querySelectorAll('.insightItem')) : [];
-    if (selected.has('summary') && items.length < 4) throw new Error(currentLang === 'fr' ? 'Résumé incomplet.' : 'Samenvatting is nog niet volledig opgebouwd.');
-
-    {
-      const root = document.createElement('div');
-      root.className = 'pdfExportRoot';
-      await buildSelectedPdfPages(root, selected, items);
-      const { jsPDF } = window.jspdf;
-      const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4', compress: true });
-      const pageW = pdf.internal.pageSize.getWidth();
-      const pageH = pdf.internal.pageSize.getHeight();
-      const pages = Array.from(root.querySelectorAll('.pdfTestPage'));
-      for (let i = 0; i < pages.length; i++) {
-        const canvas = await html2canvas(pages[i], {
-          scale: 2,
-          backgroundColor: '#ffffff',
-          useCORS: true,
-          logging: false,
-          windowWidth: pages[i].scrollWidth,
-          windowHeight: pages[i].scrollHeight
-        });
-        if (i > 0) pdf.addPage('a4', 'portrait');
-        pdf.addImage(canvas.toDataURL('image/jpeg', 0.95), 'JPEG', 0, 0, pageW, pageH, undefined, 'FAST');
-      }
-      root.remove();
-      const name = brokerInfo?.name || $('brokerName')?.textContent || 'Dashboard';
-      pdf.save(`${makeSafeFilePart(name)}_samenvatting.pdf`);
-      return;
-    }
-
-  } catch (err) {
-    console.error(err);
-    alert((currentLang === 'fr' ? 'Impossible de créer le PDF : ' : 'PDF kon niet worden gemaakt: ') + err.message);
-  } finally {
-    const root = document.querySelector('.pdfExportRoot');
-    if (root) root.remove();
-    const testRoot = document.querySelector('.pdfTestScreenshotRoot');
-    if (testRoot) testRoot.remove();
-    document.body.classList.remove('pdfPrintPreparing', 'pdfExportBusy');
-    if (mainBtn) mainBtn.disabled = false;
-    if (mainLabel) mainLabel.textContent = msg('exportPdf');
-    if (exportBtn) exportBtn.disabled = false;
-    if (printBtn) printBtn.disabled = false;
-  }
-}
-
 function printPdfSuggestedTitle() {
   const name = String(brokerInfo?.name || $('brokerName')?.textContent || '').trim()
     .replace(/[\\/:*?"<>|]+/g, '-')
@@ -2000,12 +1928,10 @@ async function printSelectedPdf() {
 
   const printBtn = $('printPdfBtn');
   const mainBtn = $('exportPdfBtn');
-  const exportBtn = $('pdfExportConfirmBtn');
   const originalTitle = document.title;
   setPdfOptionsOpen(false);
   if (printBtn) { printBtn.disabled = true; printBtn.textContent = msg('printPdfBusy'); }
   if (mainBtn) mainBtn.disabled = true;
-  if (exportBtn) exportBtn.disabled = true;
   document.body.classList.add('pdfExportBusy', 'pdfPrintPreparing');
 
   let root = null;
@@ -2016,7 +1942,6 @@ async function printSelectedPdf() {
     document.body.classList.remove('printingPdf', 'pdfPrintPreparing', 'pdfExportBusy');
     if (printBtn) { printBtn.disabled = false; printBtn.textContent = msg('printPdf'); }
     if (mainBtn) mainBtn.disabled = false;
-    if (exportBtn) exportBtn.disabled = false;
     printPdfCleanup = null;
   };
 
@@ -2047,7 +1972,6 @@ async function printSelectedPdf() {
   }
 }
 
-$('pdfExportConfirmBtn')?.addEventListener('click', exportSummaryPdf);
 $('printPdfBtn')?.addEventListener('click', printSelectedPdf);
 $('exportPdfBtn')?.addEventListener('click', e => {
   e.preventDefault();

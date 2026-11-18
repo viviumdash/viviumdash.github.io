@@ -4,6 +4,86 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = 'libs/pdf.worker.min.js';
 // ─── UI helper ───────────────────────────────────────────────────────────────
 const $ = id => document.getElementById(id);
 
+let releaseNotesLoaded = false;
+let releaseNotesReturnFocus = null;
+function scrollReleaseNotesToLatest() {
+  const content = $('releaseNotesContent');
+  if (!content) return;
+  requestAnimationFrame(() => requestAnimationFrame(() => { content.scrollTop = content.scrollHeight; }));
+}
+function renderReleaseNotes(rawText) {
+  const content = $('releaseNotesContent');
+  if (!content) return;
+  const fragment = document.createDocumentFragment();
+  let list = null;
+  String(rawText || '').split(/\r?\n/).forEach(rawLine => {
+    const line = rawLine.trim();
+    if (!line) { list = null; return; }
+    if (/^v\d{1,2}\.\d{1,2}[.,](?:\d{2}|\d{4})$/i.test(line)) {
+      const title = document.createElement('h3');
+      title.className = 'releaseNotesVersion';
+      title.textContent = line;
+      fragment.appendChild(title);
+      list = null;
+      return;
+    }
+    if (!list) {
+      list = document.createElement('ul');
+      list.className = 'releaseNotesList';
+      fragment.appendChild(list);
+    }
+    const item = document.createElement('li');
+    item.textContent = line.replace(/^[•*\-]\s*/, '');
+    list.appendChild(item);
+  });
+  content.replaceChildren(fragment);
+}
+function openReleaseNotesModal() {
+  const modal = $('releaseNotesModal');
+  const content = $('releaseNotesContent');
+  if (!modal || !content) return;
+  releaseNotesReturnFocus = document.activeElement;
+  modal.classList.remove('hidden');
+  document.body.classList.add('releaseNotesOpen');
+  $('appVersionBtn')?.setAttribute('aria-expanded', 'true');
+  setText('releaseNotesTitle', currentLang === 'fr' ? 'Notes de version' : 'Release notes');
+  $('releaseNotesCloseBtn')?.setAttribute('aria-label', currentLang === 'fr' ? 'Fermer' : 'Sluiten');
+  $('releaseNotesCloseBtn')?.focus();
+  if (!releaseNotesLoaded) {
+    renderReleaseNotes($('releaseNotesSource')?.textContent || '');
+    releaseNotesLoaded = true;
+  }
+  content.classList.remove('hidden');
+  scrollReleaseNotesToLatest();
+}
+function closeReleaseNotesModal() {
+  const modal = $('releaseNotesModal');
+  if (!modal || modal.classList.contains('hidden')) return;
+  modal.classList.add('hidden');
+  document.body.classList.remove('releaseNotesOpen');
+  $('appVersionBtn')?.setAttribute('aria-expanded', 'false');
+  if (releaseNotesReturnFocus?.focus) releaseNotesReturnFocus.focus();
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  $('appVersionBtn').addEventListener('click', openReleaseNotesModal);
+  $('releaseNotesCloseBtn').addEventListener('click', closeReleaseNotesModal);
+  $('releaseNotesModal').addEventListener('click', event => {
+    if (event.target === $('releaseNotesModal')) closeReleaseNotesModal();
+  });
+  document.addEventListener('keydown', event => {
+    const modal = $('releaseNotesModal');
+    if (modal.classList.contains('hidden')) return;
+    if (event.key === 'Escape') { event.preventDefault(); closeReleaseNotesModal(); }
+    if (event.key === 'Tab') {
+      const first = $('releaseNotesCloseBtn'), last = $('releaseNotesContent');
+      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+      else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+    }
+  });
+});
+
+
 // ─── Zichtbaarheid van dashboardblokken ─────────────
 function toggleDashboardBlockVisibility(block, panelSelector) {
   if (!block) return;
@@ -130,7 +210,7 @@ const I18N = {
     heroBenefitAnalysis: 'Automatische analyse', heroBenefitCompare: 'Direct vergelijkbaar', heroBenefitSafe: 'Veilig',
     uploadTitle: "Sleep je PDF's hierheen", uploadHint: 'of klik om één of meerdere bestanden te kiezen', heroUploadButton: "PDF's selecteren", heroUploadMeta: 'PDF · NL of FR', importPdf: 'Importeer',
     downloadCsv: 'Download CSV', exportPdf: 'Exporteer PDF', pdfBusy: 'PDF wordt gemaakt…', pdfOptionsTitle: 'PDF-secties', pdfNoSections: 'Selecteer minstens één PDF-sectie.', noPdf: 'Klaar om je kerncijfers te verwerken', processing: '⏳ PDF verwerken…',
-    pdfSelectAll: 'Alles selecteren', pdfSelectNone: 'Niets selecteren', pdfExportConfirmBtn: 'Download PDF', kpiExport: 'KPI’s exporteren', imageDownload: 'Download als PNG', imageCopy: 'Kopieer als afbeelding',
+    pdfSelectAll: 'Alles selecteren', pdfSelectNone: 'Niets selecteren', printPdf: 'Print to PDF', printPdfDestinationHint: 'Kies in het afdrukvenster ‘Opslaan als PDF’ als bestemming/printer.', kpiExport: 'KPI’s exporteren', imageDownload: 'Download als PNG', imageCopy: 'Kopieer als afbeelding',
     success: n => '✅ PDF geladen & verwerkt: ' + n + ' datarijen.', error: '❌ Fout bij verwerken PDF: ',
     broker: 'Makelaar', koepelnummer: 'koepelnummer', groepsnummer: 'groepsnummer', vs: 'vs', main: 'Hoofd', sub: 'Sub', lowerPositive: 'daling is positief', lowerBetter: '', viewModeLabel: 'Weergave', viewAll: 'Hoofd- en subcategorieën', viewMainOnly: 'Hoofdcategorieën', viewSubOnly: 'Subcategorieën', drillDown: 'Beperkte weergave', drillDownActive: 'Alles tonen', importControlTitle: 'Importcontrole', importControlSub: 'Snelle controle of de life-PDF correct werd geïnterpreteerd', importPeriods: 'Aantal periodes gevonden', importLatestPeriod: 'Laatste periode gevonden', importTotalProd: 'TOTAAL LEVEN productie', importTotalSchade: '', importSpPct: '', importBroker: 'Makelaar/koepelnummer', yes: 'Ja', no: 'Nee', topCompactTitle: 'PDF import & controle', topShow: 'Toon importinformatie', topHide: 'Verberg importinformatie', topOk: 'Importcontrole OK', topAttention: n => n + ' aandachtspunt' + (n === 1 ? '' : 'en'), topPeriodsShort: 'periodes', topLatestShort: 'laatste',
     tabSamenvatting: 'Samenvatting', tabProductie: 'Productie', tabVerval: 'Verval', tabTransformatie: 'Transformatie', tabProgressie: 'Progressie', tabSchade: 'Schade', tabPortefeuille: 'Portefeuille', tabDetail: 'Detail', pdfOptDetail: 'Detail per categorie',
@@ -147,7 +227,7 @@ const I18N = {
     heroBenefitAnalysis: 'Analyse automatique', heroBenefitCompare: 'Comparaison directe', heroBenefitSafe: 'Sécurisé',
     uploadTitle: 'Glissez votre PDF ici', uploadHint: 'ou cliquez pour choisir un fichier', heroUploadButton: 'Sélectionner un PDF', heroUploadMeta: 'PDF · NL ou FR', importPdf: 'Importer',
     downloadCsv: 'Télécharger CSV', exportPdf: 'Exporter PDF', pdfBusy: 'Création du PDF…', pdfOptionsTitle: 'Sections PDF', pdfNoSections: 'Sélectionnez au moins une section PDF.', noPdf: 'Prêt à traiter vos chiffres clés', processing: '⏳ Traitement du PDF…',
-    pdfSelectAll: 'Tout sélectionner', pdfSelectNone: 'Tout désélectionner', pdfExportConfirmBtn: 'Télécharger le PDF', kpiExport: 'Exporter les indicateurs', imageDownload: 'Télécharger en PNG', imageCopy: 'Copier comme image',
+    pdfSelectAll: 'Tout sélectionner', pdfSelectNone: 'Tout désélectionner', printPdf: 'Imprimer en PDF', printPdfDestinationHint: 'Choisissez « Enregistrer au format PDF » comme destination/imprimante dans la fenêtre d’impression.', kpiExport: 'Exporter les indicateurs', imageDownload: 'Télécharger en PNG', imageCopy: 'Copier comme image',
     success: n => '✅ PDF chargé et traité : ' + n + ' lignes de données.', error: '❌ Erreur lors du traitement du PDF : ',
     broker: 'Courtier', koepelnummer: 'n° coupole', groepsnummer: 'n° groupe', vs: 'vs', main: 'Principal', sub: 'Sous-cat.', lowerPositive: 'baisse positive', lowerBetter: 'sinistres : plus bas est meilleur', viewModeLabel: 'Affichage', viewAll: 'Tout', viewMainOnly: 'Catégories principales', viewSubOnly: 'Sous-catégories', drillDown: 'Affichage limité', drillDownActive: 'Tout afficher', importControlTitle: 'Contrôle import', importControlSub: 'Contrôle rapide de l’interprétation du PDF', importPeriods: 'Nombre de périodes', importLatestPeriod: 'Dernière période trouvée', importTotalProd: 'TOTAL NON VIE production', importTotalSchade: 'TOTAL NON VIE sinistres', importSpPct: 'S/P % lu correctement', importBroker: 'Courtier/n° coupole', yes: 'Oui', no: 'Non', topCompactTitle: 'Import PDF & contrôle', topShow: 'Afficher les informations import', topHide: 'Masquer les informations import', topOk: 'Contrôle import OK', topAttention: n => n + ' point' + (n === 1 ? '' : 's') + ' d’attention', topPeriodsShort: 'périodes', topLatestShort: 'dernière',
     tabSamenvatting: 'Résumé', tabProductie: 'Production', tabVerval: 'Chute', tabTransformatie: 'Transformation', tabProgressie: 'Progression', tabSchade: 'Sinistres', tabPortefeuille: 'Portefeuille', tabDetail: 'Détail', pdfOptDetail: 'Détail par catégorie',
@@ -179,10 +259,12 @@ function setHtml(id, html) { const el = $(id); if (el) el.innerHTML = html; }
 function updateStaticLanguage() {
   document.documentElement.lang = currentLang; document.title = 'Dashboard kerncijfers life';
   setText('languageLabel', currentLang === 'fr' ? 'Langue' : 'Taal / Langue');
-  for (const id of ['pageTitle', 'heroEyebrow', 'heroBenefitAnalysis', 'heroBenefitCompare', 'heroBenefitSafe', 'uploadTitle', 'uploadHint', 'heroUploadButton', 'heroUploadMeta', 'pdfSelectAll', 'pdfSelectNone', 'pdfExportConfirmBtn']) setText(id, msg(id));
+  for (const id of ['pageTitle', 'heroEyebrow', 'heroBenefitAnalysis', 'heroBenefitCompare', 'heroBenefitSafe', 'uploadTitle', 'uploadHint', 'heroUploadButton', 'heroUploadMeta', 'pdfSelectAll', 'pdfSelectNone']) setText(id, msg(id));
   setHtml('pageLead', msg('pageLead'));
   setText('downloadCsvLabel', msg('downloadCsv'));
   setText('exportPdfLabel', msg('exportPdf'));
+  setText('printPdfBtn', msg('printPdf'));
+  setText('pdfPrintDestinationHint', msg('printPdfDestinationHint'));
   setText('summaryTitle', msg('tabSamenvatting'));
   setText('previousYearsToggleLabel', currentLang === 'fr' ? 'Années précédentes' : 'Vorige jaren');
   $('viewModeControls').setAttribute('aria-label', msg('viewModeLabel'));
@@ -195,6 +277,7 @@ function updateStaticLanguage() {
   setText('viewAllBtn', msg('viewAll')); setText('viewMainBtn', msg('viewMainOnly')); setText('viewSubBtn', msg('viewSubOnly')); applyDashboardDisplayModes(); setText('topCompactTitle', msg('topCompactTitle')); if (lastData && (dashboardCurrentPeriod || currentDashboardType === 'adviesvergoeding')) { if (dashboardCurrentPeriod) renderImportControl(lastData, dashboardCurrentPeriod); renderTopCompactBar(); updateTopInfoToggleButton(); }
   setText('prodTitle', msg('prodTitle')); setText('vervalTitle', msg('vervalTitle')); setText('transTitle', msg('transTitle')); setText('progTitle', msg('progTitle')); setText('portefeuilleTitle', msg('portefeuilleTitle')); setText('detailTitle', msg('detailTitle')); setText('productionPieTitle', msg('productionPieTitle'));
   updateSectionPeriodInline(dashboardPreviousPeriod, dashboardCurrentPeriod);
+  applyLifeDashboardLabels();
   setText('prodNote', msg('prodNote')); setText('vervalNote', msg('vervalNote')); setText('transNote', msg('transNote')); setText('progNote', msg('progNote')); setText('portefeuilleNote', msg('portefeuilleNote'));
   const status = $('status'); if (status && (!csvResult || status.textContent.includes('Nog geen PDF') || status.textContent.includes('Aucun PDF'))) status.textContent = msg('noPdf');
   const styleId = 'i18nTotalPrefixStyle';
@@ -1178,7 +1261,7 @@ function buildPdfHeader() {
   } else {
     const fallback = document.createElement('div');
     fallback.className = 'brokerInfo';
-    fallback.innerHTML = `<div><div class="label">Kerncijfers Non-Life</div><div class="brokerName">Dashboard</div></div>`;
+    fallback.innerHTML = `<div><div class="label">Kerncijfers Life</div><div class="brokerName">Dashboard</div></div>`;
     header.appendChild(fallback);
   }
   return header;
@@ -1648,130 +1731,164 @@ function selectedPdfSections() {
     .map(input => input.value));
 }
 
-async function exportSummaryPdf() {
-  if (!lastData) return;
-  const mainBtn = $('exportPdfBtn');
-  const confirmBtn = $('pdfExportConfirmBtn');
-  try {
-    const selected = selectedPdfSections();
-    if (!selected.size) {
-      alert(msg('pdfNoSections'));
-      return;
+function lifePdfSections() {
+  return [
+    {key:'summary', tab:'tabSamenvatting', label:'pdfOptSummary'},
+    {key:'productie', tab:'tabProductie', label:'pdfOptProductie', source:'prodGrouped'},
+    {key:'verval', tab:'tabVerval', label:'pdfOptVerval', source:'vervalGrouped'},
+    {key:'transformatie', tab:'tabTransformatie', label:'pdfOptTransformatie', source:'transGrouped'},
+    {key:'portefeuille', tab:'tabPortefeuille', label:'pdfOptPortefeuille', source:'portefeuilleCharts'},
+    {key:'detail', tab:'tabDetail', label:'pdfOptDetail', source:'categoryDetails'}
+  ];
+}
+function updateLifePdfSectionLabels() {
+  lifePdfSections().forEach(section => setText(section.label, $(section.tab)?.textContent || ''));
+}
+function prepareLifePdfBlock(source, section) {
+  const clone = source.cloneNode(true);
+  clone.classList.remove('manualClosed', 'drillOpen');
+  clone.querySelectorAll('.blockExportActions,.pieTooltip').forEach(el => el.remove());
+  const canvases = source.querySelectorAll('canvas');
+  clone.querySelectorAll('canvas').forEach((canvas, index) => {
+    const image = document.createElement('img');
+    image.src = canvases[index].toDataURL('image/png');
+    image.alt = section;
+    canvas.replaceWith(image);
+  });
+  clone.querySelectorAll('[id]').forEach(el => el.removeAttribute('id'));
+  // Match the visible main/subcategory selection, while opening the exported blocks.
+  if (viewMode === 'main') clone.querySelectorAll('.barrow:has(.catSubText)').forEach(el => el.remove());
+  if (viewMode === 'sub' && !clone.classList.contains('totalNonLife')) clone.querySelectorAll('.barrow:has(.catMainText.hasSubs)').forEach(el => el.remove());
+  return clone;
+}
+function lifePdfDistribution(section) {
+  const cfg = lifePillarPieConfig(section);
+  const card = document.createElement('div');
+  card.className = 'portfolioPieCard pdfLifeDistribution';
+  card.innerHTML = '<h2>' + esc(cfg.title) + '</h2><div class="portfolioPiePair"></div>';
+  [dashboardPreviousPeriod, dashboardCurrentPeriod].forEach((period, index) => {
+    const panel = document.createElement('div');
+    panel.className = 'portfolioPiePanel';
+    const heading = index ? (currentLang === 'fr' ? 'Dernière période' : 'Laatste periode') : (currentLang === 'fr' ? 'Période précédente' : 'Vorige periode');
+    const items = lifePillarPieItems(lastData, period, cfg);
+    const canvas = document.createElement('canvas');
+    canvas.width = 990; canvas.height = 645;
+    drawPortfolioPie(canvas, period, items, -1, cfg.center);
+    panel.innerHTML = '<h3>' + esc(heading + ' · ' + fmtPeriod(period)) + '</h3><img alt="' + esc(cfg.title) + '" src="' + canvas.toDataURL('image/png') + '"><div class="portfolioPieTotal">' + esc(cfg.total) + ': <b>' + euro.format(items.reduce((sum, item) => sum + item.value, 0)) + '</b></div><div class="pieLegend"></div>';
+    renderPortfolioPieLegend(panel.querySelector('.pieLegend'), items);
+    card.querySelector('.portfolioPiePair').appendChild(panel);
+  });
+  return card;
+}
+async function appendLifePdfBlocks(root, blocks, section) {
+  let page, frame, count = 0;
+  const startPage = () => {
+    page = document.createElement('div');
+    page.className = 'pdfExportPage pdfTestPage pdfLifePage';
+    page.dataset.section = section.key;
+    const heading = document.createElement('h2');
+    heading.className = 'pdfLifeSectionTitle';
+    heading.textContent = $(section.tab).textContent + ' · ' + fmtPeriod(dashboardPreviousPeriod) + ' → ' + fmtPeriod(dashboardCurrentPeriod);
+    page.appendChild(heading);
+    frame = document.createElement('div');
+    frame.className = 'pdfLifeFrame';
+    page.appendChild(frame);
+    root.appendChild(page);
+    count = 0;
+  };
+  const bottom = () => frame.getBoundingClientRect().bottom;
+  for (const block of blocks) {
+    if (!page) startPage();
+    frame.appendChild(block);
+    await Promise.all(Array.from(block.querySelectorAll('img')).map(img => img.decode().catch(() => {})));
+    if (block.getBoundingClientRect().bottom > bottom() && count) {
+      block.remove(); startPage(); frame.appendChild(block);
     }
-    setPdfOptionsOpen(false);
-    mainBtn.disabled = true;
-    confirmBtn.disabled = true;
-    setText('exportPdfLabel', msg('pdfBusy'));
-    document.body.classList.add('pdfExportBusy');
-
-    const summary = $('insightSummary');
-    const items = summary ? Array.from(summary.querySelectorAll('.insightItem')) : [];
-    if (selected.has('summary') && items.length < 4) throw new Error(currentLang === 'fr' ? 'Résumé incomplet.' : 'Samenvatting is nog niet volledig opgebouwd.');
-
-    {
-      const root = document.createElement('div');
-      root.className = 'pdfExportRoot';
-      if (selected.has('summary')) {
-        root.appendChild(buildPdfTestPage(items.slice(0, 2), true));
-        root.appendChild(buildPdfTestPage(items.slice(2, 4)));
-      }
-      document.body.appendChild(root);
-      await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
-      if (selected.has('productie')) await buildPdfTestCategoryPages(root, 'prodGrouped', 'productie');
-      if (selected.has('verval')) await buildPdfTestCategoryPages(root, 'vervalGrouped', 'verval');
-      if (selected.has('transformatie')) await buildPdfTestCategoryPages(root, 'transGrouped', 'transformatie');
-      if (selected.has('schade')) await buildPdfTestCategoryPages(root, 'schadeGrouped', 'schade');
-      if (selected.has('distributions')) buildPdfDistributionPages(root, lastData, dashboardCurrentPeriod);
-      if (selected.has('detail')) await buildPdfTestDetailPages(root);
-      addPdfTestPageNumbers(root);
-      await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
-      const { jsPDF } = window.jspdf;
-      const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4', compress: true });
-      const pageW = pdf.internal.pageSize.getWidth();
-      const pageH = pdf.internal.pageSize.getHeight();
-      const pages = Array.from(root.querySelectorAll('.pdfTestPage'));
-      for (let i = 0; i < pages.length; i++) {
-        const canvas = await html2canvas(pages[i], {
-          scale: 2,
-          backgroundColor: '#ffffff',
-          useCORS: true,
-          logging: false,
-          windowWidth: pages[i].scrollWidth,
-          windowHeight: pages[i].scrollHeight
-        });
-        if (i > 0) pdf.addPage('a4', 'portrait');
-        pdf.addImage(canvas.toDataURL('image/jpeg', 0.95), 'JPEG', 0, 0, pageW, pageH, undefined, 'FAST');
-      }
-      root.remove();
-      const name = brokerInfo?.name || $('brokerName')?.textContent || 'Dashboard';
-      pdf.save(`${makeSafeFilePart(name)}_samenvatting.pdf`);
-      return;
+    // A large category stays intact; fit only that individual block to the page.
+    if (block.getBoundingClientRect().bottom > bottom()) {
+      const width = block.getBoundingClientRect().width;
+      const height = block.getBoundingClientRect().height;
+      const scale = Math.min(1, (bottom() - block.getBoundingClientRect().top - 2) / height);
+      if (!(scale > 0)) throw new Error('PDF: onvoldoende ruimte voor dit blok.');
+      const fit = document.createElement('div');
+      fit.style.cssText = 'position:relative;height:' + height * scale + 'px;flex:none';
+      block.replaceWith(fit); fit.appendChild(block);
+      block.style.cssText += ';position:absolute;left:0;top:0;width:' + width + 'px;transform-origin:top left;transform:scale(' + scale + ');margin:0!important';
     }
-
-    const root = document.createElement('div');
-    root.className = 'pdfExportRoot';
-    items.slice(0, 4).forEach(item => root.appendChild(buildPdfPage(item))); // één samenvattingsblok per landscape-pagina
-    root.appendChild(buildPdfDetailPage('#categoryDetails .productionDetail'));
-    root.appendChild(buildPdfDetailPage('#categoryDetails .schadeDetail'));
-    root.appendChild(buildPdfPortfolioPiePage('portfolioPiePrevPanel', 'portfolioPiePrevCanvas', $('portfolioPiePrevTitle')?.textContent || ''));
-    root.appendChild(buildPdfPortfolioPiePage('portfolioPieCurrPanel', 'portfolioPieCurrCanvas', $('portfolioPieCurrTitle')?.textContent || ''));
-
-    document.body.appendChild(root);
-    await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
-    fitPdfDetailPages(root);
-    fitPdfPortfolioPiePages(root);
-    await new Promise(resolve => requestAnimationFrame(resolve));
-
-    const { jsPDF } = window.jspdf;
-    const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4', compress: true });
-    const pageW = pdf.internal.pageSize.getWidth();
-    const pageH = pdf.internal.pageSize.getHeight();
-    const margin = 6;
-    const maxW = pageW - margin * 2;
-    const maxH = pageH - margin * 2;
-
-    const pages = Array.from(root.querySelectorAll('.pdfExportPage'));
-    for (let i = 0; i < pages.length; i++) {
-      const canvas = await html2canvas(pages[i], {
-        scale: 2,
-        backgroundColor: '#ffffff',
-        useCORS: true,
-        logging: false,
-        windowWidth: pages[i].scrollWidth,
-        windowHeight: pages[i].scrollHeight
-      });
-      if (i > 0) pdf.addPage('a4', 'landscape');
-      const ratio = Math.min(maxW / canvas.width, maxH / canvas.height);
-      const imgW = canvas.width * ratio;
-      const imgH = canvas.height * ratio;
-      const x = (pageW - imgW) / 2;
-      const y = (pageH - imgH) / 2;
-      pdf.addImage(canvas.toDataURL('image/jpeg', 0.94), 'JPEG', x, y, imgW, imgH, undefined, 'FAST');
+    count++;
+  }
+}
+function lifePdfSummaryKpis() {
+  const kpis = document.createElement('div');
+  kpis.className = 'kpis pdfLifeKpis';
+  kpis.innerHTML = (lastKpiContext?.summary || []).map(item => {
+    const delta = yoy(item.o, item.v);
+    return '<div class="kpi"><div class="label">' + esc(item.l) + '<br>ULT. ' + esc(dashboardCurrentPeriod) + '</div><div class="value">' + fmt(item.v,item.type) + '</div><div class="delta ' + cls(delta, item.invert) + '">' + signedPct(delta) + ' ' + msg('vs') + ' ' + esc(dashboardPreviousPeriod) + '</div>' + lifeKpiComparisonHtml(item,dashboardPreviousPeriod,dashboardCurrentPeriod) + '</div>';
+  }).join('');
+  return kpis;
+}
+async function buildLifePdfPages(root, selected) {
+  document.body.appendChild(root);
+  if (document.fonts?.ready) await document.fonts.ready;
+  for (const section of lifePdfSections()) {
+    if (!selected.has(section.key)) continue;
+    let blocks;
+    if (section.key === 'summary') {
+      const summary = $('insightSummary');
+      blocks = [buildPdfHeader(), lifePdfSummaryKpis(), ...Array.from(summary.querySelectorAll('.insightItem')).map(item => prepareLifePdfBlock(item, section.key))];
+      const mix = summary.querySelector('.summaryProductionMixCard');
+      if (mix) blocks.push(prepareLifePdfBlock(mix, section.key));
+    } else {
+      blocks = Array.from($(section.source).querySelectorAll(':scope > .cat')).map(block => prepareLifePdfBlock(block, section.key));
+      if (section.key !== 'detail') blocks.push(lifePdfDistribution(section.key));
     }
-    root.remove();
-
-    const name = brokerInfo?.name || $('brokerName')?.textContent || 'Dashboard';
-    pdf.save(`${makeSafeFilePart(name)}_samenvatting.pdf`);
-  } catch (err) {
-    console.error(err);
-    alert((currentLang === 'fr' ? 'Impossible de créer le PDF : ' : 'PDF kon niet worden gemaakt: ') + err.message);
-  } finally {
-    const root = document.querySelector('.pdfExportRoot');
-    if (root) root.remove();
-    const testRoot = document.querySelector('.pdfTestScreenshotRoot');
-    if (testRoot) testRoot.remove();
-    document.body.classList.remove('pdfExportBusy');
-    mainBtn.disabled = false;
-    confirmBtn.disabled = false;
+    if (!blocks.length) throw new Error('PDF: geen inhoud gevonden voor ' + $(section.tab).textContent);
+    await appendLifePdfBlocks(root, blocks, section);
+  }
+  addPdfTestPageNumbers(root);
+  await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+}
+let lifePrintCleanup = null;
+async function printSelectedPdf() {
+  if (!lastData || lifePrintCleanup || document.body.classList.contains('pdfExportBusy')) return;
+  const selected = selectedPdfSections();
+  if (!selected.size) { alert(msg('pdfNoSections')); return; }
+  const buttons = ['exportPdfBtn','printPdfBtn'].map($).filter(Boolean);
+  const originalTitle = document.title;
+  let root;
+  const finish = () => {
+    window.removeEventListener('afterprint', finish);
+    root?.remove();
+    document.title = originalTitle;
+    document.body.classList.remove('printingPdf','pdfPrintPreparing','pdfExportBusy');
+    buttons.forEach(button => button.disabled = false);
     setText('exportPdfLabel', msg('exportPdf'));
-    if (!$('pdfOptionsWrap').classList.contains('open')) mainBtn.focus();
+    lifePrintCleanup = null;
+  };
+  try {
+    setPdfOptionsOpen(false);
+    buttons.forEach(button => button.disabled = true);
+    setText('exportPdfLabel', msg('pdfBusy'));
+    document.body.classList.add('pdfExportBusy','pdfPrintPreparing');
+    root = document.createElement('div'); root.className = 'pdfExportRoot pdfLifeExportRoot';
+    await buildLifePdfPages(root, selected);
+    const pages = Array.from(root.querySelectorAll('.pdfTestPage'));
+    if (!pages.length) throw new Error('PDF: geen pagina’s aangemaakt.');
+    lifePrintCleanup = finish;
+    window.addEventListener('afterprint', finish, {once:true});
+    document.body.classList.add('printingPdf');
+    document.title = 'Dashboard kerncijfers life - ' + makeSafeFilePart(brokerInfo?.name || $('brokerName')?.textContent || 'Dashboard');
+    window.print();
+  } catch (error) {
+    console.error(error); finish();
+    alert((currentLang === 'fr' ? 'Impossible de créer le PDF : ' : 'PDF kon niet worden gemaakt: ') + error.message);
   }
 }
 
 function setPdfOptionsOpen(open) {
   $('pdfOptionsWrap').classList.toggle('open', open);
   $('exportPdfBtn').setAttribute('aria-expanded', String(open));
-  if (open) $('pdfSelectAll').focus();
+  if (open) $('pdfOptionsMenu').querySelector('.pdfSectionCheck')?.focus();
 }
 
 function selectPdfSections(selected) {
@@ -1780,7 +1897,7 @@ function selectPdfSections(selected) {
 
 $('pdfSelectAll').addEventListener('click', () => selectPdfSections(true));
 $('pdfSelectNone').addEventListener('click', () => selectPdfSections(false));
-$('pdfExportConfirmBtn').addEventListener('click', exportSummaryPdf);
+$('printPdfBtn').addEventListener('click', printSelectedPdf);
 $('exportPdfBtn').addEventListener('click', e => {
   e.stopPropagation();
   setPdfOptionsOpen(!$('pdfOptionsWrap').classList.contains('open'));
@@ -5172,16 +5289,18 @@ function renderLifeGroupedSection(containerId, data, type, prevP, currP, renderG
   $(containerId).innerHTML = totalHtml + catHtml || `<div class="note">${esc(emptyText)}</div>`;
 }
 function applyLifeDashboardLabels() {
-  setText('tabSamenvatting', 'Samenvatting');
-  setText('tabProductie', 'Productie');
-  setText('tabVerval', 'Koopsommen');
-  setText('tabTransformatie', 'Verhogingen');
+  const fr = currentLang === 'fr';
+  setText('tabSamenvatting', fr ? 'Résumé' : 'Samenvatting');
+  setText('tabProductie', fr ? 'Production' : 'Productie');
+  setText('tabVerval', fr ? 'Primes uniques' : 'Koopsommen');
+  setText('tabTransformatie', fr ? 'Augmentations' : 'Verhogingen');
   setText('tabPortefeuille', 'Portefeuille');
   setText('prodTitle', 'Productie');
   setText('vervalTitle', 'Koopsommen');
   setText('transTitle', 'Verhogingen');
   setText('portefeuilleTitle', 'Portefeuille');
   setText('detailTitle', 'Hoofd- en subcategorieen');
+  updateLifePdfSectionLabels();
   $('tabProgressie')?.classList.add('hidden');
   $('progressie')?.classList.add('hidden');
   if ($('tabProgressie')?.classList.contains('active')) {

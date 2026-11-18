@@ -4,11 +4,10 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Dashboard rappelcijfers life</title>
-  <link rel="stylesheet" href="dashboardliferappel.css?v=20261118-version-date">
+  <link rel="stylesheet" href="dashboardliferappel.css?v=20261118-rappel-portrait">
   <script defer src="libs/xlsx.full.min.js"></script>
   <script defer src="libs/html2canvas.min.js"></script>
-  <script defer src="libs/jspdf.umd.min.js"></script>
-  <script defer src="dashboardliferappel.js?v=20261118-version-date"></script>
+  <script defer src="dashboardliferappel.js?v=20261118-rappel-portrait"></script>
 </head>
 <body>
   <button class="appVersion" id="version">v18.11.2026</button>
@@ -42,7 +41,7 @@
         <div class="topCompactMain"><span class="topCompactTitle" id="sourceTitle"></span><span class="topCompactSummary" id="source"></span></div>
         <div class="topCompactActions" id="topActions">
           <button class="btn-csv" id="csv"></button>
-          <details id="pdfMenu"><summary class="life-pdf-toggle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M12 18v-6m-3 3 3-3 3 3"/></svg><span id="pdfLabel"></span><svg class="life-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="m7 10 5 5 5-5"/></svg></summary><div class="life-pdf-options"><strong id="pdfSections"></strong><div id="pdfChecks"></div><button class="life-button" id="print"></button></div></details>
+          <details id="pdfMenu"><summary class="life-pdf-toggle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M12 18v-6m-3 3 3-3 3 3"/></svg><span id="pdfLabel"></span><svg class="life-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="m7 10 5 5 5-5"/></svg></summary><div class="life-pdf-options"><strong id="pdfSections"></strong><div class="pdfSelectionActions"><button type="button" id="pdfSelectAll">Alles selecteren</button><button type="button" id="pdfSelectNone">Niets selecteren</button></div><div id="pdfChecks"></div><button class="life-button" id="print"></button></div></details>
           <button class="topInfoToggleBtn" id="replace"></button>
         </div>
       </div>
