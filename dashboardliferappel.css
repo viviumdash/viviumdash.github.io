@@ -2174,3 +2174,10 @@ body:not(.topInfoReady) .hero .panel .lead {
   body:not(.topInfoReady) .wrap { padding-inline: 22px; }
   body:not(.topInfoReady) .hero #pageTitle { min-height: 2.3em; }
 }
+
+/* Distribution tables share Detail's column separators. */
+#groups-table .life-table th + th,
+#groups-table .life-table td + td { border-inline-start:1px dashed rgba(13,20,115,.24); }
+#groups-table .life-table:not(:has(.life-group-label)) :is(th,td):first-child { min-width:110px; width:130px; white-space:normal; }
+#groups-table .life-table :is(th,td) { padding:10px 8px; }
+#groups-table .life-table th { white-space:normal; }

@@ -16,11 +16,11 @@
 <script src="libs/pdf.min.js"></script>
 <script src="libs/html2canvas.min.js"></script>
 <script src="libs/jspdf.umd.min.js"></script>
-<link rel="stylesheet" href="dashboard.css?v=20261117-intro-alignment">
+<link rel="stylesheet" href="dashboard.css?v=20261118-version-date">
 </head>
 <body>
 <svg width="0" height="0" aria-hidden="true" style="position:absolute;pointer-events:none"><defs><filter id="viviumLogoTransparent" color-interpolation-filters="sRGB" x="0" y="0" width="100%" height="100%"><feColorMatrix in="SourceGraphic" type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  1.18605 0 0 0 -0.18605"/></filter></defs></svg>
-<button type="button" class="appVersion" id="appVersionBtn" aria-haspopup="dialog" aria-controls="releaseNotesModal">v20.10,2026</button>
+<button type="button" class="appVersion" id="appVersionBtn" aria-haspopup="dialog" aria-controls="releaseNotesModal">v18.11.2026</button>
 <div class="releaseNotesModal hidden" id="releaseNotesModal" role="dialog" aria-modal="true" aria-labelledby="releaseNotesTitle">
   <div class="releaseNotesDialog">
     <div class="releaseNotesHead"><h2 id="releaseNotesTitle">Release notes</h2><button type="button" class="releaseNotesClose" id="releaseNotesCloseBtn" aria-label="Sluiten">×</button></div>
@@ -148,7 +148,7 @@
 
     <section id="samenvatting" class="section active">
       <div class="card full">
-        <div class="titleExportRow"><div class="sectionTitleWrap"><h2 id="summaryTitle">Samenvatting</h2><span class="sectionPeriodInline" id="summaryPeriodInline"></span></div><div class="sectionToolbarSlot"></div><div class="blockExportActions" data-export-target="summaryAll" aria-label="Samenvatting exporteren"><button type="button" class="blockExportBtn blockExportDownload" title="Download Samenvatting als PNG"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button><button type="button" class="blockExportBtn blockExportCopy" title="Kopieer Samenvatting als afbeelding"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><span style="font-size:11px;font-weight:950;padding-left:4px">Kopieer</span></button></div></div>
+        <div class="titleExportRow"><div class="sectionTitleWrap"><h2 id="summaryTitle">Samenvatting</h2><span class="sectionPeriodInline" id="summaryPeriodInline"></span></div><label class="summaryChartControl"><span id="summaryBarOrientationLabel">Grafiekweergave</span><select id="summaryBarOrientation" onchange="setSummaryBarOrientation(this.value)"><option id="summaryBarsVertical" value="vertical">Verticale balken</option><option id="summaryBarsHorizontal" value="horizontal">Horizontale balken</option></select></label><div class="sectionToolbarSlot"></div><div class="blockExportActions" data-export-target="summaryAll" aria-label="Samenvatting exporteren"><button type="button" class="blockExportBtn blockExportDownload" title="Download Samenvatting als PNG"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button><button type="button" class="blockExportBtn blockExportCopy" title="Kopieer Samenvatting als afbeelding"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><span style="font-size:11px;font-weight:950;padding-left:4px">Kopieer</span></button></div></div>
         <div id="insightSummary" class="insightSummary hidden"></div>
       </div>
       <div id="prodBarTooltip" class="prodBarTooltip"></div>
@@ -398,8 +398,12 @@ De weergave start nu met alleen hoofdcategorieën. Bovenaan kun je ook alleen su
 
 v20.10,2026
 mogelijkheid om meerdere PDFs in te lezen en te combineren in één rapport
+
+v18.11.2026
+Mogelijkheid om in Samenvatting te wisselen tussen verticale en horizontale grafieken.
+Bij Detail verticale randlijnen voorzien voor betere leesbaarheid.
 </script>
-<script src="dashboard.js?v=20261117-browser-title"></script>
+<script src="dashboard.js?v=20261118-version-date"></script>
 
 
 

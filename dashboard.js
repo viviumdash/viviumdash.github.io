@@ -171,6 +171,7 @@ let dashboardCurrentPeriod = null;
 let dashboardPreviousPeriod = null;
 let viewMode = 'main';
 let previousYearsMode = false;
+let summaryBarOrientation = 'vertical';
 let view360AnalysisMode = 'main';
 const view360OpenSubcategories = new Set();
 let drillMode = true;
@@ -259,6 +260,7 @@ function updateStaticLanguage() {
   setText('pdfOptionsTitle', msg('pdfOptionsTitle')); setText('pdfOptSummary', msg('tabSamenvatting')); setText('pdfOpt360', msg('tab360')); setText('pdfOptProductie', msg('tabProductie')); setText('pdfOptVerval', msg('tabVerval')); setText('pdfOptSchade', msg('tabSchade')); setText('pdfOptDistributions', currentLang === 'fr' ? 'Répartitions' : 'Verdelingen'); setText('pdfOptDetail', msg('tabDetail'));
   setText('tabSamenvatting', msg('tabSamenvatting')); setText('tab360', msg('tab360')); setText('tabProductie', msg('tabProductie')); setText('tabVerval', msg('tabVerval')); setText('tabProgressie', msg('tabProgressie')); setText('tabSchade', msg('tabSchade')); setText('tabPortefeuille', msg('tabPortefeuille')); setText('tabKpis', msg('tabKpis')); setText('tabDetail', msg('tabDetail'));
   setText('kpiCheckSamenvatting', msg('tabSamenvatting')); setText('kpiCheckProductie', msg('tabProductie')); setText('kpiCheckVerval', msg('tabVerval')); setText('kpiCheckProgressie', msg('tabProgressie')); setText('kpiCheckSchade', msg('tabSchade')); setText('kpiCheckPortefeuille', msg('tabPortefeuille')); updateKpiSelectorLabel();
+  updateSummaryBarControl();
   setText('viewModeLabel', msg('viewModeLabel')); setText('viewAllBtn', msg('viewAll')); setText('viewMainBtn', msg('viewMainOnly')); setText('viewSubBtn', msg('viewSubOnly')); setText('previousYearsToggleLabel', msg('previousYears')); setText('drillToggleBtn', drillMode ? msg('drillDownActive') : msg('drillDown')); updateViewDropdownLabel(); setText('topCompactTitle', msg('topCompactTitle')); if (lastData && dashboardCurrentPeriod) { renderImportControl(lastData, dashboardCurrentPeriod); renderTopCompactBar(); updateTopInfoToggleButton(); }
   setText('summaryTitle', msg('tabSamenvatting')); setText('view360Title', msg('tab360')); setText('view360MainBtn', msg('viewMainOnly')); setText('view360SubBtn', msg('viewSubOnly')); setText('view360AllBtn', msg('viewAll')); setText('prodTitle', msg('prodTitle')); setText('vervalTitle', msg('vervalTitle')); setText('progTitle', msg('progTitle')); setText('schadeTitle', msg('schadeTitle')); setText('portefeuilleTitle', msg('portefeuilleTitle')); setText('kpiOverviewTitle', msg('tabKpis')); setText('detailTitle', msg('detailTitle')); setText('productionPieTitle', msg('productionPieTitle'));
   document.querySelectorAll('[data-view360-analysis]').forEach(button => button.classList.toggle('active', button.dataset.view360Analysis === view360AnalysisMode));
@@ -2834,6 +2836,36 @@ function compactCategoryLabelParts(label) {
 function compactProdBarLabelHtml(label) {
   return compactCategoryLabelParts(label).map(part => `<span>${esc(part)}</span>`).join('');
 }
+function updateSummaryBarControl() {
+  const fr = currentLang === 'fr';
+  setText('summaryBarOrientationLabel', fr ? 'Affichage des graphiques' : 'Grafiekweergave');
+  setText('summaryBarsVertical', fr ? 'Barres verticales' : 'Verticale balken');
+  setText('summaryBarsHorizontal', fr ? 'Barres horizontales' : 'Horizontale balken');
+  const select = $('summaryBarOrientation');
+  if (select) select.value = summaryBarOrientation;
+}
+function setSummaryBarOrientation(value) {
+  summaryBarOrientation = value === 'horizontal' ? 'horizontal' : 'vertical';
+  hideProdBarTip();
+  if (lastData && dashboardPreviousPeriod && dashboardCurrentPeriod) {
+    renderInsightSummary(lastData, dashboardPreviousPeriod, dashboardCurrentPeriod);
+  }
+}
+function renderSummaryHorizontalBars(items, prevP, currP, title, type = 'money', lowerIsBetter = false) {
+  const max = Math.max(1, ...items.flatMap(item => [Math.abs(item.prev), Math.abs(item.curr)]));
+  const line = (item, period, current, delta = '') => {
+    const value = current ? item.curr : item.prev;
+    const count = current ? item.currCount : item.prevCount;
+    const countHtml = count == null ? '' : ' <span class="summaryCaseCount">(# ' + num.format(count) + ')</span>';
+    return '<div class="barline"><div class="period">' + esc(fmtPeriod(period)) + '</div><div class="track"><div class="fill ' + (current ? 'currPeriod' : 'prevPeriod') + '" style="width:' + Math.abs(value) / max * 100 + '%"></div></div><div class="barDeltaSlot">' + delta + '</div><div class="value">' + fmt(value, type) + countHtml + '</div></div>';
+  };
+  return '<div class="miniCard summaryHorizontalChart"><h3>' + esc(title) + '</h3><div class="bars">' + items.map(item => {
+    const d = type === 'pct' ? ppDelta(item.prev, item.curr) : yoy(item.prev, item.curr);
+    const deltaText = type === 'pct' ? signedPointDelta(d) : (d >= 0 ? '+' : '') + pct.format(d) + '%';
+    const delta = '<span class="summaryComparison ' + cls(d, lowerIsBetter) + '"><svg viewBox="0 0 12 24" aria-hidden="true"><path d="M2 22C12 22 12 2 2 2m3 4L2 2l4-1"/></svg>' + deltaText + '</span>';
+    return '<div class="barrow"><div class="barlabel">' + esc(item.label) + '</div><div class="bararea">' + line(item, currP, true) + line(item, prevP, false, delta) + '</div></div>';
+  }).join('') + '</div></div>';
+}
 function renderPremiumBarChart(data, prevP, currP, field, lowerIsBetter = false) {
   const cats = [
     'Auto Vloten','Auto Niet Vloten',
@@ -2842,19 +2874,25 @@ function renderPremiumBarChart(data, prevP, currP, field, lowerIsBetter = false)
     'Arbeidsongevallen','Rechtsbijstand'
   ];
   const normV = value => String(value || '').trim().toUpperCase();
-  const getValue = (key, period) => {
+  const getValue = (key, period, valueField = field) => {
     const aliases = portfolioCategoryAliases(key).map(normKey);
     const candidates = rowsOfPeriod(data, 'PRODUCTIE', period)
       .filter(row => aliases.includes(normV(row[cols.sub])) || aliases.includes(normV(row[cols.hoofd])));
-    const withData = candidates.slice().reverse().find(row => n(row[field]) !== 0);
-    return n((withData || candidates[candidates.length - 1] || {})[field]);
+    const withData = candidates.slice().reverse().find(row => n(row[valueField]) !== 0);
+    return n((withData || candidates[candidates.length - 1] || {})[valueField]);
   };
   const items = cats.map(key => {
     const prev = getValue(key, prevP);
     const curr = getValue(key, currP);
-    return { label: portfolioCategoryLabel(key), prev, curr, d: yoy(prev, curr) };
+    const countField = lowerIsBetter ? cols.vervalAantal : cols.prodAantal;
+    return { label: portfolioCategoryLabel(key), prev, curr, d: yoy(prev, curr),
+      prevCount: getValue(key, prevP, countField), currCount: getValue(key, currP, countField) };
   }).filter(item => item.prev !== 0 || item.curr !== 0);
   if (!items.length) return '';
+  if (summaryBarOrientation === 'horizontal') {
+    const title = currentLang === 'fr' ? (lowerIsBetter ? 'Prime de chute par branche' : 'Prime de production par branche') : (lowerIsBetter ? 'Vervalpremie per tak' : 'Productiepremie per tak');
+    return renderSummaryHorizontalBars(items, prevP, currP, title, 'money', lowerIsBetter);
+  }
 
   const max = Math.max(1, ...items.flatMap(item => [Math.abs(item.prev), Math.abs(item.curr)]));
   const chartHeight = 120;
@@ -2922,6 +2960,10 @@ function renderSpBarChart(data, prevP, currP, field, cellIndex) {
   }).filter(x => x.prev !== 0 || x.curr !== 0);
 
   if (!items.length) return '';
+  if (summaryBarOrientation === 'horizontal') {
+    const title = currentLang === 'fr' ? (field === cols.spCap ? 'S/P écrêté par branche' : 'S/P par branche') : (field === cols.spCap ? 'Afgetopte S/P per tak' : 'S/P per tak');
+    return renderSummaryHorizontalBars(items, prevP, currP, title, 'pct', true);
+  }
 
   const max = Math.max(1, ...items.flatMap(x => [Math.abs(x.prev), Math.abs(x.curr)]));
   const CHART_H = 120;

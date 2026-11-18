@@ -1877,3 +1877,26 @@ body:not(.topInfoReady) .hero .panel .lead {
   body:not(.topInfoReady) .wrap { padding-inline: 22px; }
   body:not(.topInfoReady) .hero #pageTitle { min-height: 2.3em; }
 }
+
+/* Summary charts can use the same horizontal comparisons as Life. */
+.summaryChartControl { display:flex; flex-wrap:wrap; align-items:center; gap:10px; margin:12px 0 0; min-height:43px; box-sizing:border-box; grid-column:1; grid-row:2; justify-self:start; color:var(--blue); font-size:13px; font-weight:700; }
+.summaryChartControl select { width:auto; padding:8px 14px; border:1px solid var(--line); border-radius:999px; background:#f5f9ff; color:var(--blue); font:inherit; cursor:pointer; }
+.summaryHorizontalChart { margin-top:18px; }
+.summaryHorizontalChart h3 { min-height:0; margin-bottom:18px; }
+.summaryHorizontalChart .barline { grid-template-columns:62px minmax(0,1fr) 72px 158px; gap:6px; }
+.summaryHorizontalChart .value { font-size:13px; white-space:nowrap; }
+.summaryCaseCount { color:var(--muted); }
+.summaryHorizontalChart .barDeltaSlot::before { content:none!important; }
+.summaryComparison { position:absolute; left:18px; top:-3px; transform:translateY(-50%); border:1px solid var(--line); border-radius:999px; padding:4px 8px; font-size:11px; line-height:1; background:#eef6fb; color:var(--muted); }
+.summaryComparison.pos { background:#e5f4f7; color:#007a60; border-color:#b7dce6; }
+.summaryComparison.neg { background:#fff4e8; color:#b65314; border-color:#ffd2b0; }
+.summaryComparison svg { position:absolute; right:calc(100% + 5px); top:50%; transform:translateY(-50%); width:11px; height:24px; fill:none; stroke:currentColor; stroke-width:1.5; stroke-linecap:round; stroke-linejoin:round; }
+@media(max-width:640px) {
+  .summaryHorizontalChart { padding:12px; }
+  .summaryHorizontalChart .barline { grid-template-columns:51px minmax(0,1fr) 55px 105px; gap:3px; }
+  .summaryHorizontalChart .value,.summaryHorizontalChart .period { font-size:10px; }
+  .summaryComparison { left:12px; font-size:9px; padding:3px 4px; }
+  .summaryComparison svg { right:calc(100% + 3px); width:8px; }
+}
+
+#samenvatting.active > .card > .titleExportRow > .sectionToolbarSlot { display:none; }
