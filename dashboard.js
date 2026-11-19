@@ -322,6 +322,28 @@ function subcategoryToggleHtml(hasSubcategories) {
   if (!hasSubcategories) return '';
   return `<button type="button" class="categorySubcategoryToggle" aria-expanded="false">${currentLang === 'fr' ? 'afficher les sous-catégories' : 'toon subcategorieën'}</button>`;
 }
+const categoryTypeFilterParents = new Set(['AUTO', 'PARTICULIEREN', 'ONDERNEMINGEN', 'PARTICULIERS', 'ENTREPRISES']);
+const hiddenCategoryTypes = new Map();
+function categoryTypeFilterHtml(cat, ordered) {
+  if (!categoryTypeFilterParents.has(normKey(cat))) return '';
+  const subs = ordered.filter(sub => sub !== cat);
+  if (!subs.length) return '';
+  const label = currentLang === 'fr' ? 'Catégories' : 'Categorieën';
+  return `<details class="categoryTypeFilter" data-filter-category="${esc(normKey(cat))}"><summary aria-label="${esc(cat)}: ${label}">${label} <span class="categoryTypeCount"></span></summary><div class="categoryTypeMenu" role="group" aria-label="${esc(cat)}: ${label}">${subs.map(sub => `<label><input type="checkbox" data-category-type="${esc(normKey(sub))}" checked><span>${escLabel(sub)}</span></label>`).join('')}</div></details>`;
+}
+function applyCategoryTypeFilters() {
+  document.querySelectorAll('.categoryTypeFilter').forEach(filter => {
+    if (viewMode !== 'sub') filter.open = false;
+    const hidden = hiddenCategoryTypes.get(filter.dataset.filterCategory) || new Set();
+    const inputs = Array.from(filter.querySelectorAll('[data-category-type]'));
+    inputs.forEach(input => { input.checked = !hidden.has(input.dataset.categoryType); });
+    filter.querySelector('.categoryTypeCount').textContent = `(${inputs.filter(input => input.checked).length}/${inputs.length})`;
+    filter.closest('.cat').querySelectorAll('.barrow,.vervalRatioSection').forEach(row => {
+      const sub = row.querySelector('.catSubText[data-subcategory]');
+      row.classList.toggle('categoryTypeHidden', !!sub && hidden.has(sub.dataset.subcategory));
+    });
+  });
+}
 function updateCategorySubcategoryToggle(block) {
   const button = block?.querySelector('.categorySubcategoryToggle');
   if (!button) return;
@@ -370,6 +392,7 @@ function applyDashboardDisplayModes() {
   dash.classList.toggle('view-main-only', viewMode === 'main');
   dash.classList.toggle('view-sub-only', viewMode === 'sub');
   dash.classList.toggle('drillMode', !!drillMode);
+  applyCategoryTypeFilters();
   document.querySelectorAll('[data-view]').forEach(btn => btn.classList.toggle('active', btn.dataset.view === viewMode));
   document.querySelectorAll('[data-view360-analysis]').forEach(btn => btn.classList.toggle('active', btn.dataset.view360Analysis === view360AnalysisMode));
   const previousYearsToggle = $('previousYearsToggle');
@@ -674,6 +697,10 @@ document.addEventListener('DOMContentLoaded', () => {
       requestAnimationFrame(() => window.scrollTo({ top: scrollY, left: 0, behavior: 'auto' }));
       return;
     }
+    document.querySelectorAll('.categoryTypeFilter[open]').forEach(filter => {
+      if (!filter.contains(e.target)) filter.open = false;
+    });
+    if (e.target.closest('.categoryTypeFilter')) return;
     const exportBtn = e.target.closest('.blockExportBtn');
     if (exportBtn) {
       e.preventDefault();
@@ -708,6 +735,23 @@ document.addEventListener('DOMContentLoaded', () => {
     const section = cat.closest('.section');
     if (!section || !['productie','verval','progressie','schade','detail'].includes(section.id)) return;
     toggleDashboardBlockVisibility(cat, '.p-18');
+  });
+  document.addEventListener('change', e => {
+    const input = e.target.closest('.categoryTypeFilter [data-category-type]');
+    if (!input) return;
+    const key = input.closest('.categoryTypeFilter').dataset.filterCategory;
+    const hidden = hiddenCategoryTypes.get(key) || new Set();
+    if (input.checked) hidden.delete(input.dataset.categoryType);
+    else hidden.add(input.dataset.categoryType);
+    hiddenCategoryTypes.set(key, hidden);
+    applyCategoryTypeFilters();
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key !== 'Escape') return;
+    document.querySelectorAll('.categoryTypeFilter[open]').forEach(filter => {
+      filter.open = false;
+      if (filter.contains(document.activeElement)) filter.querySelector('summary').focus();
+    });
   });
   $('kpis')?.addEventListener('click', e => {
     const spToggle = e.target.closest('.kpiSpToggle');
@@ -2305,7 +2349,7 @@ function orderedSubs(catRows, cat) { const subAll = [...new Set(catRows.map(r =>
 function categoryRowLabelHtml(s, cat, hasSubs = false) {
   const isMain = s === cat;
   const clsName = isMain ? `catMainText${hasSubs ? ' hasSubs' : ''}` : 'catSubText';
-  return `<span class="${clsName}">${escLabel(s)}</span>`;
+  return `<span class="${clsName}"${isMain ? '' : ` data-subcategory="${esc(normKey(s))}"`}>${escLabel(s)}</span>`;
 }
 function labelHtmlFor(ordered, cat) {
   const hasSubs = ordered.some(s => s !== cat);
@@ -4297,8 +4341,8 @@ function miniCardHtml(title, body, extraClass = '') {
   const cls = extraClass ? ` ${extraClass}` : '';
   return `<div class="miniCard${cls}"><h3>${title}</h3>${body}</div>`;
 }
-function categoryBlockHtml(cat, periodHtml, bodyHtml) {
-  return `<div class="cat" data-category-key="${esc(cat)}"><div class="catHead exportableBlockHeader"><div class="catTitle">${catTitleHtml(cat)}</div><div class="small">${fmtPeriod(periodHtml)}</div>${productBlockExportActionsHtml()}</div><div class="p-18">${bodyHtml}</div></div>`;
+function categoryBlockHtml(cat, periodHtml, bodyHtml, filterSubs = []) {
+  return `<div class="cat" data-category-key="${esc(cat)}"><div class="catHead exportableBlockHeader"><div class="catTitle">${catTitleHtml(cat)}${categoryTypeFilterHtml(cat, filterSubs)}</div><div class="small">${fmtPeriod(periodHtml)}</div>${productBlockExportActionsHtml()}</div><div class="p-18">${bodyHtml}</div></div>`;
 }
 function renderProductionGroup(cat, rows, prevP, currP, data) {
   const { ordered, labels, vals, head, prevHead } = groupContext(cat, rows, prevP, currP);
@@ -4315,7 +4359,7 @@ function renderProductionGroup(cat, rows, prevP, currP, data) {
     miniCardHtml(msg('aantalProductiezaken'), barCompareHtmlWithPreviousYears(labels, vals(cols.prodAantal, prevP), vals(cols.prodAantal, currP), prevP, currP, 'num', 'blue', '', { showDelta: true }, countHistory)) +
     `</div>`;
   const hasSubcategories = ordered.some(sub => sub !== cat);
-  return categoryBlockHtml(cat, `${prevP} → ${currP}`, metrics + cards + subcategoryToggleHtml(hasSubcategories));
+  return categoryBlockHtml(cat, `${prevP} → ${currP}`, metrics + cards + subcategoryToggleHtml(hasSubcategories), ordered);
 }
 
 function earnedPremiumForVervalRatio(data, key, period) {
@@ -4419,7 +4463,7 @@ function renderVervalGroup(cat, rows, prevP, currP, data) {
     miniCardHtml(msg('aantalVervallenZaken'), barCompareHtmlWithPreviousYears(labels, vals(cols.vervalAantal, prevP), vals(cols.vervalAantal, currP), prevP, currP, 'num', 'orange', '', { showDelta: true, invertDelta: true }, vervalAantalHistory)) +
     extraCards +
     `</div>`;
-  return categoryBlockHtml(cat, `${prevP} → ${currP}`, metrics + cards + subcategoryToggleHtml(ordered.some(sub => sub !== cat)));
+  return categoryBlockHtml(cat, `${prevP} → ${currP}`, metrics + cards + subcategoryToggleHtml(ordered.some(sub => sub !== cat)), ordered);
 }
 
 function progressionCompositionBars(data, cat, ordered, labels, vals, prevP, currP, counts = false) {
@@ -4570,7 +4614,7 @@ function renderSchadeGroup(cat, rows, prevP, currP, data) {
     miniCardHtml(msg('aantalSchadegevallen'), barCompareHtmlWithPreviousYears(labelHtml, vals(cols.schadeAantal, prevP), vals(cols.schadeAantal, currP), prevP, currP, 'num', 'red', '', { showDelta: true, invertDelta: true }, schadeAantalHistory)) +
     miniCardHtml(msg('verdiendePremie'), barCompareHtmlWithPreviousYears(labelHtml, vals(cols.verdiend, prevP), vals(cols.verdiend, currP), prevP, currP, 'money', 'blue', '', { showDelta: true }, verdiendHistory)) +
     `</div>`;
-  return categoryBlockHtml(cat, headRight, metrics + cards + subcategoryToggleHtml(hasSubs));
+  return categoryBlockHtml(cat, headRight, metrics + cards + subcategoryToggleHtml(hasSubs), ordered);
 }
 
 

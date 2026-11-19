@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="nl">
 <head>
 <!-- Google tag (gtag.js) -->
@@ -15,11 +15,12 @@
 <title>Dashboard kerncijfers non-life</title>
 <script src="libs/pdf.min.js"></script>
 <script src="libs/html2canvas.min.js"></script>
-<link rel="stylesheet" href="dashboard.css?v=20261118-print-only-cleanup">
+<link rel="stylesheet" href="dashboard.css?v=20261119-categories-aligned">
+<link rel="stylesheet" href="libs/dashboard-shared.css?v=20261118-shared-style">
 </head>
 <body>
 <svg width="0" height="0" aria-hidden="true" style="position:absolute;pointer-events:none"><defs><filter id="viviumLogoTransparent" color-interpolation-filters="sRGB" x="0" y="0" width="100%" height="100%"><feColorMatrix in="SourceGraphic" type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  1.18605 0 0 0 -0.18605"/></filter></defs></svg>
-<button type="button" class="appVersion" id="appVersionBtn" aria-haspopup="dialog" aria-controls="releaseNotesModal">v18.11.2026</button>
+<button type="button" class="appVersion" id="appVersionBtn" aria-haspopup="dialog" aria-controls="releaseNotesModal">v19.11.2026</button>
 <div class="releaseNotesModal hidden" id="releaseNotesModal" role="dialog" aria-modal="true" aria-labelledby="releaseNotesTitle">
   <div class="releaseNotesDialog">
     <div class="releaseNotesHead"><h2 id="releaseNotesTitle">Release notes</h2><button type="button" class="releaseNotesClose" id="releaseNotesCloseBtn" aria-label="Sluiten">×</button></div>
@@ -402,8 +403,14 @@ v18.11.2026
 Mogelijkheid om in Samenvatting te wisselen tussen verticale en horizontale grafieken.
 Bij Detail verticale randlijnen voorzien voor betere leesbaarheid.
 PDF opslaan via Print to PDF; afzonderlijke Export-knop verwijderd.
+Gedeelde lettertypes, basiskleuren en tekstgroottes centraal ondergebracht in libs/dashboard-shared.css.
+
+v19.11.2026
+Bij Productie, Verval en Schade kun je naast Auto via Categorieën de subcategorieën Vloten en Niet-vloten aan- of uitzetten. De selectie blijft behouden tussen deze tabs.
+De categoriedropdown staat volledig vóór de overige informatie en blijft aanklikbaar.
+De knop Categorieën verschijnt uitsluitend bij de weergave Subcategorieën en is ook beschikbaar voor Particulieren en Ondernemingen. De knoppen en menu's zijn onderling links uitgelijnd.
 </script>
-<script src="dashboard.js?v=20261118-print-only-cleanup"></script>
+<script src="dashboard.js?v=20261119-categories-aligned"></script>
 
 
 
