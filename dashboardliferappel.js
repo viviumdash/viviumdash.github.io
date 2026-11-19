@@ -36,7 +36,9 @@
         capital: singleGroup?null:number(r[3], i + 1, 'D', true),productionMonth:singleGroup?text(3):'',sourceLayout:singleGroup?'single-group':'groups',
         unweighted: Math.round(read('unweighted') * 100),
         weighted: Math.round(read('weighted') * 100),
-        rate: read('rate',true),commission: Math.round(read('commission') * 100),
+        rate: read('rate',true),
+        rappelRate: read('rate',true),
+        commission: Math.round(read('commission') * 100),
         groupId: group?.[1]||'', groupName: group?.[2]||'', producer: text(cols.producer), product: text(cols.product), sourceRow: i + 1});
     }
     if (!records.length) throw new Error('Het bestand bevat geen productieregels.');
@@ -53,7 +55,14 @@
     return [...groups].map(([id, rows]) => ({id, rows, ...totals(rows)}));
   }
   function share(value, total) { return total === 0 ? null : value / total * 100; }
-  const api = {TYPES, number, parseGrid, totals, groupBy, share,isSingleGroupHeader};
+  function rappelRates(records) {
+    return [...new Set(records.map(r=>r.rappelRate).filter(rate=>Number.isFinite(rate)))].sort((a,b)=>a-b);
+  }
+  function averageRappelRate(records) {
+    const rates=records.map(r=>r.rappelRate).filter(rate=>Number.isFinite(rate));
+    return rates.length ? rates.reduce((sum,rate)=>sum+rate,0)/rates.length : null;
+  }
+  const api = {TYPES, number, parseGrid, totals, groupBy, share,isSingleGroupHeader,rappelRates,averageRappelRate};
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.LifeCore = api;
 })(typeof globalThis !== 'undefined' ? globalThis : this);
@@ -74,7 +83,7 @@ const words = {
   csv:['Download CSV','Télécharger CSV'],pdf:['Exporteer PDF','Exporter PDF'],pdfSections:['PDF-secties','Sections PDF'],allSelect:['Alles selecteren','Tout sélectionner'],noneSelect:['Niets selecteren','Tout désélectionner'],print:['Print naar PDF','Imprimer en PDF'],
   dashboardView:['Dashboardweergave','Vue du tableau de bord'],
   summary:['Samenvatting','Résumé'],groups:['Verdelingen','Répartitions'],detail:['Detail','Détail'],
-  count:['Aantal productieregels','Nombre de lignes de production'],shortCount:['Aantal','Nombre'],unweighted:['Premie voor weging','Prime avant pondération'],weighted:['Premie na weging','Prime après pondération'],commission:['Rappelcommissie','Commission de rappel'],policies:['Aantal unieke polissen','Nombre de polices distinctes'],clients:['Aantal unieke klanten','Nombre de clients distincts'],
+  count:['Aantal productieregels','Nombre de lignes de production'],shortCount:['Aantal','Nombre'],unweighted:['Premie voor weging','Prime avant pondération'],weighted:['Premie na weging','Prime après pondération'],commission:['Rappelcommissie','Commission de rappel'],policies:['Aantal unieke polissen','Nombre de polices distinctes'],rappelRate:['Rappelpercentage','Pourcentage de rappel'],
   showWeighted:['Toon premie na weging','Afficher la prime après pondération'],
   productionPie:['Verdeling premie per type productie','Répartition des primes par type de production'],commissionPie:['Verdeling rappelcommissie per type','Répartition des commissions de rappel par type'],
   all:['Alle','Tous'],group:['Groep','Groupe'],type:['Type productie','Type de production'],product:['Product','Produit'],producer:['Producentnummer','Numéro de producteur'],search:['Zoek polis of klant','Rechercher police ou client'],reset:['Filters wissen','Effacer les filtres'],
@@ -155,19 +164,29 @@ function card(id,title,html,controls='') { return `<article class="card exportab
 function percent(value,total) { return pct(C.share(value,total)); }
 function metricValue(rows,key) {
   if(key==='policies')return new Set(rows.map(r=>r.policy)).size;
-  if(key==='clients')return new Set(rows.map(r=>r.client.normalize('NFKC').trim().replace(/\s+/g,' ').toLocaleLowerCase('nl-BE')).filter(Boolean)).size;
   return C.totals(rows)[key];
 }
+function rappelRateKpi(rows) {
+  const rates = types().map((code,i)=>{
+    const values = C.rappelRates(rows.filter(r=>r.type===code));
+    const label = values.length ? values.map(pct).join(' / ') : '—';
+    return `<div class="life-kpi-contribution"><div class="life-kpi-contribution-label"><span><i style="background:${colors[i%colors.length]}"></i>${esc(typeLabel(code))}</span><span>${esc(label)}</span></div><div class="life-kpi-contribution-track life-kpi-contribution-spacer" aria-hidden="true"></div></div>`;
+  }).join('');
+  const average=pct(C.averageRappelRate(rows));
+  const averageLabel=lang==='fr'?'Pourcentage de rappel moyen':'Gemiddeld rappelpercentage';
+  return `<div class="kpi"><div class="label">${t('rappelRate')}</div><div class="value" title="${averageLabel}" aria-label="${averageLabel}: ${esc(average)}">${average}</div><div class="life-kpi-contributions">${rates}</div></div>`;
+}
 function metrics(total,rows) {
-  return `<div class="life-kpis ${state.showWeighted ? '' : 'life-kpis-unweighted'}">${visibleFields(['unweighted','weighted','commission','policies','clients']).map(key => {
-    const value = ['policies','clients'].includes(key) ? fmt(total[key]) : money(total[key]);
+  return `<div class="life-kpis life-headline-kpis ${state.showWeighted ? '' : 'life-kpis-unweighted'}" style="--headline-kpi-rows:${types().length+2}">${visibleFields(['unweighted','weighted','commission','policies','rappelRate']).map(key => {
+    if(key==='rappelRate')return rappelRateKpi(rows);
+    const value = key==='policies' ? fmt(total[key]) : money(total[key]);
     const bars=types().map((code,i)=>{
       const amount=metricValue(rows.filter(r=>r.type===code),key),share=C.share(amount,total[key]);
-      const amountLabel=['policies','clients'].includes(key)?fmt(amount):money(amount);
+      const amountLabel=key==='policies'?fmt(amount):money(amount);
       const label=`${typeLabel(code)}: ${amountLabel} (${pct(share)})`;
       return `<div class="life-kpi-contribution" title="${esc(label)}"><div class="life-kpi-contribution-label"><span><i style="background:${colors[i%colors.length]}"></i>${esc(typeLabel(code))}</span><span>${amountLabel} (${pct(share)})</span></div><div class="life-kpi-contribution-track" role="img" aria-label="${esc(label)}"><span style="background:${colors[i%colors.length]};width:${Math.max(0,Math.min(100,share||0))}%"></span></div></div>`;
     }).join('');
-    const note=['policies','clients'].includes(key)?(lang==='fr'?'Une police ou un client peut figurer dans plusieurs types.':'Een polis of klant kan in meerdere types voorkomen.'):'';
+    const note=key==='policies'?(lang==='fr'?'Une police peut figurer dans plusieurs types.':'Een polis kan in meerdere types voorkomen.'):'';
     return `<div class="kpi"><div class="label">${t(key)}</div><div class="value">${value}</div><div class="life-kpi-contributions" title="${esc(note)}">${bars}</div></div>`;
   }).join('')}</div>`;
 }
@@ -307,7 +326,6 @@ function renderData() {
   if (!state.showWeighted) Object.values(state.sorts).forEach(sort=>{if(['weighted','weightedShare'].includes(sort.key))sort.key=sort.key==='weighted'?'unweighted':'unweightedShare';});
   const rows = selected(), total = C.totals(rows);
   total.policies = new Set(rows.map(r => r.policy)).size;
-  total.clients = new Set(rows.map(r => r.client.normalize('NFKC').trim().replace(/\s+/g,' ').toLocaleLowerCase('nl-BE')).filter(Boolean)).size;
   $('headline').innerHTML = head(t('total'),'headline') + metrics(total,rows);
   $('summary').innerHTML = summaryCharts(rows) + card('summary-types',t('byType'),typeCards(rows)) + card('summary-table',t('summary'),aggregateTable(rows,'type'));
   const productOptions=[...new Set(state.records.map(r=>r.product))].sort((a,b)=>a.localeCompare(b,lang==='fr'?'fr-BE':'nl-BE'));
