@@ -1412,6 +1412,9 @@ function normalizePdfSummaryBars(page, targetMaxHeight) {
 function buildPdfTestPage(summaryItems, includeHeader = false, includeKpis = false) {
   const page = document.createElement('div');
   page.className = 'pdfExportPage pdfTestPage' + (includeKpis ? ' pdfTestPageWithKpis' : '');
+  if (summaryItems.some(item => item.querySelector('.summaryHorizontalChart'))) {
+    page.classList.add('pdfHorizontalSummaryPage');
+  }
 
   if (includeHeader) page.appendChild(buildPdfHeader());
   if (includeKpis && lastKpiContext?.summary?.length) {
@@ -1725,8 +1728,10 @@ async function buildSelectedPdfPages(root, selected, items) {
     }
   }
   if (selected.has('summary')) {
-    root.appendChild(buildPdfTestPage(items.slice(0, 2), true, true));
-    root.appendChild(buildPdfTestPage(items.slice(2, 4)));
+    const itemsPerPage = items.some(item => item.querySelector('.summaryHorizontalChart')) ? 1 : 2;
+    for (let offset = 0; offset < items.length; offset += itemsPerPage) {
+      root.appendChild(buildPdfTestPage(items.slice(offset, offset + itemsPerPage), offset === 0, offset === 0));
+    }
   }
   document.body.appendChild(root);
   await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
@@ -1755,6 +1760,7 @@ async function buildSelectedPdfPages(root, selected, items) {
 
 function preparePrintVectorDetails(root) {
   root.querySelectorAll('.bararea > .barline > .barDeltaSlot:has(>span)').forEach(slot => {
+    if (slot.querySelector('.summaryComparison')) return; // This summary label already contains its vector arrow.
     const arrow = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     arrow.setAttribute('class', 'pdfPrintDeltaArrow');
     arrow.setAttribute('viewBox', '0 0 12 24');
@@ -2819,19 +2825,40 @@ function setSummaryBarOrientation(value) {
     renderInsightSummary(lastData, dashboardPreviousPeriod, dashboardCurrentPeriod);
   }
 }
+function summaryChartHeaderHtml(title, prevP, currP) {
+  return `<div class="summaryChartHeader summaryHorizontalHeader"><h3>${esc(title)}</h3><div class="summaryChartLegend summaryHorizontalLegend"><span><i class="summaryLegendSwatch currPeriod"></i>${esc(fmtPeriod(currP))}</span><span><i class="summaryLegendSwatch prevPeriod"></i>${esc(fmtPeriod(prevP))}</span></div></div>`;
+}
+function summaryComparisonHtml(prev, curr, prevP, currP, type, lowerIsBetter) {
+  const d = type === 'pct' ? ppDelta(prev, curr) : yoy(prev, curr);
+  const text = type === 'pct' ? signedPointDelta(Math.abs(d)).replace(/^\+/, '') : pct.format(Math.abs(d)) + '%';
+  const arrow = d > 0 ? '↑' : d < 0 ? '↓' : '→';
+  return `<span class="summaryComparison ${cls(d, lowerIsBetter)}" title="${esc(fmtPeriod(currP) + ' ' + msg('vs') + ' ' + fmtPeriod(prevP))}">${arrow} ${text}</span>`;
+}
+function summaryVerticalChartHtml(title, prevP, currP, bars, deltas, labels) {
+  return `<div class="prodBarChart summaryVerticalChart" style="--summary-category-count:${bars.length}">
+    ${summaryChartHeaderHtml(title, prevP, currP)}
+    <div class="summaryVerticalPlot"><div class="summaryVerticalPlotContent">
+      <div class="prodBarGrid">${bars.join('')}</div>
+      <div class="prodBarDeltaRow">${deltas.join('')}</div>
+      <div class="prodBarLabelRow">${labels.join('')}</div>
+    </div></div>
+  </div>`;
+}
 function renderSummaryHorizontalBars(items, prevP, currP, title, type = 'money', lowerIsBetter = false) {
+  const sortedItems = [...items].sort((a, b) => b.curr - a.curr);
+  const counts = items.flatMap(item => [item.prevCount, item.currCount]).filter(count => count != null);
+  const countWidth = counts.length ? Math.max(10, ...counts.map(count => num.format(count).length + 4)) : 0;
   const max = Math.max(1, ...items.flatMap(item => [Math.abs(item.prev), Math.abs(item.curr)]));
-  const line = (item, period, current, delta = '') => {
+  const line = (item, period, current) => {
     const value = current ? item.curr : item.prev;
     const count = current ? item.currCount : item.prevCount;
-    const countHtml = count == null ? '' : ' <span class="summaryCaseCount">(# ' + num.format(count) + ')</span>';
-    return '<div class="barline"><div class="period">' + esc(fmtPeriod(period)) + '</div><div class="track"><div class="fill ' + (current ? 'currPeriod' : 'prevPeriod') + '" style="width:' + Math.abs(value) / max * 100 + '%"></div></div><div class="barDeltaSlot">' + delta + '</div><div class="value">' + fmt(value, type) + countHtml + '</div></div>';
+    const countHtml = count == null ? '' : ' <span class="summaryCaseCount" title="' + esc(msg('aantalZaken')) + '">(# ' + num.format(count) + ')</span>';
+    const year = String(period).match(/\d{4}$/)?.[0] || fmtPeriod(period);
+    return '<div class="barline"><div class="period" title="' + esc(fmtPeriod(period)) + '">' + esc(year) + '</div><div class="track"><div class="fill ' + (current ? 'currPeriod' : 'prevPeriod') + '" style="width:' + Math.abs(value) / max * 100 + '%"></div></div><div class="value"><span>' + fmt(value, type) + '</span>' + countHtml + '</div></div>';
   };
-  return '<div class="miniCard summaryHorizontalChart"><h3>' + esc(title) + '</h3><div class="bars">' + items.map(item => {
-    const d = type === 'pct' ? ppDelta(item.prev, item.curr) : yoy(item.prev, item.curr);
-    const deltaText = type === 'pct' ? signedPointDelta(d) : (d >= 0 ? '+' : '') + pct.format(d) + '%';
-    const delta = '<span class="summaryComparison ' + cls(d, lowerIsBetter) + '"><svg viewBox="0 0 12 24" aria-hidden="true"><path d="M2 22C12 22 12 2 2 2m3 4L2 2l4-1"/></svg>' + deltaText + '</span>';
-    return '<div class="barrow"><div class="barlabel">' + esc(item.label) + '</div><div class="bararea">' + line(item, currP, true) + line(item, prevP, false, delta) + '</div></div>';
+  return '<div class="miniCard summaryHorizontalChart' + (counts.length ? ' hasCaseCounts' : '') + '" style="--summary-count-width:' + countWidth + 'ch">' + summaryChartHeaderHtml(title, prevP, currP) + '<div class="bars">' + sortedItems.map(item => {
+    const delta = summaryComparisonHtml(item.prev, item.curr, prevP, currP, type, lowerIsBetter);
+    return '<div class="barrow" data-category="' + esc(item.key || item.label) + '"><div class="summaryHorizontalRowHead"><div class="barlabel">' + esc(item.label) + '</div>' + delta + '</div><div class="bararea">' + line(item, currP, true) + line(item, prevP, false) + '</div></div>';
   }).join('') + '</div></div>';
 }
 function renderPremiumBarChart(data, prevP, currP, field, lowerIsBetter = false) {
@@ -2855,10 +2882,10 @@ function renderPremiumBarChart(data, prevP, currP, field, lowerIsBetter = false)
     const countField = lowerIsBetter ? cols.vervalAantal : cols.prodAantal;
     return { label: portfolioCategoryLabel(key), prev, curr, d: yoy(prev, curr),
       prevCount: getValue(key, prevP, countField), currCount: getValue(key, currP, countField) };
-  }).filter(item => item.prev !== 0 || item.curr !== 0);
+  }).filter(item => item.prev !== 0 || item.curr !== 0).sort((a, b) => b.curr - a.curr);
   if (!items.length) return '';
+  const title = currentLang === 'fr' ? (lowerIsBetter ? 'Prime de chute par branche' : 'Prime de production par branche') : (lowerIsBetter ? 'Vervalpremie per tak' : 'Productiepremie per tak');
   if (summaryBarOrientation === 'horizontal') {
-    const title = currentLang === 'fr' ? (lowerIsBetter ? 'Prime de chute par branche' : 'Prime de production par branche') : (lowerIsBetter ? 'Vervalpremie per tak' : 'Productiepremie per tak');
     return renderSummaryHorizontalBars(items, prevP, currP, title, 'money', lowerIsBetter);
   }
 
@@ -2868,22 +2895,14 @@ function renderPremiumBarChart(data, prevP, currP, field, lowerIsBetter = false)
   items.forEach(item => {
     const hPrev = Math.max(2, Math.round(Math.abs(item.prev) / max * chartHeight));
     const hCurr = Math.max(2, Math.round(Math.abs(item.curr) / max * chartHeight));
-    const direction = lowerIsBetter ? -item.d : item.d;
-    const deltaClass = direction > 0 ? 'pos' : direction < 0 ? 'neg' : 'neu';
     bars.push(`<div class="prodBarCol"><div class="prodBarPair">
-      <div class="prodBarStick prevPeriod" style="height:${hPrev}px" data-amount="${euro.format(item.prev)}" data-period="${esc(prevP)}" onmouseenter="showProdBarTip(event,this)" onmouseleave="hideProdBarTip()"></div>
       <div class="prodBarStick currPeriod" style="height:${hCurr}px" data-amount="${euro.format(item.curr)}" data-period="${esc(currP)}" onmouseenter="showProdBarTip(event,this)" onmouseleave="hideProdBarTip()"></div>
+      <div class="prodBarStick prevPeriod" style="height:${hPrev}px" data-amount="${euro.format(item.prev)}" data-period="${esc(prevP)}" onmouseenter="showProdBarTip(event,this)" onmouseleave="hideProdBarTip()"></div>
     </div></div>`);
-    deltas.push(`<div class="prodBarDeltaCol ${deltaClass}">${item.d >= 0 ? '+' : ''}${pct.format(item.d)}%</div>`);
+    deltas.push(`<div class="prodBarDeltaCol">${summaryComparisonHtml(item.prev, item.curr, prevP, currP, 'money', lowerIsBetter)}</div>`);
     labels.push(`<div class="prodBarLabelCol" title="${esc(item.label)}">${compactProdBarLabelHtml(item.label)}</div>`);
   });
-  const swatch = (color, opacity) => `<span class="prodBarSwatch" style="background:${color};opacity:${opacity}"></span>`;
-  return `<div class="prodBarChart">
-    <div class="prodBarLegend"><span>${swatch('#0d1473', '.85')}${esc(fmtPeriod(prevP))}</span><span>${swatch('#ff934c', '1')}${esc(fmtPeriod(currP))}</span></div>
-    <div class="prodBarGrid">${bars.join('')}</div>
-    <div class="prodBarDeltaRow">${deltas.join('')}</div>
-    <div class="prodBarLabelRow">${labels.join('')}</div>
-  </div>`;
+  return summaryVerticalChartHtml(title, prevP, currP, bars, deltas, labels);
 }
 function renderProdBarChart(data, prevP, currP) {
   return renderPremiumBarChart(data, prevP, currP, cols.prodPremie);
@@ -2900,8 +2919,6 @@ function renderVervalBarChart(data, prevP, currP) {
 // Zelfde categorieën en opbouw als productie/verval, maar tooltip en as tonen percentages.
 // Bij S/P is een daling positief en een stijging negatief.
 function renderSpBarChart(data, prevP, currP, field, cellIndex) {
-  const VIVIUM_BLUE   = '#0d1473';
-  const VIVIUM_ORANGE = '#ff934c';
   const cats = [
     'Auto Vloten','Auto Niet Vloten',
     'Particulieren Brand','Particulieren BA',
@@ -2925,11 +2942,11 @@ function renderSpBarChart(data, prevP, currP, field, cellIndex) {
     const { prev, curr } = getVal(key);
     const d = ppDelta(prev, curr);
     return { key, label: portfolioCategoryLabel(key), prev, curr, d };
-  }).filter(x => x.prev !== 0 || x.curr !== 0);
+  }).filter(x => x.prev !== 0 || x.curr !== 0).sort((a, b) => b.curr - a.curr);
 
   if (!items.length) return '';
+  const title = currentLang === 'fr' ? (field === cols.spCap ? 'S/P écrêté par branche' : 'S/P par branche') : (field === cols.spCap ? 'Afgetopte S/P per tak' : 'S/P per tak');
   if (summaryBarOrientation === 'horizontal') {
-    const title = currentLang === 'fr' ? (field === cols.spCap ? 'S/P écrêté par branche' : 'S/P par branche') : (field === cols.spCap ? 'Afgetopte S/P per tak' : 'S/P per tak');
     return renderSummaryHorizontalBars(items, prevP, currP, title, 'pct', true);
   }
 
@@ -2942,38 +2959,28 @@ function renderSpBarChart(data, prevP, currP, field, cellIndex) {
   items.forEach(x => {
     const hPrev = Math.max(2, Math.round(Math.abs(x.prev) / max * CHART_H));
     const hCurr = Math.max(2, Math.round(Math.abs(x.curr) / max * CHART_H));
-    const dClass = x.d > 0 ? 'neg' : x.d < 0 ? 'pos' : 'neu';
     barHtml.push(`<div class="prodBarCol">
       <div class="prodBarPair">
-        <div class="prodBarStick prevPeriod"
-             style="height:${hPrev}px"
-             data-amount="${pct.format(x.prev)}%"
-             data-period="${esc(prevP)}"
-             onmouseenter="showProdBarTip(event,this)"
-             onmouseleave="hideProdBarTip()"></div>
         <div class="prodBarStick currPeriod"
              style="height:${hCurr}px"
              data-amount="${pct.format(x.curr)}%"
              data-period="${esc(currP)}"
              onmouseenter="showProdBarTip(event,this)"
              onmouseleave="hideProdBarTip()"></div>
+        <div class="prodBarStick prevPeriod"
+             style="height:${hPrev}px"
+             data-amount="${pct.format(x.prev)}%"
+             data-period="${esc(prevP)}"
+             onmouseenter="showProdBarTip(event,this)"
+             onmouseleave="hideProdBarTip()"></div>
       </div>
     </div>`);
 
-    deltaHtml.push(`<div class="prodBarDeltaCol ${dClass}">${signedPointDelta(x.d)}</div>`);
+    deltaHtml.push(`<div class="prodBarDeltaCol">${summaryComparisonHtml(x.prev, x.curr, prevP, currP, 'pct', true)}</div>`);
     labelHtml.push(`<div class="prodBarLabelCol" title="${esc(x.label)}">${compactProdBarLabelHtml(x.label)}</div>`);
   });
 
-  const swatch = (color, op) => `<span class="prodBarSwatch" style="background:${color};opacity:${op}"></span>`;
-  const legendPrev = `${swatch(VIVIUM_BLUE, '.85')}${esc(fmtPeriod(prevP))}`;
-  const legendCurr = `${swatch(VIVIUM_ORANGE, '1')}${esc(fmtPeriod(currP))}`;
-
-  return `<div class="prodBarChart">
-    <div class="prodBarLegend"><span>${legendPrev}</span><span>${legendCurr}</span></div>
-    <div class="prodBarGrid">${barHtml.join('')}</div>
-    <div class="prodBarDeltaRow">${deltaHtml.join('')}</div>
-    <div class="prodBarLabelRow">${labelHtml.join('')}</div>
-  </div>`;
+  return summaryVerticalChartHtml(title, prevP, currP, barHtml, deltaHtml, labelHtml);
 }
 
 function showProdBarTip(e, el) {

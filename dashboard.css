@@ -10315,41 +10315,105 @@ body.pdfPrintPreparing .pdfExportRoot .portfolioBarFill {
   cursor: pointer;
 }
 
-.summaryHorizontalChart {
+.summaryHorizontalChart,
+.summaryVerticalChart {
   margin-top: 18px;
+  padding: 20px 24px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: none;
 }
-
-.summaryHorizontalChart h3 {
+.summaryHorizontalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+  margin-bottom: 6px;
+}
+.summaryChartHeader h3 {
   min-height: 0;
-  margin-bottom: 18px;
+  margin: 0;
 }
-
+.summaryHorizontalLegend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  color: var(--muted);
+  font-size: 12px;
+}
+.summaryHorizontalLegend > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+.summaryLegendSwatch {
+  display: inline-block;
+  width: 18px;
+  height: 8px;
+  border-radius: 999px;
+}
+.summaryLegendSwatch.currPeriod { background: linear-gradient(90deg,#fff4ed,#ff934c); }
+.summaryLegendSwatch.prevPeriod { background: linear-gradient(90deg,#c5d6e5,#0d1473); }
+.summaryHorizontalChart .bars { gap: 0; }
+.summaryHorizontalChart .barrow {
+  padding: 14px 0;
+  border-bottom: 1px solid var(--line);
+}
+.summaryHorizontalChart .barrow:last-child { border-bottom: 0; padding-bottom: 0; }
+.summaryHorizontalRowHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.summaryHorizontalChart .barlabel {
+  margin: 0;
+  font-size: 14px;
+  color: var(--blue);
+}
+.summaryHorizontalChart .bararea { gap: 7px; }
 .summaryHorizontalChart .barline {
-  grid-template-columns: 62px minmax(0,1fr) 72px 158px;
-  gap: 6px;
+  grid-template-columns: 38px minmax(0,1fr) calc(100px + var(--summary-count-width,0px));
+  gap: 8px;
+  font-size: 13px;
 }
-
+.summaryHorizontalChart .track { height: 12px; box-shadow: none; }
+.summaryHorizontalChart .fill {
+  left: 0;
+  top: 0;
+  height: 100%;
+  max-width: 100%;
+  box-shadow: none;
+}
+.summaryHorizontalChart .period { font-size: 12px; font-weight: 400; }
 .summaryHorizontalChart .value {
+  display: grid;
+  grid-template-columns: minmax(0,1fr);
+  align-items: baseline;
+  gap: 4px;
   font-size: 13px;
   white-space: nowrap;
 }
-
+.summaryHorizontalChart.hasCaseCounts .value {
+  grid-template-columns: minmax(0,1fr) var(--summary-count-width);
+}
+.summaryHorizontalChart .value > span:first-child { text-align: right; }
+.summaryHorizontalChart .summaryCaseCount { grid-column: 2; text-align: right; }
 .summaryCaseCount {
   color: var(--muted);
-}
-
-.summaryHorizontalChart .barDeltaSlot::before {
-  content: none !important;
+  font-size: 11px;
+  font-weight: 400;
 }
 
 .summaryComparison {
-  position: absolute;
-  left: 18px;
-  top: -3px;
-  transform: translateY(-50%);
+  flex: 0 0 auto;
   border: 1px solid var(--line);
   border-radius: 999px;
-  padding: 4px 8px;
+  padding: 3px 10px;
   font-size: 11px;
   line-height: 1;
   background: #eef6fb;
@@ -10368,44 +10432,66 @@ body.pdfPrintPreparing .pdfExportRoot .portfolioBarFill {
   border-color: #ffd2b0;
 }
 
-.summaryComparison svg {
-  position: absolute;
-  right: calc(100% + 5px);
-  top: 50%;
-  transform: translateY(-50%);
-  width: 11px;
-  height: 24px;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 1.5;
-  stroke-linecap: round;
-  stroke-linejoin: round;
+.summaryVerticalChart { gap: 12px; min-width: 0; }
+.summaryVerticalPlot { min-width: 0; width: 100%; overflow-x: auto; }
+.summaryVerticalPlotContent { min-width: calc(var(--summary-category-count) * 64px); }
+.summaryVerticalChart .prodBarGrid,
+.summaryVerticalChart .prodBarDeltaRow,
+.summaryVerticalChart .prodBarLabelRow {
+  display: grid;
+  grid-template-columns: repeat(var(--summary-category-count),minmax(0,1fr));
+  gap: 8px;
+  padding-inline: 0;
 }
+.summaryVerticalChart .prodBarGrid {
+  grid-template-rows: minmax(0,1fr);
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  border-radius: 0;
+  background: #fff;
+  box-shadow: none;
+}
+.summaryVerticalChart .prodBarCol,
+.summaryVerticalChart .prodBarPair { min-height: 0; }
+.summaryVerticalChart .prodBarDeltaRow { margin-top: 8px; }
+.summaryVerticalChart .prodBarLabelRow { margin-top: 8px; }
+.summaryVerticalChart .prodBarLabelCol { color: var(--blue); font-weight: 400; }
+.summaryVerticalChart .prodBarDeltaCol {
+  display: flex;
+  justify-content: center;
+  align-items: start;
+  padding: 0;
+  overflow: visible;
+  background: transparent;
+}
+.summaryVerticalChart .summaryComparison { padding: 3px 5px; font-size: 10px; }
+.summaryVerticalChart .prodBarStick {
+  border: 0;
+  border-radius: 6px 6px 0 0;
+  box-shadow: none;
+}
+.summaryVerticalChart .prodBarStick.currPeriod { background: linear-gradient(180deg,#fff4ed,#ff934c); }
+.summaryVerticalChart .prodBarStick.prevPeriod { background: linear-gradient(180deg,#c5d6e5,#0d1473); }
 
 @media(max-width:640px) {
-  .summaryHorizontalChart {
+  .summaryHorizontalChart,
+  .summaryVerticalChart {
     padding: 12px;
   }
 
   .summaryHorizontalChart .barline {
-    grid-template-columns: 51px minmax(0,1fr) 55px 105px;
-    gap: 3px;
+    grid-template-columns: 30px minmax(0,1fr) calc(88px + var(--summary-count-width,0px));
+    gap: 5px;
+    font-size: 10px;
   }
 
   .summaryHorizontalChart .value,.summaryHorizontalChart .period {
     font-size: 10px;
   }
 
-  .summaryComparison {
-    left: 12px;
-    font-size: 9px;
-    padding: 3px 4px;
-  }
-
-  .summaryComparison svg {
-    right: calc(100% + 3px);
-    width: 8px;
-  }
+  .summaryHorizontalChart .summaryCaseCount { font-size: 9px; }
+  .summaryHorizontalChart .barlabel { font-size: 12px; }
+  .summaryHorizontalLegend { font-size: 10px; }
 }
 
 #samenvatting.active > .card > .titleExportRow > .sectionToolbarSlot {
@@ -10509,3 +10595,89 @@ body.pdfPrintPreparing .pdfExportRoot .portfolioBarFill {
 @media print {
   .categoryTypeFilter { display: none !important; }
 }
+
+/* Horizontal summary charts need a full page per insight, independently of
+   screen size. Keep these dimensions fixed for both PDF export paths. */
+.pdfExportRoot .pdfTestPage.pdfHorizontalSummaryPage .insightGrid {
+  grid-template-rows: minmax(0,1fr) !important;
+}
+.pdfExportRoot .pdfHorizontalSummaryPage .summaryHorizontalChart {
+  grid-area: chart !important;
+  margin: 0 !important;
+  padding: 12px !important;
+  min-width: 0;
+  width: 100%;
+  align-self: end;
+  border-radius: 10px;
+}
+.pdfExportRoot .pdfTestPage.pdfHorizontalSummaryPage .summaryHorizontalChart h3 {
+  min-height: 0 !important;
+  margin: 0 !important;
+  font-size: 12px !important;
+  line-height: 1.2 !important;
+}
+.pdfExportRoot .pdfHorizontalSummaryPage .summaryHorizontalChart .bars {
+  gap: 0;
+}
+.pdfExportRoot .pdfHorizontalSummaryPage .summaryHorizontalChart .barrow {
+  display: block;
+  padding: 8px 0;
+  margin: 0;
+}
+.pdfExportRoot .pdfHorizontalSummaryPage .summaryHorizontalHeader { margin-bottom: 4px; }
+.pdfExportRoot .pdfHorizontalSummaryPage .summaryHorizontalLegend { font-size: 10px; }
+.pdfExportRoot .pdfHorizontalSummaryPage .summaryHorizontalRowHead { margin-bottom: 5px; }
+.pdfExportRoot .pdfHorizontalSummaryPage .summaryHorizontalChart .barlabel {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.2;
+}
+.pdfExportRoot .pdfHorizontalSummaryPage .summaryHorizontalChart .bararea {
+  gap: 5px;
+}
+.pdfExportRoot .pdfHorizontalSummaryPage .summaryHorizontalChart .barline {
+  grid-template-columns: 32px minmax(0,1fr) calc(88px + var(--summary-count-width,0px));
+  gap: 5px;
+  min-height: 14px;
+  font-size: 10px;
+}
+.pdfExportRoot .pdfHorizontalSummaryPage .summaryHorizontalChart .period,
+.pdfExportRoot .pdfHorizontalSummaryPage .summaryHorizontalChart .value {
+  font-size: 10px;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+.pdfExportRoot .pdfHorizontalSummaryPage .summaryHorizontalChart .track {
+  height: 10px;
+}
+.pdfExportRoot .pdfHorizontalSummaryPage .summaryComparison {
+  padding: 3px 5px;
+  font-size: 9px;
+}
+.pdfExportRoot .pdfHorizontalSummaryPage .summaryCaseCount { font-size: 9px; }
+
+/* Retain the fixed vertical-chart pagination and sizes in the print layout. */
+.pdfExportRoot .pdfTestPage .summaryVerticalPlot { overflow: visible; }
+.pdfExportRoot .pdfTestPage .summaryVerticalPlotContent { min-width: 0; }
+.pdfExportRoot .pdfTestPage .summaryVerticalChart { background: #fff !important; border-radius: 10px !important; }
+.pdfExportRoot .pdfTestPage .summaryVerticalChart .summaryChartHeader h3 {
+  font-size: 12px !important;
+  line-height: 1.2 !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+}
+.pdfExportRoot .pdfTestPage .summaryVerticalChart .summaryChartLegend { font-size: 9px; gap: 12px; }
+.pdfExportRoot .pdfTestPage .summaryVerticalChart .prodBarGrid {
+  grid-template-columns: repeat(var(--summary-category-count),minmax(0,1fr));
+  padding-inline: 0 !important;
+  padding-top: 0 !important;
+  background: #fff !important;
+  border: 0 !important;
+  border-bottom: 1px solid var(--line) !important;
+  border-radius: 0 !important;
+}
+.pdfExportRoot .pdfTestPage .summaryVerticalChart .prodBarDeltaRow,
+.pdfExportRoot .pdfTestPage .summaryVerticalChart .prodBarLabelRow { gap: 9px !important; }
+.pdfExportRoot .pdfTestPage .summaryVerticalChart .summaryComparison { padding: 2px 4px; font-size: 8px; }
+.pdfExportRoot .pdfTestPage .prodBarChart.summaryVerticalChart .prodBarStick.currPeriod { background: linear-gradient(180deg,#fff4ed,#ff934c) !important; }
+.pdfExportRoot .pdfTestPage .prodBarChart.summaryVerticalChart .prodBarStick.prevPeriod { background: linear-gradient(180deg,#c5d6e5,#0d1473) !important; }
