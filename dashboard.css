@@ -10470,8 +10470,8 @@ body.pdfPrintPreparing .pdfExportRoot .portfolioBarFill {
   border-radius: 6px 6px 0 0;
   box-shadow: none;
 }
-.summaryVerticalChart .prodBarStick.currPeriod { background: linear-gradient(180deg,#fff4ed,#ff934c); }
-.summaryVerticalChart .prodBarStick.prevPeriod { background: linear-gradient(180deg,#c5d6e5,#0d1473); }
+.summaryVerticalChart .prodBarStick.currPeriod { background: linear-gradient(180deg,#ff934c,#fff4ed); }
+.summaryVerticalChart .prodBarStick.prevPeriod { background: linear-gradient(180deg,#0d1473,#c5d6e5); }
 
 @media(max-width:640px) {
   .summaryHorizontalChart,
@@ -10679,5 +10679,5 @@ body.pdfPrintPreparing .pdfExportRoot .portfolioBarFill {
 .pdfExportRoot .pdfTestPage .summaryVerticalChart .prodBarDeltaRow,
 .pdfExportRoot .pdfTestPage .summaryVerticalChart .prodBarLabelRow { gap: 9px !important; }
 .pdfExportRoot .pdfTestPage .summaryVerticalChart .summaryComparison { padding: 2px 4px; font-size: 8px; }
-.pdfExportRoot .pdfTestPage .prodBarChart.summaryVerticalChart .prodBarStick.currPeriod { background: linear-gradient(180deg,#fff4ed,#ff934c) !important; }
-.pdfExportRoot .pdfTestPage .prodBarChart.summaryVerticalChart .prodBarStick.prevPeriod { background: linear-gradient(180deg,#c5d6e5,#0d1473) !important; }
+.pdfExportRoot .pdfTestPage .prodBarChart.summaryVerticalChart .prodBarStick.currPeriod { background: linear-gradient(180deg,#ff934c,#fff4ed) !important; }
+.pdfExportRoot .pdfTestPage .prodBarChart.summaryVerticalChart .prodBarStick.prevPeriod { background: linear-gradient(180deg,#0d1473,#c5d6e5) !important; }
