@@ -23,6 +23,9 @@
     if (header < 0 || grid[header].length < 11) throw new Error('Kolomkoppen niet gevonden. Gebruik het Life-detailrapport met kolommen A–K of A–M.');
     const singleGroup=isSingleGroupHeader(grid[header]);
     const cols=singleGroup?{unweighted:7,weighted:8,rate:9,commission:10,producer:11,product:12}:{unweighted:4,weighted:5,rate:6,commission:7,producer:9,product:10};
+    const producerTypeColumn = grid[header].findIndex(value => /type.*(?:producent|producteur)/i.test(String(value || '')));
+    const exactGroupColumn = grid[header].findIndex(value => /^(?:groep|groupe|group)$/i.test(String(value || '').trim()));
+    const taxColumn = exactGroupColumn >= 0 ? exactGroupColumn : producerTypeColumn >= 0 ? producerTypeColumn : cols.product;
     const records = [];
     for (let i = header + 1; i < grid.length; i++) {
       const r = grid[i];
@@ -39,6 +42,7 @@
         rate: read('rate',true),
         rappelRate: read('rate',true),
         commission: Math.round(read('commission') * 100),
+        taxGroup: text(taxColumn >= 0 ? taxColumn : singleGroup ? -1 : 8),
         groupId: group?.[1]||'', groupName: group?.[2]||'', producer: text(cols.producer), product: text(cols.product), sourceRow: i + 1});
     }
     if (!records.length) throw new Error('Het bestand bevat geen productieregels.');
@@ -62,7 +66,15 @@
     const rates=records.map(r=>r.rappelRate).filter(rate=>Number.isFinite(rate));
     return rates.length ? rates.reduce((sum,rate)=>sum+rate,0)/rates.length : null;
   }
-  const api = {TYPES, number, parseGrid, totals, groupBy, share,isSingleGroupHeader,rappelRates,averageRappelRate};
+  function isNonFiscal(record) {
+    return /\bNIET\b/i.test(record.taxGroup ?? `${record.groupId || ''} ${record.groupName || ''}`);
+  }
+  function fiscalTotals(records) {
+    const fiscal = records.filter(record => !isNonFiscal(record));
+    const nonFiscal = records.filter(isNonFiscal);
+    return { fiscal, nonFiscal, fiscalTotal: totals(fiscal), nonFiscalTotal: totals(nonFiscal) };
+  }
+  const api = {TYPES, number, parseGrid, totals, groupBy, share,isSingleGroupHeader,rappelRates,averageRappelRate,isNonFiscal,fiscalTotals};
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.LifeCore = api;
 })(typeof globalThis !== 'undefined' ? globalThis : this);
@@ -84,7 +96,7 @@ const words = {
   dashboardView:['Dashboardweergave','Vue du tableau de bord'],
   summary:['Samenvatting','Résumé'],groups:['Verdelingen','Répartitions'],detail:['Detail','Détail'],
   count:['Aantal productieregels','Nombre de lignes de production'],shortCount:['Aantal','Nombre'],unweighted:['Premie voor weging','Prime avant pondération'],weighted:['Premie na weging','Prime après pondération'],commission:['Rappelcommissie','Commission de rappel'],policies:['Aantal unieke polissen','Nombre de polices distinctes'],rappelRate:['Rappelpercentage','Pourcentage de rappel'],
-  showWeighted:['Toon premie na weging','Afficher la prime après pondération'],
+  fiscalStatus:['Fiscaal / niet-fiscaal','Fiscal / non fiscal'],fiscal:['Fiscaal','Fiscal'],nonFiscal:['Niet-fiscaal','Non fiscal'],
   productionPie:['Verdeling premie per type productie','Répartition des primes par type de production'],commissionPie:['Verdeling rappelcommissie per type','Répartition des commissions de rappel par type'],
   all:['Alle','Tous'],group:['Groep','Groupe'],type:['Type productie','Type de production'],product:['Product','Produit'],producer:['Producentnummer','Numéro de producteur'],search:['Zoek polis of klant','Rechercher police ou client'],reset:['Filters wissen','Effacer les filtres'],
   NZ:['Nieuwe zaken','Affaires nouvelles'],VH:['Verhogingen','Augmentations'],KP:['Koopsom','Prime unique'],KO:['Koopsom','Prime unique'],NK:['Nieuwe koopsom','Nouvelle prime unique'],selected:['geselecteerd','sélectionnés'],
@@ -109,13 +121,13 @@ const fmt = n => new Intl.NumberFormat(lang === 'fr' ? 'fr-BE' : 'nl-BE').format
 const money = cents => new Intl.NumberFormat(lang === 'fr' ? 'fr-BE' : 'nl-BE', {style:'currency',currency:'EUR',minimumFractionDigits:0,maximumFractionDigits:0}).format(Math.trunc(cents / 100));
 const pct = n => n == null ? '—' : new Intl.NumberFormat(lang === 'fr' ? 'fr-BE' : 'nl-BE',{maximumFractionDigits:2,minimumFractionDigits:1}).format(n) + '%';
 const colors = ['#0d1473','#ff934c','#007e97','#8064a2','#437bb4','#b65f40','#418d69','#be6a92','#717e2a','#377d91','#a06d18','#6956a3','#4b6c45','#b04c60','#6876bd','#aa7a49','#357e72','#8e6382','#667a8c','#a65e1f'];
-const state = {records:[],pending:null,workbook:null,source:'',sheet:'',tab:'summary',metric:'unweighted',showWeighted:false,page:0,
-  filters:{groupId:'',policy:'',type:'',product:'',producer:'',search:''},countType:'',groupProducts:[],groupProductionTypes:[],detailProducts:[],detailProductionTypes:[],chartModes:{unweighted:'pie',count:'pie',commission:'pie'},
+const state = {records:[],pending:null,workbook:null,source:'',sheet:'',tab:'summary',metric:'unweighted',page:0,
+  filters:{groupId:'',policy:'',type:'',product:'',producer:'',search:''},countType:'',groupProducts:[],groupProductionTypes:[],groupFiscal:[],detailProducts:[],detailProductionTypes:[],detailFiscal:[],chartModes:{unweighted:'bar',count:'bar',commission:'bar'},
   sorts:{groups:{key:'unweighted',direction:'desc'},detail:{key:'policy',direction:'asc'}}};
 const sections = ['summary','groups','detail'];
 function singleGroupFile(){return state.records[0]?.sourceLayout==='single-group';}
 function visibleSections(){return sections.filter(id=>id!=='groups'||!singleGroupFile()||new Set(state.records.map(r=>r.producer).filter(Boolean)).size>1);}
-const visibleFields = keys => keys.filter(key => (state.showWeighted || !['weighted','weightedShare'].includes(key))&&(!singleGroupFile()||!['groupNo','groupName'].includes(key)));
+const visibleFields = keys => keys.filter(key => !['weighted','weightedShare'].includes(key)&&(!singleGroupFile()||!['groupNo','groupName'].includes(key)));
 function detailColumns(){return visibleFields(['policy','client','type',...(singleGroupFile()?['productionMonth']:[]),'unweighted','weighted','rate','commission','groupNo','groupName','producer','product']);}
 function types() { return [...C.TYPES, ...new Set(state.records.map(r => r.type).filter(x => !C.TYPES.includes(x)))]; }
 function typeLabel(code) { return [...C.TYPES,'KO'].includes(code) ? t(code) : code; }
@@ -162,33 +174,28 @@ function head(title,id,level='h2',controls='') {
 }
 function card(id,title,html,controls='') { return `<article class="card exportable" id="${id}">${head(title,id,'h2',controls)}${html}</article>`; }
 function percent(value,total) { return pct(C.share(value,total)); }
-function metricValue(rows,key) {
-  if(key==='policies')return new Set(rows.map(r=>r.policy)).size;
-  return C.totals(rows)[key];
+function rappelRateKpi(rows, fiscal = '') {
+  const total = C.totals(rows);
+  const rate = C.share(total.commission, total.unweighted);
+  const suffix = fiscal ? ` ${t(fiscal)}` : '';
+  const note = lang === 'fr' ? 'Commission de rappel / prime avant pondération' : 'Rappelcommissie / premie voor weging';
+  return `<div class="kpi rappel-rate-kpi" data-rappel-kpi="rate-${fiscal || 'total'}"><div class="label">${t('rate')}${suffix}</div><div class="value" title="${note}${suffix}">${pct(rate)}</div></div>`;
 }
-function rappelRateKpi(rows) {
-  const rates = types().map((code,i)=>{
-    const values = C.rappelRates(rows.filter(r=>r.type===code));
-    const label = values.length ? values.map(pct).join(' / ') : '—';
-    return `<div class="life-kpi-contribution"><div class="life-kpi-contribution-label"><span><i style="background:${colors[i%colors.length]}"></i>${esc(typeLabel(code))}</span><span>${esc(label)}</span></div><div class="life-kpi-contribution-track life-kpi-contribution-spacer" aria-hidden="true"></div></div>`;
+function rappelAmountKpi(rows, key, fiscal = '') {
+  const total = C.totals(rows)[key];
+  const suffix = fiscal === 'fiscal' ? (lang === 'fr' ? 'FISCAL' : 'FISCAAL') : fiscal === 'nonFiscal' ? (lang === 'fr' ? 'NON FISCAL' : 'NIET-FISCAAL') : '';
+  const bars = types().map((code, i) => {
+    const amount = C.totals(rows.filter(row => row.type === code))[key];
+    const share = C.share(amount, total);
+    const label = `${typeLabel(code)}: ${money(amount)} (${pct(share)})`;
+    return `<div class="life-kpi-contribution" title="${esc(label)}"><div class="life-kpi-contribution-label"><span><i style="background:${colors[i % colors.length]}"></i>${esc(typeLabel(code))}</span><span>${money(amount)} (${pct(share)})</span></div><div class="life-kpi-contribution-track" role="img" aria-label="${esc(label)}"><span style="background:${colors[i % colors.length]};width:${Math.max(0, Math.min(100, share || 0))}%"></span></div></div>`;
   }).join('');
-  const average=pct(C.averageRappelRate(rows));
-  const averageLabel=lang==='fr'?'Pourcentage de rappel moyen':'Gemiddeld rappelpercentage';
-  return `<div class="kpi"><div class="label">${t('rappelRate')}</div><div class="value" title="${averageLabel}" aria-label="${averageLabel}: ${esc(average)}">${average}</div><div class="life-kpi-contributions">${rates}</div></div>`;
+  return `<div class="kpi${fiscal ? ' rappel-component summaryComponentKpi' : ' rappel-total summaryTotalKpi'}" data-rappel-kpi="${key}-${fiscal || 'total'}"${fiscal ? ` data-equation="${fiscal === 'fiscal' ? '=' : '+'}"` : ''}><div class="label">${t(key)}${suffix ? `<br>${suffix}` : ''}</div><div class="value">${money(total)}</div><div class="life-kpi-contributions">${bars}</div></div>`;
 }
-function metrics(total,rows) {
-  return `<div class="life-kpis life-headline-kpis ${state.showWeighted ? '' : 'life-kpis-unweighted'}" style="--headline-kpi-rows:${types().length+2}">${visibleFields(['unweighted','weighted','commission','policies','rappelRate']).map(key => {
-    if(key==='rappelRate')return rappelRateKpi(rows);
-    const value = key==='policies' ? fmt(total[key]) : money(total[key]);
-    const bars=types().map((code,i)=>{
-      const amount=metricValue(rows.filter(r=>r.type===code),key),share=C.share(amount,total[key]);
-      const amountLabel=key==='policies'?fmt(amount):money(amount);
-      const label=`${typeLabel(code)}: ${amountLabel} (${pct(share)})`;
-      return `<div class="life-kpi-contribution" title="${esc(label)}"><div class="life-kpi-contribution-label"><span><i style="background:${colors[i%colors.length]}"></i>${esc(typeLabel(code))}</span><span>${amountLabel} (${pct(share)})</span></div><div class="life-kpi-contribution-track" role="img" aria-label="${esc(label)}"><span style="background:${colors[i%colors.length]};width:${Math.max(0,Math.min(100,share||0))}%"></span></div></div>`;
-    }).join('');
-    const note=key==='policies'?(lang==='fr'?'Une police peut figurer dans plusieurs types.':'Een polis kan in meerdere types voorkomen.'):'';
-    return `<div class="kpi"><div class="label">${t(key)}</div><div class="value">${value}</div><div class="life-kpi-contributions" title="${esc(note)}">${bars}</div></div>`;
-  }).join('')}</div>`;
+function metrics(total, rows) {
+  const { fiscal, nonFiscal } = C.fiscalTotals(rows);
+  const row = key => `<div class="life-kpis life-headline-kpis rappel-equation-row" style="--headline-kpi-rows:${types().length + 2}">${rappelAmountKpi(rows, key)}${rappelAmountKpi(fiscal, key, 'fiscal')}${rappelAmountKpi(nonFiscal, key, 'nonFiscal')}</div>`;
+  return `<div class="life-kpis rappel-headline-rows">${row('unweighted')}${row('commission')}<div class="rappel-rate-stack">${rappelRateKpi(rows)}${rappelRateKpi(fiscal, 'fiscal')}${rappelRateKpi(nonFiscal, 'nonFiscal')}</div></div>`;
 }
 function typeCards(rows) {
   const total = C.totals(rows);
@@ -208,7 +215,8 @@ function sortedRows(rows,tableId) {
   });
 }
 function table(headers,rows,footer='',sort=null) {
-  return `<div class="life-table-wrap"><table class="life-table"><thead><tr>${headers.map((x,i) => {
+  const colgroup = sort?.widths ? `<colgroup>${sort.widths.map(width=>`<col style="width:${width}%">`).join('')}</colgroup>` : '';
+  return `<div class="life-table-wrap"><table class="life-table${sort?.compact ? ' life-koepel-detail' : ''}">${colgroup}<thead><tr>${headers.map((x,i) => {
     if(!sort)return `<th scope="col"${i===0?' class="life-text-heading"':''}>${esc(x)}</th>`;
     const key=sort.keys[i],current=state.sorts[sort.id],active=current.key===key;
     const direction=active?(current.direction==='asc'?'ascending':'descending'):'none';
@@ -218,10 +226,19 @@ function table(headers,rows,footer='',sort=null) {
 }
 function aggregateTable(rows,key) {
   const total = C.totals(rows);
-  const aggregates = key === 'type' ? types().map(id => ({id,...C.totals(rows.filter(r => r.type === id))})) : sortedRows(C.groupBy(rows,key).map(g=>({...g,countShare:C.share(g.count,total.count),unweightedShare:C.share(g.unweighted,total.unweighted),weightedShare:C.share(g.weighted,total.weighted),commissionShare:C.share(g.commission,total.commission)})),'groups');
-  const dataCells = a => `<td>${fmt(a.count)}</td><td>${percent(a.count,total.count)}</td><td>${money(a.unweighted)}</td><td>${percent(a.unweighted,total.unweighted)}</td>${state.showWeighted ? `<td>${money(a.weighted)}</td><td>${percent(a.weighted,total.weighted)}</td>` : ''}<td>${money(a.commission)}</td><td>${percent(a.commission,total.commission)}</td>`;
+  const grouped = key === 'type' ? types().map(id => ({id,rows:rows.filter(r => r.type === id)})) : C.groupBy(rows,key);
+  const split = grouped.flatMap(group => fiscalBuckets(group.rows).map(bucket => ({id:group.id,fiscalLabel:bucket.label,...C.totals(bucket.rows)})));
+  const aggregates = key === 'type' ? split : sortedRows(split.map(g=>({...g,countShare:C.share(g.count,total.count),unweightedShare:C.share(g.unweighted,total.unweighted),weightedShare:C.share(g.weighted,total.weighted),commissionShare:C.share(g.commission,total.commission)})),'groups');
+  const dataCells = a => `<td>${fmt(a.count)}</td><td>${percent(a.count,total.count)}</td><td>${money(a.unweighted)}</td><td>${percent(a.unweighted,total.unweighted)}</td><td>${money(a.commission)}</td><td>${percent(a.commission,total.commission)}</td>`;
   return table([t(key === 'groupId' ? (singleGroupFile()?'fileTotal':'group') : key),...visibleFields(['shortCount','countShare','unweighted','unweightedShare','weighted','weightedShare','commission','commissionShare']).map(t)],
-    aggregates.map(a => `<tr><td>${key === 'groupId' ? groupMarkup(a.id) : esc(key === 'type' ? typeLabel(a.id) : a.id)}</td>${dataCells(a)}</tr>`),`<tr><td>${t('total')}</td>${dataCells(total)}</tr>`,key!=='type'?{id:'groups',keys:['id',...visibleFields(['shortCount','countShare','unweighted','unweightedShare','weighted','weightedShare','commission','commissionShare'])]}:null);
+    aggregates.map(a => `<tr><td>${key === 'groupId' ? groupMarkup(a.id) : esc(key === 'type' ? typeLabel(a.id) : a.id)}<span class="rappel-fiscal-label">${esc(a.fiscalLabel)}</span></td>${dataCells(a)}</tr>`),`<tr><td>${t('total')}</td>${dataCells(total)}</tr>`,key!=='type'?{id:'groups',keys:['id',...visibleFields(['shortCount','countShare','unweighted','unweightedShare','weighted','weightedShare','commission','commissionShare'])]}:null);
+}
+function fiscalBuckets(rows) {
+  return [false,true].map(nonFiscal => ({nonFiscal,label:nonFiscal ? (lang === 'fr' ? 'Non fiscal' : 'Niet-fiscaal') : (lang === 'fr' ? 'Fiscal' : 'Fiscaal'),rows:rows.filter(row => C.isNonFiscal(row) === nonFiscal)})).filter(bucket => bucket.rows.length);
+}
+function fiscalColor(color, nonFiscal) {
+  if (!nonFiscal || !/^#[0-9a-f]{6}$/i.test(color)) return color;
+  return '#' + [1,3,5].map(start => Math.round(parseInt(color.slice(start,start+2),16)*.55+255*.45).toString(16).padStart(2,'0')).join('');
 }
 function bars(rows,key) {
   const total = C.totals(rows)[key];
@@ -246,7 +263,7 @@ function donut(parts,total,metric = state.metric,label = t('groupShare')) {
 function summaryCharts(rows) {
   return `<div class="life-chart-grid life-summary-charts">${['unweighted','commission'].map(key => {
     const title = t(key === 'unweighted' ? 'productionPie' : 'commissionPie');
-    const parts = types().map((code,i) => {const data=rows.filter(r=>r.type===code);return {label:typeLabel(code),count:data.length,value:C.totals(data)[key],color:colors[i % colors.length]};});
+    const parts = types().flatMap((code,i) => fiscalBuckets(rows.filter(r=>r.type===code)).map(bucket => ({label:`${typeLabel(code)} · ${bucket.label}`,count:bucket.rows.length,value:C.totals(bucket.rows)[key],color:fiscalColor(colors[i % colors.length],bucket.nonFiscal)})));
     const total = C.totals(rows)[key];
     return card(`summary-pie-${key}`,title,`<p class="small">${t(key)}</p><div class="life-chart-body">${donut(parts,total,key,title)}<table class="life-legend life-summary-legend"><thead><tr><th>${t('type')}</th><th>${t('shortCount')}</th><th>${t(key)}</th></tr></thead><tbody>${parts.map(p => `<tr><td><span class="life-swatch" style="background:${p.color}"></span>${esc(p.label)}</td><td>${fmt(p.count)}</td><td>${money(p.value)}<small>${percent(p.value,total)}</small></td></tr>`).join('')}</tbody></table></div>`);
   }).join('')}</div>`;
@@ -255,8 +272,8 @@ function charts(rows) {
   return `<div class="life-chart-grid">${['unweighted','count','commission'].map((key) => {
     const countTypes=selections(state.countType);
     const data = !singleGroupFile() && key === 'count' && countTypes.length ? rows.filter(r => countTypes.includes(r.type)) : rows;
-    const parts = C.groupBy(data,singleGroupFile()?'producer':'groupId').map(g => ({groupId:g.id,label:singleGroupFile()?`${t('producer')} ${g.id}`:groupLabel(g.id),value:g[key],color:groupColor(g.id)})).sort((a,b) => b.value-a.value);
-    const itemLabel=p=>singleGroupFile()?esc(p.label):groupMarkup(p.groupId);
+    const parts = C.groupBy(data,singleGroupFile()?'producer':'groupId').flatMap(g => fiscalBuckets(g.rows).map(bucket => ({groupId:g.id,fiscalLabel:bucket.label,label:`${singleGroupFile()?`${t('producer')} ${g.id}`:groupLabel(g.id)} · ${bucket.label}`,value:C.totals(bucket.rows)[key],color:fiscalColor(groupColor(g.id),bucket.nonFiscal)}))).sort((a,b) => b.value-a.value);
+    const itemLabel=p=>singleGroupFile()?esc(p.label):`${groupMarkup(p.groupId)}<span class="rappel-fiscal-label">${esc(p.fiscalLabel)}</span>`;
     const total = C.totals(data)[key], id = `group-chart-${key}`;
     const title = `${singleGroupFile()?(lang==='fr'?'Part par producteur':'Aandeel per producent'):t('groupShare')} · ${t(key === 'count' ? 'countByType' : key)}`;
     const selector = key === 'count' && !singleGroupFile() ? `<div class="life-count-selector" data-html2canvas-ignore>${multiDropdown('countType',t('type'),types(),countTypes)}</div><p class="small">${esc(countTypes.length?countTypes.map(typeLabel).join(', '):t('all'))}</p>` : '';
@@ -268,7 +285,7 @@ function charts(rows) {
   }).join('')}</div>`;
 }
 function multiDropdown(key,label,ids,values,open=false) {
-  const text=id=>key==='groupId'?groupLabel(id):['countType','groupProductionTypes','detailProductionTypes'].includes(key)?typeLabel(id):id;
+  const text=id=>['detailFiscal','groupFiscal'].includes(key)?t(id):key==='groupId'?groupLabel(id):['countType','groupProductionTypes','detailProductionTypes'].includes(key)?typeLabel(id):id;
   const summary=values.length===1?text(values[0]):values.length?`${values.length} ${t('selected')}`:t('all');
   return `<div class="life-filter-field"><span>${esc(label)}</span><details class="life-multiselect" id="multi-${key}" ${open?'open':''}><summary>${esc(summary)}<span aria-hidden="true">⌄</span></summary><div class="life-multiselect-options" role="group" aria-label="${esc(label)}"><button type="button" class="life-button" data-multi-clear="${key}">${t('all')}</button>${ids.map(id=>`<label><input type="checkbox" data-multi="${key}" value="${esc(id)}" ${values.includes(id)?'checked':''}>${key==='groupId'?groupMarkup(id):`<span>${esc(text(id))}</span>`}</label>`).join('')}</div></details></div>`;
 }
@@ -291,8 +308,10 @@ function setMultiSelection(key,values) {
   if(key==='countType')state.countType=values;
   else if(key==='groupProducts')state.groupProducts=values;
   else if(key==='groupProductionTypes')state.groupProductionTypes=values;
+  else if(key==='groupFiscal')state.groupFiscal=values;
   else if(key==='detailProducts')state.detailProducts=values;
   else if(key==='detailProductionTypes')state.detailProductionTypes=values;
+  else if(key==='detailFiscal')state.detailFiscal=values;
   else {
     state.filters[key]=values;
     if(['groupId','policy'].includes(key))state.filters.producer=selections(state.filters.producer).filter(id=>state.records.some(r=>(!values.length||values.includes(r[key]))&&r.producer===id));
@@ -302,35 +321,42 @@ function setMultiSelection(key,values) {
   if(key==='countType')$('multi-countType').open=true;
   if(key==='groupProducts')$('multi-groupProducts').open=true;
   if(key==='groupProductionTypes')$('multi-groupProductionTypes').open=true;
-  if(['detailProducts','detailProductionTypes'].includes(key))$('multi-'+key).open=true;
+  if(key==='groupFiscal')$('multi-groupFiscal').open=true;
+  if(['detailProducts','detailProductionTypes','detailFiscal'].includes(key))$('multi-'+key).open=true;
 }
-function filterDetailRows(rows){return rows.filter(r=>(!state.detailProducts.length||state.detailProducts.includes(r.product))&&(!state.detailProductionTypes.length||state.detailProductionTypes.includes(r.type)));}
+function filterDetailRows(rows){return rows.filter(r=>(!state.detailProducts.length||state.detailProducts.includes(r.product))&&(!state.detailProductionTypes.length||state.detailProductionTypes.includes(r.type))&&(!state.detailFiscal.length||state.detailFiscal.includes(C.isNonFiscal(r)?'nonFiscal':'fiscal')));}
+function detailHeading(key) {
+  const short = lang === 'fr' ? {commission:'Comm. rappel',producer:'N° prod.',groupNo:'N° groupe'} : {commission:'Rappelcomm.',producer:'Prodnr.',groupNo:'Groepsnr.'};
+  return !singleGroupFile() && short[key] ? short[key] : t(key);
+}
 function renderDetail(rows) {
   rows=filterDetailRows(rows);
   const size = 50, maxPage = Math.max(0,Math.ceil(rows.length/size)-1); state.page = Math.min(state.page,maxPage);
   const subset = sortedRows(rows,'detail').slice(state.page*size,(state.page+1)*size);
   const columns=detailColumns();
-  const html = table(columns.map(t),subset.map(r => `<tr>${columns.map(key=>{
+  const widths = {policy:9,client:14,type:9,unweighted:9,rate:6,commission:9,groupNo:8,groupName:15,producer:6,product:15};
+  const html = table(columns.map(detailHeading),subset.map(r => `<tr>${columns.map(key=>{
     const value=key==='type'?typeLabel(r.type):key==='groupNo'?r.groupId:['unweighted','weighted','commission'].includes(key)?money(r[key]):key==='rate'?pct(r.rate):r[key];
     return `<td${['client','type','groupNo','groupName','product'].includes(key)?' class="text"':''}>${esc(value)}</td>`;
-  }).join('')}</tr>`),'',{id:'detail',keys:columns});
+  }).join('')}</tr>`),'',{id:'detail',keys:columns,compact:!singleGroupFile(),widths:singleGroupFile()?null:columns.map(key=>widths[key])});
   const products=[...new Set(state.records.map(r=>r.product))].sort((a,b)=>a.localeCompare(b,lang==='fr'?'fr-BE':'nl-BE'));
-  const controls=`<div class="life-group-table-filters" data-html2canvas-ignore>${multiDropdown('detailProducts',t('product'),products,state.detailProducts)}${multiDropdown('detailProductionTypes',t('type'),types(),state.detailProductionTypes)}<button type="button" class="life-button" id="resetDetailFilters">${t('reset')}</button></div>`;
-  $('detail').innerHTML = card('detail-table',t('detail'),`${controls}<p class="small">${t('product')}: ${esc(state.detailProducts.length?state.detailProducts.join(', '):t('all'))} · ${t('type')}: ${esc(state.detailProductionTypes.length?state.detailProductionTypes.map(typeLabel).join(', '):t('all'))}</p><p class="small">${t('recordNote')} ${t('csv')}: ${fmt(rows.length)} ${t('count').toLowerCase()}.</p>${html}<div class="life-pagination" data-html2canvas-ignore><span>${rows.length ? fmt(state.page*size+1) : 0}–${fmt(Math.min((state.page+1)*size,rows.length))} / ${fmt(rows.length)}</span><div><button class="life-button" data-page="-1" ${state.page === 0 ? 'disabled' : ''}>${t('prev')}</button> <button class="life-button" data-page="1" ${state.page === maxPage ? 'disabled' : ''}>${t('next')}</button></div></div>`);
+  const controls=`<div class="life-group-table-filters rappel-table-filters rappel-detail-filters" data-html2canvas-ignore>${multiDropdown('detailFiscal',t('fiscalStatus'),['fiscal','nonFiscal'],state.detailFiscal)}${multiDropdown('detailProducts',t('product'),products,state.detailProducts)}${multiDropdown('detailProductionTypes',t('type'),types(),state.detailProductionTypes)}<button type="button" class="life-button" id="resetDetailFilters">${t('reset')}</button></div>`;
+  $('detail').innerHTML = card('detail-table',t('detail'),`${controls}<p class="small">${t('product')}: ${esc(state.detailProducts.length?state.detailProducts.join(', '):t('all'))} · ${t('type')}: ${esc(state.detailProductionTypes.length?state.detailProductionTypes.map(typeLabel).join(', '):t('all'))} · ${t('fiscalStatus')}: ${esc(state.detailFiscal.length?state.detailFiscal.map(t).join(', '):t('all'))}</p><p class="small">${t('recordNote')} ${t('csv')}: ${fmt(rows.length)} ${t('count').toLowerCase()}.</p>${html}<div class="life-pagination" data-html2canvas-ignore><span>${rows.length ? fmt(state.page*size+1) : 0}–${fmt(Math.min((state.page+1)*size,rows.length))} / ${fmt(rows.length)}</span><div><button class="life-button" data-page="-1" ${state.page === 0 ? 'disabled' : ''}>${t('prev')}</button> <button class="life-button" data-page="1" ${state.page === maxPage ? 'disabled' : ''}>${t('next')}</button></div></div>`);
 }
 function renderData() {
   if (!state.records.length) return;
   if(!visibleSections().includes(state.tab))state.tab='summary';
   $('chartTooltip').classList.add('hidden');
-  if (!state.showWeighted && state.metric === 'weighted') state.metric = 'unweighted';
-  if (!state.showWeighted) Object.values(state.sorts).forEach(sort=>{if(['weighted','weightedShare'].includes(sort.key))sort.key=sort.key==='weighted'?'unweighted':'unweightedShare';});
+  Object.values(state.sorts).forEach(sort=>{if(['weighted','weightedShare'].includes(sort.key))sort.key=sort.key==='weighted'?'unweighted':'unweightedShare';});
   const rows = selected(), total = C.totals(rows);
   total.policies = new Set(rows.map(r => r.policy)).size;
-  $('headline').innerHTML = head(t('total'),'headline') + metrics(total,rows);
+  $('headline').querySelector(':scope > .life-section-head')?.remove();
+  $('headline').insertAdjacentHTML('afterbegin', head(t('total'),'headline'));
+  $('headlineKpis').innerHTML = metrics(total,rows);
   $('summary').innerHTML = summaryCharts(rows) + card('summary-types',t('byType'),typeCards(rows)) + card('summary-table',t('summary'),aggregateTable(rows,'type'));
   const productOptions=[...new Set(state.records.map(r=>r.product))].sort((a,b)=>a.localeCompare(b,lang==='fr'?'fr-BE':'nl-BE'));
-  const groupRows=rows.filter(r=>(!state.groupProducts.length||state.groupProducts.includes(r.product))&&(!state.groupProductionTypes.length||state.groupProductionTypes.includes(r.type)));
-  const productFilter=`<div class="life-group-table-filters" data-html2canvas-ignore>${multiDropdown('groupProducts',t('product'),productOptions,state.groupProducts)}${multiDropdown('groupProductionTypes',t('type'),types(),state.groupProductionTypes)}<button type="button" class="life-button" id="resetGroupFilters">${t('reset')}</button></div><p class="small">${t('product')}: ${esc(state.groupProducts.length?state.groupProducts.join(', '):t('all'))} · ${t('type')}: ${esc(state.groupProductionTypes.length?state.groupProductionTypes.map(typeLabel).join(', '):t('all'))}</p>`;
+  const groupRows=rows.filter(r=>(!state.groupProducts.length||state.groupProducts.includes(r.product))&&(!state.groupProductionTypes.length||state.groupProductionTypes.includes(r.type))&&(!state.groupFiscal.length||state.groupFiscal.includes(C.isNonFiscal(r)?'nonFiscal':'fiscal')));
+  const productFilter=`<div class="life-group-table-filters rappel-table-filters" data-html2canvas-ignore>${multiDropdown('groupFiscal',t('fiscalStatus'),['fiscal','nonFiscal'],state.groupFiscal)}${multiDropdown('groupProducts',t('product'),productOptions,state.groupProducts)}${multiDropdown('groupProductionTypes',t('type'),types(),state.groupProductionTypes)}<button type="button" class="life-button" id="resetGroupFilters">${t('reset')}</button></div><p class="small">${t('fiscalStatus')}: ${esc(state.groupFiscal.length?state.groupFiscal.map(t).join(', '):t('all'))} · ${t('product')}: ${esc(state.groupProducts.length?state.groupProducts.join(', '):t('all'))} · ${t('type')}: ${esc(state.groupProductionTypes.length?state.groupProductionTypes.map(typeLabel).join(', '):t('all'))}</p>`;
   const distributionRows=singleGroupFile()?state.records.filter(r=>!selections(state.filters.producer).length||selections(state.filters.producer).includes(r.producer)):rows;
   $('groups').innerHTML = singleGroupFile()?card('groups-table',lang==='fr'?'Totaux par producteur':'Producenttotalen',aggregateTable(distributionRows,'producer'))+charts(distributionRows):card('groups-table',t('groupTotal'),productFilter+aggregateTable(groupRows,'groupId'))+charts(rows);
   renderDetail(rows);
@@ -339,14 +365,12 @@ function renderData() {
 function renderStatic() {
   if(!visibleSections().includes(state.tab))state.tab='summary';
   document.documentElement.lang = lang;
-  $('showWeightedLabel').textContent = t('showWeighted');
   $('dashboardViewLabel').textContent = t('dashboardView');
   $('heroEyebrow').textContent = t('eyebrow');
   $('replace').textContent = t('importAction');
   $('lifeTop').setAttribute('aria-label',lang==='fr'?'Retour en haut':'Ga naar boven');
   $('lifeTop').setAttribute('title',lang==='fr'?'Retour en haut':'Ga naar boven');
   if (state.records.length) $('source').textContent = `Excel: ${state.source} · ${fmt(state.records.length)} ${t('count').toLowerCase()} · ${singleGroupFile()?'A–M · ':''}${t('importOk')}`;
-  $('showWeighted').checked = state.showWeighted;
   const labels = {pageTitle:'title',lead:'lead',benefit1:'benefit1',benefit2:'benefit2',benefit3:'benefit3',uploadTitle:'upload',uploadHint:'uploadHint',pick:'pick',previewTitle:'preview',commit:'commit',cancel:'cancel',sheetLabel:'sheet',sourceTitle:'source',csv:'csv',pdfLabel:'pdf',pdfSections:'pdfSections',pdfSelectAll:'allSelect',pdfSelectNone:'noneSelect',print:'print',empty:'empty',footer:'footer',releaseText:'release'};
   Object.entries(labels).forEach(([id,key]) => {if(id==='lead')$(id).innerHTML=t(key);else $(id).textContent=t(key);});
   $('dropzone').setAttribute('aria-label',t('pick'));
@@ -420,9 +444,11 @@ function commit() {
   state.records = state.pending.records; state.source = state.pending.name; state.sheet = state.pending.sheet;
   state.pending = null; state.workbook = null; state.filters = {groupId:'',policy:'',type:'',product:'',producer:'',search:''}; state.page = 0;
   state.countType = '';
+  state.chartModes = {unweighted:'bar',count:'bar',commission:'bar'};
   state.groupProducts = [];
   state.groupProductionTypes = [];
-  state.detailProducts = [];state.detailProductionTypes = [];
+  state.groupFiscal = [];
+  state.detailProducts = [];state.detailProductionTypes = [];state.detailFiscal = [];
   $('source').textContent = state.source + (state.sheet ? ` · ${state.sheet}` : '');
   $('importPreview').classList.add('hidden'); $('intro').classList.add('hidden'); $('empty').classList.add('hidden'); $('dashboard').classList.remove('hidden');
   $('topActions').appendChild($('languageSwitch'));
@@ -624,7 +650,6 @@ function showChartTooltip(event) {
 }
 function init() {
   renderStatic();
-  $('showWeighted').addEventListener('change',e=>{state.showWeighted=e.target.checked;renderData();if(state.pending)preview();});
   ['pick','replace'].forEach(id => $(id).addEventListener('click',e => {e.stopPropagation();$('file').click();}));
   $('dropzone').addEventListener('click',()=>$('file').click());
   $('dropzone').addEventListener('keydown',e=>{if(['Enter',' '].includes(e.key)){e.preventDefault();$('file').click();}});
@@ -636,7 +661,7 @@ function init() {
   $('cancel').addEventListener('click',()=>{++importRequest;state.pending=null;state.workbook=null;$('importPreview').classList.add('hidden');message(state.records.length?t('loaded'):t('ready'));});
   $('sheet').addEventListener('change',e=>{try{const records=C.parseGrid(sheetGrid(state.workbook.Sheets[e.target.value]));state.pending.records=records;state.pending.sheet=e.target.value;preview();$('commit').disabled=false;message(t('preview'));}catch(err){$('commit').disabled=true;message(err.message,true);}});
   $('language').addEventListener('change',e=>{lang=e.target.value;renderStatic();});
-  document.addEventListener('change',e=>{const key=e.target.dataset.multi;if(!key)return;const values=selections(['countType','groupProducts','groupProductionTypes','detailProducts','detailProductionTypes'].includes(key)?state[key]:state.filters[key]);setMultiSelection(key,e.target.checked?[...new Set([...values,e.target.value])]:values.filter(v=>v!==e.target.value));});
+  document.addEventListener('change',e=>{const key=e.target.dataset.multi;if(!key)return;const values=selections(['countType','groupProducts','groupProductionTypes','groupFiscal','detailProducts','detailProductionTypes','detailFiscal'].includes(key)?state[key]:state.filters[key]);setMultiSelection(key,e.target.checked?[...new Set([...values,e.target.value])]:values.filter(v=>v!==e.target.value));});
   document.addEventListener('click',e=>{const button=e.target.closest('[data-multi-clear]');if(button)setMultiSelection(button.dataset.multiClear,[]);});
   document.addEventListener('click',e=>{if(!e.target.closest('.life-multiselect'))document.querySelectorAll('.life-multiselect[open]').forEach(menu=>menu.open=false);});
   $('filters').addEventListener('input',e=>{if(e.target.dataset.filter==='search'){state.filters.search=e.target.value;state.page=0;renderData();}});
@@ -650,8 +675,8 @@ function init() {
   });
   document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.excel)exportDetailExcel();if(b.dataset.png)exportImage(b.dataset.png,false);if(b.dataset.copy)exportImage(b.dataset.copy,true);if(b.dataset.page){state.page+=Number(b.dataset.page);renderDetail(selected());}});
   $('groups').addEventListener('change',e=>{const key=e.target.dataset.chartMode;if(key){state.chartModes[key]=e.target.value;renderData();}});
-  $('groups').addEventListener('click',e=>{if(e.target.closest('#resetGroupFilters')){state.groupProducts=[];state.groupProductionTypes=[];renderData();}});
-  $('detail').addEventListener('click',e=>{if(e.target.closest('#resetDetailFilters')){state.detailProducts=[];state.detailProductionTypes=[];state.page=0;renderData();}});
+  $('groups').addEventListener('click',e=>{if(e.target.closest('#resetGroupFilters')){state.groupProducts=[];state.groupProductionTypes=[];state.groupFiscal=[];renderData();}});
+  $('detail').addEventListener('click',e=>{if(e.target.closest('#resetDetailFilters')){state.detailProducts=[];state.detailProductionTypes=[];state.detailFiscal=[];state.page=0;renderData();}});
   $('csv').addEventListener('click',csvExport);$('print').addEventListener('click',printPdf);
   $('pdfSelectAll').addEventListener('click',()=>selectPdfSections(true));
   $('pdfSelectNone').addEventListener('click',()=>selectPdfSections(false));
