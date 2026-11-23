@@ -123,7 +123,7 @@ const pct = n => n == null ? '—' : new Intl.NumberFormat(lang === 'fr' ? 'fr-B
 const colors = ['#0d1473','#ff934c','#007e97','#8064a2','#437bb4','#b65f40','#418d69','#be6a92','#717e2a','#377d91','#a06d18','#6956a3','#4b6c45','#b04c60','#6876bd','#aa7a49','#357e72','#8e6382','#667a8c','#a65e1f'];
 const state = {records:[],pending:null,workbook:null,source:'',sheet:'',tab:'summary',metric:'unweighted',page:0,
   filters:{groupId:'',policy:'',type:'',product:'',producer:'',search:''},countType:'',groupProducts:[],groupProductionTypes:[],groupFiscal:[],detailProducts:[],detailProductionTypes:[],detailFiscal:[],chartModes:{unweighted:'bar',count:'bar',commission:'bar'},
-  sorts:{groups:{key:'unweighted',direction:'desc'},detail:{key:'policy',direction:'asc'}}};
+  sorts:{summary:{key:null,direction:'asc'},groups:{key:'unweighted',direction:'desc'},detail:{key:'policy',direction:'asc'}}};
 const sections = ['summary','groups','detail'];
 function singleGroupFile(){return state.records[0]?.sourceLayout==='single-group';}
 function visibleSections(){return sections.filter(id=>id!=='groups'||!singleGroupFile()||new Set(state.records.map(r=>r.producer).filter(Boolean)).size>1);}
@@ -206,9 +206,10 @@ function typeCards(rows) {
 }
 function sortedRows(rows,tableId) {
   const {key,direction}=state.sorts[tableId];
+  if (!key) return [...rows];
   const field={groupNo:'groupId',shortCount:'count'}[key]||key;
   return [...rows].sort((a,b)=>{
-    const x=a[field],y=b[field];
+    const x=tableId==='summary'&&field==='id'?`${typeLabel(a.id)} ${a.fiscalLabel}`:a[field],y=tableId==='summary'&&field==='id'?`${typeLabel(b.id)} ${b.fiscalLabel}`:b[field];
     if(x==null||y==null)return x==null?(y==null?0:1):-1;
     const order=typeof x==='number'&&typeof y==='number'?x-y:String(x).localeCompare(String(y),lang==='fr'?'fr-BE':'nl-BE',{numeric:true,sensitivity:'base'});
     return direction==='asc'?order:-order;
@@ -228,10 +229,10 @@ function aggregateTable(rows,key) {
   const total = C.totals(rows);
   const grouped = key === 'type' ? types().map(id => ({id,rows:rows.filter(r => r.type === id)})) : C.groupBy(rows,key);
   const split = grouped.flatMap(group => fiscalBuckets(group.rows).map(bucket => ({id:group.id,fiscalLabel:bucket.label,...C.totals(bucket.rows)})));
-  const aggregates = key === 'type' ? split : sortedRows(split.map(g=>({...g,countShare:C.share(g.count,total.count),unweightedShare:C.share(g.unweighted,total.unweighted),weightedShare:C.share(g.weighted,total.weighted),commissionShare:C.share(g.commission,total.commission)})),'groups');
+  const aggregates = sortedRows(split.map(g=>({...g,countShare:C.share(g.count,total.count),unweightedShare:C.share(g.unweighted,total.unweighted),weightedShare:C.share(g.weighted,total.weighted),commissionShare:C.share(g.commission,total.commission)})),key === 'type' ? 'summary' : 'groups');
   const dataCells = a => `<td>${fmt(a.count)}</td><td>${percent(a.count,total.count)}</td><td>${money(a.unweighted)}</td><td>${percent(a.unweighted,total.unweighted)}</td><td>${money(a.commission)}</td><td>${percent(a.commission,total.commission)}</td>`;
   return table([t(key === 'groupId' ? (singleGroupFile()?'fileTotal':'group') : key),...visibleFields(['shortCount','countShare','unweighted','unweightedShare','weighted','weightedShare','commission','commissionShare']).map(t)],
-    aggregates.map(a => `<tr><td>${key === 'groupId' ? groupMarkup(a.id) : esc(key === 'type' ? typeLabel(a.id) : a.id)}<span class="rappel-fiscal-label">${esc(a.fiscalLabel)}</span></td>${dataCells(a)}</tr>`),`<tr><td>${t('total')}</td>${dataCells(total)}</tr>`,key!=='type'?{id:'groups',keys:['id',...visibleFields(['shortCount','countShare','unweighted','unweightedShare','weighted','weightedShare','commission','commissionShare'])]}:null);
+    aggregates.map(a => `<tr><td>${key === 'groupId' ? groupMarkup(a.id) : esc(key === 'type' ? typeLabel(a.id) : a.id)}<span class="rappel-fiscal-label">${esc(a.fiscalLabel)}</span></td>${dataCells(a)}</tr>`),`<tr><td>${t('total')}</td>${dataCells(total)}</tr>`,{id:key === 'type' ? 'summary' : 'groups',keys:['id',...visibleFields(['shortCount','countShare','unweighted','unweightedShare','weighted','weightedShare','commission','commissionShare'])]});
 }
 function fiscalBuckets(rows) {
   return [false,true].map(nonFiscal => ({nonFiscal,label:nonFiscal ? (lang === 'fr' ? 'Non fiscal' : 'Niet-fiscaal') : (lang === 'fr' ? 'Fiscal' : 'Fiscaal'),rows:rows.filter(row => C.isNonFiscal(row) === nonFiscal)})).filter(bucket => bucket.rows.length);
@@ -445,6 +446,7 @@ function commit() {
   state.pending = null; state.workbook = null; state.filters = {groupId:'',policy:'',type:'',product:'',producer:'',search:''}; state.page = 0;
   state.countType = '';
   state.chartModes = {unweighted:'bar',count:'bar',commission:'bar'};
+  state.sorts.summary = {key:null,direction:'asc'};
   state.groupProducts = [];
   state.groupProductionTypes = [];
   state.groupFiscal = [];
