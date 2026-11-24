@@ -165,7 +165,7 @@ function groupMarkup(id) {
 function scopeHtml() { return ''; }
 function actions(id) {
   const svg = paths => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths}</svg>`;
-  if(id==='detail-table')return `<div class="life-export blockExportActions" data-html2canvas-ignore><button type="button" class="blockExportBtn life-excel-export" data-excel="detail" aria-label="Export naar Excel" title="Export naar Excel">${svg('<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="m8 12 6 6m0-6-6 6M17 12h1m-1 3h1m-1 3h1"/>')}</button><button type="button" class="blockExportBtn blockExportCopy" data-copy="${id}" aria-label="Copy naar geheugen" title="Copy naar geheugen">${svg('<rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>')}</button></div>`;
+  if(id==='detail-table'||id==='groups-table')return `<div class="life-export blockExportActions" data-html2canvas-ignore><button type="button" class="blockExportBtn life-excel-export" data-excel="${id==='groups-table'?'groups':'detail'}" aria-label="Export naar Excel" title="Export naar Excel">${svg('<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="m8 12 6 6m0-6-6 6M17 12h1m-1 3h1m-1 3h1"/>')}</button><button type="button" class="blockExportBtn blockExportCopy" data-copy="${id}" aria-label="Copy naar geheugen" title="Copy naar geheugen">${svg('<rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>')}</button></div>`;
   return `<div class="life-export blockExportActions" data-html2canvas-ignore><button type="button" class="blockExportBtn blockExportDownload" data-png="${id}" aria-label="${esc(t('download'))}" title="${esc(t('download'))}">${svg('<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>')}</button><button type="button" class="blockExportBtn blockExportCopy" data-copy="${id}" aria-label="${esc(t('copy'))}" title="${esc(t('copy'))}">${svg('<rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>')}</button></div>`;
 }
 function head(title,id,level='h2',controls='') {
@@ -248,11 +248,14 @@ function table(headers,rows,footer='',sort=null) {
     return `<th scope="col"${textColumn?' class="life-text-heading"':''} aria-sort="${direction}"><button type="button" class="life-sort-button" data-sort-table="${sort.id}" data-sort-key="${key}">${esc(x)}<span aria-hidden="true">${active?(current.direction==='asc'?'▲':'▼'):'↕'}</span></button></th>`;
   }).join('')}</tr></thead><tbody>${rows.length ? rows.join('') : `<tr><td colspan="${headers.length}">${t('noData')}</td></tr>`}</tbody>${footer ? `<tfoot>${footer}</tfoot>` : ''}</table></div>`;
 }
-function aggregateTable(rows,key) {
+function aggregateRows(rows,key) {
   const total = C.totals(rows);
   const grouped = key === 'type' ? types().map(id => ({id,rows:rows.filter(r => r.type === id)})) : C.groupBy(rows,key);
   const split = key === 'type' ? grouped.flatMap(group => fiscalBuckets(group.rows).map(bucket => ({id:group.id,fiscalLabel:bucket.label,...C.totals(bucket.rows)}))) : grouped.map(group=>({id:group.id,...C.totals(group.rows)}));
-  const aggregates = sortedRows(split.map(g=>({...g,countShare:C.share(g.count,total.count),unweightedShare:C.share(g.unweighted,total.unweighted),weightedShare:C.share(g.weighted,total.weighted),commissionShare:C.share(g.commission,total.commission),averageRappel:C.share(g.commission,g.unweighted)})),key === 'type' ? 'summary' : 'groups');
+  return sortedRows(split.map(g=>({...g,countShare:C.share(g.count,total.count),unweightedShare:C.share(g.unweighted,total.unweighted),weightedShare:C.share(g.weighted,total.weighted),commissionShare:C.share(g.commission,total.commission),averageRappel:C.share(g.commission,g.unweighted)})),key === 'type' ? 'summary' : 'groups');
+}
+function aggregateTable(rows,key) {
+  const total=C.totals(rows), aggregates=aggregateRows(rows,key);
   const fields = visibleFields(['shortCount','countShare','unweighted','unweightedShare','weighted','weightedShare','commission',key === 'type' ? 'averageRappel' : 'commissionShare']);
   const dataCells = a => `<td>${fmt(a.count)}</td><td>${percent(a.count,total.count)}</td><td>${money(a.unweighted)}</td><td>${percent(a.unweighted,total.unweighted)}</td><td>${money(a.commission)}</td><td>${percent(a.commission,key === 'type' ? a.unweighted : total.commission)}</td>`;
   return table([t(key === 'groupId' ? (singleGroupFile()?'fileTotal':'group') : key),...fields.map(t)],
@@ -401,6 +404,10 @@ function renderDetail(rows) {
   const controls=`<div class="life-group-table-filters rappel-table-filters rappel-detail-filters" data-html2canvas-ignore>${multiDropdown('detailFiscal',t('fiscalStatus'),['fiscal','nonFiscal'],state.detailFiscal)}${multiDropdown('detailProducts',t('product'),products,state.detailProducts)}${multiDropdown('detailProductionTypes',t('type'),types(),state.detailProductionTypes)}<button type="button" class="life-button" id="resetDetailFilters">${t('reset')}</button></div>`;
   $('detail').innerHTML = card('detail-table',t('detail'),`${controls}<p class="small">${t('product')}: ${esc(state.detailProducts.length?state.detailProducts.join(', '):t('all'))} · ${t('type')}: ${esc(state.detailProductionTypes.length?state.detailProductionTypes.map(typeLabel).join(', '):t('all'))} · ${t('fiscalStatus')}: ${esc(state.detailFiscal.length?state.detailFiscal.map(t).join(', '):t('all'))}</p><p class="small">${t('recordNote')} ${t('csv')}: ${fmt(rows.length)} ${t('count').toLowerCase()}.</p>${html}<div class="life-pagination" data-html2canvas-ignore><span>${rows.length ? fmt(state.page*size+1) : 0}–${fmt(Math.min((state.page+1)*size,rows.length))} / ${fmt(rows.length)}</span><div><button class="life-button" data-page="-1" ${state.page === 0 ? 'disabled' : ''}>${t('prev')}</button> <button class="life-button" data-page="1" ${state.page === maxPage ? 'disabled' : ''}>${t('next')}</button></div></div>`);
 }
+function distributionTableRows() {
+  if(singleGroupFile())return state.records.filter(r=>!selections(state.filters.producer).length||selections(state.filters.producer).includes(r.producer));
+  return selected().filter(r=>(!state.groupProducts.length||state.groupProducts.includes(r.product))&&(!state.groupProductionTypes.length||state.groupProductionTypes.includes(r.type)));
+}
 function renderData() {
   if (!state.records.length) return;
   if(!visibleSections().includes(state.tab))state.tab='summary';
@@ -413,10 +420,10 @@ function renderData() {
   $('headlineKpis').innerHTML = metrics(total,rows);
   $('summary').innerHTML = summaryCharts(rows) + card('summary-table',t('summary'),aggregateTable(rows,'type'));
   const productOptions=[...new Set(state.records.map(r=>r.product))].sort((a,b)=>a.localeCompare(b,lang==='fr'?'fr-BE':'nl-BE'));
-  const groupRows=rows.filter(r=>(!state.groupProducts.length||state.groupProducts.includes(r.product))&&(!state.groupProductionTypes.length||state.groupProductionTypes.includes(r.type)));
+  const groupRows=distributionTableRows();
   const productFilter=`<div class="life-group-table-filters rappel-table-filters" data-html2canvas-ignore>${multiDropdown('groupProducts',t('product'),productOptions,state.groupProducts)}${multiDropdown('groupProductionTypes',t('type'),types(),state.groupProductionTypes)}<button type="button" class="life-button" id="resetGroupFilters">${t('reset')}</button></div><p class="small">${t('product')}: ${esc(state.groupProducts.length?state.groupProducts.join(', '):t('all'))} · ${t('type')}: ${esc(state.groupProductionTypes.length?state.groupProductionTypes.map(typeLabel).join(', '):t('all'))}</p>`;
   const distributionRows=singleGroupFile()?state.records.filter(r=>!selections(state.filters.producer).length||selections(state.filters.producer).includes(r.producer)):rows;
-  $('groups').innerHTML = singleGroupFile()?card('groups-table',lang==='fr'?'Totaux par producteur':'Producenttotalen',aggregateTable(distributionRows,'producer'))+charts(distributionRows):card('groups-table',t('groupTotal'),productFilter+aggregateTable(groupRows,'groupId'))+charts(rows);
+  $('groups').innerHTML = singleGroupFile()?card('groups-table',lang==='fr'?'Totaux par producteur':'Producenttotalen',aggregateTable(groupRows,'producer'))+charts(distributionRows):card('groups-table',t('groupTotal'),productFilter+aggregateTable(groupRows,'groupId'))+charts(rows);
   renderDetail(rows);
   sections.forEach(id => $(id).classList.toggle('hidden',id !== state.tab));
 }
@@ -538,6 +545,31 @@ function exportDetailExcel() {
     if(!window.XLSX)throw new Error('Excel-bibliotheek ontbreekt.');
     const buffer=XLSX.write(detailWorkbook(),{type:'array',bookType:'xlsx'});
     saveBlob(new Blob([buffer],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}),'dashboardliferappel-detail.xlsx');
+  }catch(error){message(error.message,true);}
+}
+function groupsWorkbook() {
+  const rows=distributionTableRows(), single=singleGroupFile(), total=C.totals(rows);
+  const columns=[...(single?['producer']:['groupNo','groupName']),'shortCount','countShare','unweighted','unweightedShare','commission','commissionShare'];
+  const aggregates=aggregateRows(rows,single?'producer':'groupId');
+  const values=a=>[...(single?[a.id]:[a.id,rows.find(r=>r.groupId===a.id)?.groupName||'']),a.count,C.share(a.count,total.count)==null?null:C.share(a.count,total.count)/100,a.unweighted/100,C.share(a.unweighted,total.unweighted)==null?null:C.share(a.unweighted,total.unweighted)/100,a.commission/100,C.share(a.commission,total.commission)==null?null:C.share(a.commission,total.commission)/100];
+  const footer=values({...total,id:t('total')});
+  const sheet=XLSX.utils.aoa_to_sheet([columns.map(t),...aggregates.map(values),footer]);
+  sheet['!cols']=columns.map(key=>({wch:key==='groupName'?38:key.endsWith('Share')?32:22}));
+  sheet['!autofilter']={ref:XLSX.utils.encode_range({s:{r:0,c:0},e:{r:aggregates.length,c:columns.length-1}})};
+  for(let r=1;r<=aggregates.length+1;r++)columns.forEach((key,c)=>{
+    const cell=sheet[XLSX.utils.encode_cell({r,c})];if(!cell)return;
+    if(['unweighted','commission'].includes(key))cell.z='#,##0.00 "€"';
+    else if(key.endsWith('Share'))cell.z='0.00%';
+    else if(['producer','groupNo'].includes(key))cell.z='@';
+    else if(key==='shortCount')cell.z='0';
+  });
+  const workbook=XLSX.utils.book_new();XLSX.utils.book_append_sheet(workbook,sheet,single?'Producenttotalen':'Groepstotalen');return workbook;
+}
+function exportGroupsExcel() {
+  try {
+    if(!window.XLSX)throw new Error('Excel-bibliotheek ontbreekt.');
+    const buffer=XLSX.write(groupsWorkbook(),{type:'array',bookType:'xlsx'});
+    saveBlob(new Blob([buffer],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}),`dashboardliferappel-${singleGroupFile()?'producenttotalen':'groepstotalen'}.xlsx`);
   }catch(error){message(error.message,true);}
 }
 async function canvasFor(id) {
@@ -734,7 +766,7 @@ function init() {
     sort.direction=sort.key===key?(sort.direction==='asc'?'desc':'asc'):'desc';sort.key=key;
     state.page=0;renderData();
   });
-  document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.excel)exportDetailExcel();if(b.dataset.png)exportImage(b.dataset.png,false);if(b.dataset.copy)exportImage(b.dataset.copy,true);if(b.dataset.page){state.page+=Number(b.dataset.page);renderDetail(selected());}});
+  document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.excel==='detail')exportDetailExcel();if(b.dataset.excel==='groups')exportGroupsExcel();if(b.dataset.png)exportImage(b.dataset.png,false);if(b.dataset.copy)exportImage(b.dataset.copy,true);if(b.dataset.page){state.page+=Number(b.dataset.page);renderDetail(selected());}});
   $('groups').addEventListener('change',e=>{const key=e.target.dataset.chartMode;if(key){state.chartModes[key]=e.target.value;renderData();}});
   $('groups').addEventListener('click',e=>{if(e.target.closest('#resetGroupFilters')){state.groupProducts=[];state.groupProductionTypes=[];renderData();}});
   $('detail').addEventListener('click',e=>{if(e.target.closest('#resetDetailFilters')){state.detailProducts=[];state.detailProductionTypes=[];state.detailFiscal=[];state.page=0;renderData();}});
