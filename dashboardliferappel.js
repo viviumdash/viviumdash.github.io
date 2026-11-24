@@ -100,8 +100,11 @@ const words = {
   productionPie:['Verdeling premie per type productie','Répartition des primes par type de production'],commissionPie:['Verdeling rappelcommissie per type','Répartition des commissions de rappel par type'],
   all:['Alle','Tous'],group:['Groep','Groupe'],type:['Type productie','Type de production'],product:['Product','Produit'],producer:['Producentnummer','Numéro de producteur'],search:['Zoek polis of klant','Rechercher police ou client'],reset:['Filters wissen','Effacer les filtres'],
   NZ:['Nieuwe zaken','Affaires nouvelles'],VH:['Verhogingen','Augmentations'],KP:['Koopsom','Prime unique'],KO:['Koopsom','Prime unique'],NK:['Nieuwe koopsom','Nouvelle prime unique'],selected:['geselecteerd','sélectionnés'],
-  total:['Totaal Life','Total Vie'],byType:['Productie per type','Production par type'],share:['Aandeel','Part'],countShare:['Aandeel aantal','Part du nombre'],unweightedShare:['Aandeel premie vóór weging','Part prime avant pondération'],weightedShare:['Aandeel premie na weging','Part prime après pondération'],
-  commissionShare:['Aandeel rappelcommissie','Part de la commission de rappel'],
+  total:['Totaal Life','Total Vie'],byType:['Productie per type','Production par type'],share:['Aandeel','Part'],countShare:['Aandeel aantal','Part du nombre'],unweightedShare:['Aandeel tov totale premie','Part de la prime totale'],weightedShare:['Aandeel premie na weging','Part prime après pondération'],
+  commissionShare:['Aandeel tov totale rappelcommissie','Part de la commission de rappel totale'],
+  averageRappel:['Gemiddelde rappel','Rappel moyen'],
+  premiumShareLabel:['Aandeel tov totale premie','Part de la prime totale'],
+  commissionPieNote:['Taartdelen: verdeling rappelcommissie. Percentages: gemiddelde rappel (rappelcommissie / premie vóór weging).','Secteurs : répartition des commissions de rappel. Pourcentages : rappel moyen (commission de rappel / prime avant pondération).'],
   recordNote:['Aantallen = productieregels; meerdere regels per polis blijven behouden.','Nombre = lignes de production ; les lignes multiples d’une police sont conservées.'],
   scope:['',''],allGroups:['Alle groepen samen','Tous les groupes réunis'],basis:['Maatstaf','Mesure'],groupShare:['Aandeel per groep','Part par groupe'],countByType:['Aantal per type','Nombre par type'],
   pieNote:['Aandeel per groep binnen dit productietype. Alle groepen staan afzonderlijk in de legenda.','Part de chaque groupe au sein de ce type de production. Tous les groupes figurent séparément dans la légende.'],
@@ -121,8 +124,8 @@ const fmt = n => new Intl.NumberFormat(lang === 'fr' ? 'fr-BE' : 'nl-BE').format
 const money = cents => new Intl.NumberFormat(lang === 'fr' ? 'fr-BE' : 'nl-BE', {style:'currency',currency:'EUR',minimumFractionDigits:0,maximumFractionDigits:0}).format(Math.trunc(cents / 100));
 const pct = n => n == null ? '—' : new Intl.NumberFormat(lang === 'fr' ? 'fr-BE' : 'nl-BE',{maximumFractionDigits:2,minimumFractionDigits:1}).format(n) + '%';
 const colors = ['#0d1473','#ff934c','#007e97','#8064a2','#437bb4','#b65f40','#418d69','#be6a92','#717e2a','#377d91','#a06d18','#6956a3','#4b6c45','#b04c60','#6876bd','#aa7a49','#357e72','#8e6382','#667a8c','#a65e1f'];
-const state = {records:[],pending:null,workbook:null,source:'',sheet:'',tab:'summary',metric:'unweighted',page:0,
-  filters:{groupId:'',policy:'',type:'',product:'',producer:'',search:''},countType:'',groupProducts:[],groupProductionTypes:[],groupFiscal:[],detailProducts:[],detailProductionTypes:[],detailFiscal:[],chartModes:{unweighted:'bar',count:'bar',commission:'bar'},
+const state = {records:[],pending:null,workbook:null,source:'',sheet:'',tab:'summary',metric:'unweighted',headlineView:'compact',page:0,
+  filters:{groupId:'',policy:'',type:'',product:'',producer:'',search:''},groupProducts:[],groupProductionTypes:[],detailProducts:[],detailProductionTypes:[],detailFiscal:[],chartModes:{unweighted:'bar',commission:'bar'},
   sorts:{summary:{key:null,direction:'asc'},groups:{key:'unweighted',direction:'desc'},detail:{key:'policy',direction:'asc'}}};
 const sections = ['summary','groups','detail'];
 function singleGroupFile(){return state.records[0]?.sourceLayout==='single-group';}
@@ -174,35 +177,55 @@ function head(title,id,level='h2',controls='') {
 }
 function card(id,title,html,controls='') { return `<article class="card exportable" id="${id}">${head(title,id,'h2',controls)}${html}</article>`; }
 function percent(value,total) { return pct(C.share(value,total)); }
-function rappelRateKpi(rows, fiscal = '') {
-  const total = C.totals(rows);
-  const rate = C.share(total.commission, total.unweighted);
-  const suffix = fiscal ? ` ${t(fiscal)}` : '';
-  const note = lang === 'fr' ? 'Commission de rappel / prime avant pondération' : 'Rappelcommissie / premie voor weging';
-  return `<div class="kpi rappel-rate-kpi" data-rappel-kpi="rate-${fiscal || 'total'}"><div class="label">${t('rate')}${suffix}</div><div class="value" title="${note}${suffix}">${pct(rate)}</div></div>`;
-}
 function rappelAmountKpi(rows, key, fiscal = '') {
-  const total = C.totals(rows)[key];
+  const totals = C.totals(rows);
+  const total = totals[key];
+  const isCommission = key === 'commission';
+  const averageLabel = lang === 'fr' ? 'rappel moy.' : 'gem.rappel';
+  const formula = lang === 'fr' ? 'Commission de rappel / prime avant pondération' : 'Rappelcommissie / premie voor weging';
   const suffix = fiscal === 'fiscal' ? (lang === 'fr' ? 'FISCAL' : 'FISCAAL') : fiscal === 'nonFiscal' ? (lang === 'fr' ? 'NON FISCAL' : 'NIET-FISCAAL') : '';
-  const bars = types().map((code, i) => {
-    const amount = C.totals(rows.filter(row => row.type === code))[key];
-    const share = C.share(amount, total);
+  const contributions = types().map((code, i) => {
+    const subtotal = C.totals(rows.filter(row => row.type === code));
+    const amount = subtotal[key];
+    const share = C.share(amount, isCommission ? subtotal.unweighted : total);
+    if (isCommission) {
+      const label = `${typeLabel(code)}: ${money(amount)} / ${averageLabel} ${pct(share)} (${formula})`;
+      return `<div class="life-kpi-contribution" title="${esc(label)}"><div class="rappel-commission-detail"><div class="rappel-commission-line"><span class="rappel-commission-type"><i style="background:${colors[i % colors.length]}"></i>${esc(typeLabel(code))}</span><span class="rappel-commission-amount">${money(amount)}</span><span class="rappel-commission-average">${pct(share)}</span></div></div></div>`;
+    }
     const label = `${typeLabel(code)}: ${money(amount)} (${pct(share)})`;
-    return `<div class="life-kpi-contribution" title="${esc(label)}"><div class="life-kpi-contribution-label"><span><i style="background:${colors[i % colors.length]}"></i>${esc(typeLabel(code))}</span><span>${money(amount)} (${pct(share)})</span></div><div class="life-kpi-contribution-track" role="img" aria-label="${esc(label)}"><span style="background:${colors[i % colors.length]};width:${Math.max(0, Math.min(100, share || 0))}%"></span></div></div>`;
+    return `<div class="life-kpi-contribution" title="${esc(label)}"><div class="life-kpi-contribution-label"><span><i style="background:${colors[i % colors.length]}"></i>${esc(typeLabel(code))}</span><span class="rappel-premium-amount">${money(amount)}</span><span class="rappel-premium-share">${pct(share)}</span></div></div>`;
   }).join('');
-  return `<div class="kpi${fiscal ? ' rappel-component summaryComponentKpi' : ' rappel-total summaryTotalKpi'}" data-rappel-kpi="${key}-${fiscal || 'total'}"${fiscal ? ` data-equation="${fiscal === 'fiscal' ? '=' : '+'}"` : ''}><div class="label">${t(key)}${suffix ? `<br>${suffix}` : ''}</div><div class="value">${money(total)}</div><div class="life-kpi-contributions">${bars}</div></div>`;
+  const heading = `<div class="label rappel-commission-head"><span>${t(key).replace('Rappelcommissie','Rappel&shy;commissie')}${suffix ? `<br>${suffix}` : ''}</span><span>${isCommission ? t('averageRappel') : t('share')}</span></div>`;
+  const rate = isCommission ? C.share(total, totals.unweighted) : C.share(total, total);
+  const value = `<div class="value rappel-commission-total"><span class="rappel-commission-amount">${money(total)}</span><span class="rappel-commission-average"${isCommission ? ` title="${formula}"` : ''}>${pct(rate)}</span></div>`;
+  return `<div class="kpi rappel-commission-kpi${fiscal ? ' rappel-component summaryComponentKpi' : ' rappel-total summaryTotalKpi'}" data-rappel-kpi="${key}-${fiscal || 'total'}"${fiscal ? ` data-equation="${fiscal === 'fiscal' ? '=' : '+'}"` : ''}>${heading}${value}<div class="life-kpi-contributions">${contributions}</div></div>`;
 }
 function metrics(total, rows) {
   const { fiscal, nonFiscal } = C.fiscalTotals(rows);
   const row = key => `<div class="life-kpis life-headline-kpis rappel-equation-row" style="--headline-kpi-rows:${types().length + 2}">${rappelAmountKpi(rows, key)}${rappelAmountKpi(fiscal, key, 'fiscal')}${rappelAmountKpi(nonFiscal, key, 'nonFiscal')}</div>`;
-  return `<div class="life-kpis rappel-headline-rows">${row('unweighted')}${row('commission')}<div class="rappel-rate-stack">${rappelRateKpi(rows)}${rappelRateKpi(fiscal, 'fiscal')}${rappelRateKpi(nonFiscal, 'nonFiscal')}</div></div>`;
+  const compact = state.headlineView === 'compact';
+  const label = lang === 'fr' ? 'Vue des indicateurs' : 'KPI-weergave';
+  const choices = [['compact',"KPI’s"],['overview',lang === 'fr' ? 'Tableau' : 'Tabel']];
+  const switcher = `<div class="rappel-view-switch" data-html2canvas-ignore><div role="group" aria-label="${label}">${choices.map(([id,title])=>`<button type="button" data-kpi-view="${id}" aria-pressed="${state.headlineView === id}" aria-controls="rappelKpi${id}">${title}</button>`).join('')}</div></div>`;
+  return `${switcher}<div id="rappelKpicompact" class="rappel-kpi-pane rappel-compact-mode"${compact?'':' hidden'}><div class="life-kpis rappel-headline-rows">${row('unweighted')}${row('commission')}</div></div><div id="rappelKpioverview" class="rappel-kpi-pane"${compact?' hidden':''}>${rappelOverview(rows)}</div>`;
 }
-function typeCards(rows) {
-  const total = C.totals(rows);
-  return `<div class="life-kpis life-type-kpis">${types().map((code) => {
-    const a = C.totals(rows.filter(r => r.type === code));
-    return `<div class="kpi" style="--type-color:${colors[types().indexOf(code) % colors.length]}"><div class="label">${esc(typeLabel(code))}</div><div class="value">${fmt(a.count)}</div><div class="life-share">${t('countShare')}: ${percent(a.count,total.count)}</div>${visibleFields(['unweighted','weighted']).map(key => `<div class="life-metric"><span>${t(key)}</span><strong>${money(a[key])}</strong></div><div class="life-share">${t('share')}: ${percent(a[key],total[key])}</div>`).join('')}</div>`;
-  }).join('')}</div>`;
+function rappelOverview(rows) {
+  const split = C.fiscalTotals(rows);
+  const scopes = [{id:'all',label:lang==='fr'?'Toute la production':'Alle productie',suffix:'',rows},
+    {id:'fiscal',label:t('fiscal'),suffix:t('fiscal'),rows:split.fiscal},
+    {id:'nonFiscal',label:t('nonFiscal'),suffix:t('nonFiscal'),rows:split.nonFiscal}];
+  const average = lang === 'fr' ? 'Rappel moyen' : 'Gemiddelde rappel';
+  const formula = lang === 'fr' ? 'Commission de rappel / prime avant pondération' : 'Rappelcommissie / premie voor weging';
+  const cards = scopes.map(scope=>{
+    const total = C.totals(scope.rows);
+    const suffix = scope.suffix ? `<br>${esc(scope.suffix)}` : '';
+    return `<section class="kpi rappel-overview-card ${scope.id==='all'?'summaryTotalKpi':'summaryComponentKpi'}" data-kpi-scope="${scope.id}"><div class="rappel-overview-amounts"><div><div class="label">${t('unweighted')}${suffix}</div><div class="value">${money(total.unweighted)}</div></div><div><div class="label">${t('commission').replace('Rappelcommissie','Rappel&shy;commissie')}${suffix}</div><div class="value">${money(total.commission)}</div></div></div><div class="rappel-overview-average" title="${formula}"><span>${average}</span><strong>${pct(C.share(total.commission,total.unweighted))}</strong></div></section>`;
+  }).join('');
+  const tableRows = types().map((code,i)=>`<tr><th scope="row"><span class="rappel-overview-type"><i style="background:${colors[i%colors.length]}"></i>${esc(typeLabel(code))}</span></th>${scopes.map(scope=>{
+    const subtotal = C.totals(scope.rows.filter(row=>row.type===code));
+    return `<td class="rappel-overview-group-start" data-scope="${scope.id}" data-metric="unweighted">${money(subtotal.unweighted)}</td><td data-scope="${scope.id}" data-metric="commission">${money(subtotal.commission)}</td><td data-scope="${scope.id}" data-metric="rate" title="${formula}">${pct(C.share(subtotal.commission,subtotal.unweighted))}</td>`;
+  }).join('')}</tr>`).join('');
+  return `<div class="life-kpis rappel-overview-summaries">${cards}</div><div class="rappel-overview-table-wrap"><table class="rappel-overview-table"><colgroup><col style="width:16%">${scopes.map(()=>'<col style="width:9.25%"><col style="width:9.25%"><col style="width:9.5%">').join('')}</colgroup><thead><tr><th rowspan="2" scope="col">${t('type')}</th>${scopes.map(scope=>`<th colspan="3" scope="colgroup" class="rappel-overview-group-start" data-scope="${scope.id}">${esc(scope.label)}</th>`).join('')}</tr><tr>${scopes.map(scope=>`<th scope="col" class="rappel-overview-group-start" data-scope="${scope.id}">${t('unweighted')}</th><th scope="col" data-scope="${scope.id}">${t('commission').replace('Rappelcommissie','Rappel&shy;commissie')}</th><th scope="col" data-scope="${scope.id}" class="rappel-average-heading">${average.replace(' ','<br>')}</th>`).join('')}</tr></thead><tbody>${tableRows}</tbody></table></div>`;
 }
 function sortedRows(rows,tableId) {
   const {key,direction}=state.sorts[tableId];
@@ -228,11 +251,12 @@ function table(headers,rows,footer='',sort=null) {
 function aggregateTable(rows,key) {
   const total = C.totals(rows);
   const grouped = key === 'type' ? types().map(id => ({id,rows:rows.filter(r => r.type === id)})) : C.groupBy(rows,key);
-  const split = grouped.flatMap(group => fiscalBuckets(group.rows).map(bucket => ({id:group.id,fiscalLabel:bucket.label,...C.totals(bucket.rows)})));
-  const aggregates = sortedRows(split.map(g=>({...g,countShare:C.share(g.count,total.count),unweightedShare:C.share(g.unweighted,total.unweighted),weightedShare:C.share(g.weighted,total.weighted),commissionShare:C.share(g.commission,total.commission)})),key === 'type' ? 'summary' : 'groups');
-  const dataCells = a => `<td>${fmt(a.count)}</td><td>${percent(a.count,total.count)}</td><td>${money(a.unweighted)}</td><td>${percent(a.unweighted,total.unweighted)}</td><td>${money(a.commission)}</td><td>${percent(a.commission,total.commission)}</td>`;
-  return table([t(key === 'groupId' ? (singleGroupFile()?'fileTotal':'group') : key),...visibleFields(['shortCount','countShare','unweighted','unweightedShare','weighted','weightedShare','commission','commissionShare']).map(t)],
-    aggregates.map(a => `<tr><td>${key === 'groupId' ? groupMarkup(a.id) : esc(key === 'type' ? typeLabel(a.id) : a.id)}<span class="rappel-fiscal-label">${esc(a.fiscalLabel)}</span></td>${dataCells(a)}</tr>`),`<tr><td>${t('total')}</td>${dataCells(total)}</tr>`,{id:key === 'type' ? 'summary' : 'groups',keys:['id',...visibleFields(['shortCount','countShare','unweighted','unweightedShare','weighted','weightedShare','commission','commissionShare'])]});
+  const split = key === 'type' ? grouped.flatMap(group => fiscalBuckets(group.rows).map(bucket => ({id:group.id,fiscalLabel:bucket.label,...C.totals(bucket.rows)}))) : grouped.map(group=>({id:group.id,...C.totals(group.rows)}));
+  const aggregates = sortedRows(split.map(g=>({...g,countShare:C.share(g.count,total.count),unweightedShare:C.share(g.unweighted,total.unweighted),weightedShare:C.share(g.weighted,total.weighted),commissionShare:C.share(g.commission,total.commission),averageRappel:C.share(g.commission,g.unweighted)})),key === 'type' ? 'summary' : 'groups');
+  const fields = visibleFields(['shortCount','countShare','unweighted','unweightedShare','weighted','weightedShare','commission',key === 'type' ? 'averageRappel' : 'commissionShare']);
+  const dataCells = a => `<td>${fmt(a.count)}</td><td>${percent(a.count,total.count)}</td><td>${money(a.unweighted)}</td><td>${percent(a.unweighted,total.unweighted)}</td><td>${money(a.commission)}</td><td>${percent(a.commission,key === 'type' ? a.unweighted : total.commission)}</td>`;
+  return table([t(key === 'groupId' ? (singleGroupFile()?'fileTotal':'group') : key),...fields.map(t)],
+    aggregates.map(a => `<tr><td>${key === 'groupId' ? groupMarkup(a.id) : esc(key === 'type' ? typeLabel(a.id) : a.id)}${key === 'type' ? `<span class="rappel-fiscal-label">${esc(a.fiscalLabel)}</span>` : ''}</td>${dataCells(a)}</tr>`),`<tr><td>${t('total')}</td>${dataCells(total)}</tr>`,{id:key === 'type' ? 'summary' : 'groups',keys:['id',...fields]});
 }
 function fiscalBuckets(rows) {
   return [false,true].map(nonFiscal => ({nonFiscal,label:nonFiscal ? (lang === 'fr' ? 'Non fiscal' : 'Niet-fiscaal') : (lang === 'fr' ? 'Fiscal' : 'Fiscaal'),rows:rows.filter(row => C.isNonFiscal(row) === nonFiscal)})).filter(bucket => bucket.rows.length);
@@ -248,47 +272,66 @@ function bars(rows,key) {
   }).join('')}</div>`;
 }
 function groupColor(id) { const ids = [...new Set(state.records.map(r => singleGroupFile()?r.producer:r.groupId))].sort(); const i = ids.indexOf(id); return i < colors.length ? colors[i] : `hsl(${(i * 137.508) % 360},48%,44%)`; }
-function donut(parts,total,metric = state.metric,label = t('groupShare')) {
+function donut(parts,total,metric = state.metric,label = t('groupShare'),centerLabel = t('total')) {
   if (total <= 0 || parts.some(p => p.value < 0)) return `<div class="life-empty-chart">${t('noPie')}</div>`;
   let angle = -Math.PI / 2;
   const positive = parts.filter(p => p.value > 0);
   const paths = positive.map(p => {
     const start = angle, delta = p.value / total * Math.PI * 2; angle += delta;
-    const tooltip = esc(`${p.label}: ${metric === 'count' ? fmt(p.value) : money(p.value)} (${percent(p.value,total)})`);
-    const attributes = `tabindex="0" aria-label="${tooltip}" data-chart-tooltip="${tooltip}"`;
-    if (positive.length === 1) return `<circle cx="100" cy="100" r="86" fill="${p.color}" ${attributes}><title>${tooltip}</title></circle>`;
-    return `<path d="M100,100 L${100+86*Math.cos(start)},${100+86*Math.sin(start)} A86,86 0 ${delta > Math.PI ? 1 : 0},1 ${100+86*Math.cos(angle)},${100+86*Math.sin(angle)} Z" fill="${p.color}" stroke="white" stroke-width="1" ${attributes}><title>${tooltip}</title></path>`;
+    const percentage = 'averageRappel' in p ? `${t('averageRappel')}: ${pct(p.averageRappel)}` : `${t(metric === 'unweighted' ? 'premiumShareLabel' : 'share')}: ${percent(p.value,total)}`;
+    const tooltip = esc(`${p.label}\n${t(metric)}: ${metric === 'count' ? fmt(p.value) : money(p.value)}\n${percentage}`);
+    const mid = start + delta / 2;
+    const offset = positive.length === 1 ? 0 : 6;
+    const attributes = `tabindex="0" aria-label="${tooltip}" data-chart-tooltip="${tooltip}" style="--slice-x:${(Math.cos(mid)*offset).toFixed(2)}px;--slice-y:${(Math.sin(mid)*offset).toFixed(2)}px"`;
+    if (positive.length === 1) return `<circle cx="100" cy="100" r="86" fill="${p.color}" ${attributes}></circle>`;
+    return `<path d="M100,100 L${100+86*Math.cos(start)},${100+86*Math.sin(start)} A86,86 0 ${delta > Math.PI ? 1 : 0},1 ${100+86*Math.cos(angle)},${100+86*Math.sin(angle)} Z" fill="${p.color}" stroke="white" stroke-width="1" ${attributes}></path>`;
   }).join('');
-  return `<svg class="life-donut" viewBox="0 0 200 200" role="img" aria-label="${esc(label)}">${paths}<g pointer-events="none"><circle cx="100" cy="100" r="53" fill="white"/><text x="100" y="94" text-anchor="middle" fill="#4d4d4d" font-size="10" font-family="Arial">${esc(t('total'))}</text><text x="100" y="115" text-anchor="middle" fill="#0d1473" font-size="13" font-weight="bold" font-family="Arial">${esc(metric === 'count' ? fmt(total) : money(total))}</text></g></svg>`;
+  return `<svg class="life-donut" viewBox="0 0 200 200" role="img" aria-label="${esc(label)}">${paths}<g pointer-events="none"><circle cx="100" cy="100" r="53" fill="white"/><text x="100" y="94" text-anchor="middle" fill="#4d4d4d" font-size="10" font-family="Arial">${esc(centerLabel)}</text><text x="100" y="115" text-anchor="middle" fill="#0d1473" font-size="13" font-weight="bold" font-family="Arial">${esc(metric === 'count' ? fmt(total) : money(total))}</text></g></svg>`;
 }
 function summaryCharts(rows) {
   return `<div class="life-chart-grid life-summary-charts">${['unweighted','commission'].map(key => {
     const title = t(key === 'unweighted' ? 'productionPie' : 'commissionPie');
-    const parts = types().flatMap((code,i) => fiscalBuckets(rows.filter(r=>r.type===code)).map(bucket => ({label:`${typeLabel(code)} · ${bucket.label}`,count:bucket.rows.length,value:C.totals(bucket.rows)[key],color:fiscalColor(colors[i % colors.length],bucket.nonFiscal)})));
+    const parts = types().flatMap((code,i) => fiscalBuckets(rows.filter(r=>r.type===code)).map(bucket => {
+      const subtotal = C.totals(bucket.rows);
+      return {typeLabel:typeLabel(code),fiscalLabel:bucket.label,label:`${typeLabel(code)} · ${bucket.label}`,count:bucket.rows.length,value:subtotal[key],color:fiscalColor(colors[i % colors.length],bucket.nonFiscal),...(key === 'commission' ? {averageRappel:C.share(subtotal.commission,subtotal.unweighted)} : {})};
+    }));
     const total = C.totals(rows)[key];
-    return card(`summary-pie-${key}`,title,`<p class="small">${t(key)}</p><div class="life-chart-body">${donut(parts,total,key,title)}<table class="life-legend life-summary-legend"><thead><tr><th>${t('type')}</th><th>${t('shortCount')}</th><th>${t(key)}</th></tr></thead><tbody>${parts.map(p => `<tr><td><span class="life-swatch" style="background:${p.color}"></span>${esc(p.label)}</td><td>${fmt(p.count)}</td><td>${money(p.value)}<small>${percent(p.value,total)}</small></td></tr>`).join('')}</tbody></table></div>`);
+    return card(`summary-pie-${key}`,title,`<div class="life-chart-body">${donut(parts,total,key,title,key==='unweighted'?(lang==='fr'?'Prime':'Premie'):t('commission'))}<table class="life-legend life-summary-legend"><thead><tr><th>${t('type')}</th><th>${t('shortCount')}</th><th>${t(key)}</th></tr></thead><tbody>${parts.map(p => `<tr><td><span class="life-swatch" style="background:${p.color}"></span>${esc(p.typeLabel)}<span class="rappel-fiscal-label">${esc(p.fiscalLabel)}</span></td><td>${fmt(p.count)}</td><td>${money(p.value)}<small>${key === 'commission' ? `${t('averageRappel')}: ${pct(p.averageRappel)}` : `${t('premiumShareLabel')}: ${percent(p.value,total)}`}</small></td></tr>`).join('')}</tbody></table></div>`);
   }).join('')}</div>`;
 }
 function charts(rows) {
-  return `<div class="life-chart-grid">${['unweighted','count','commission'].map((key) => {
-    const countTypes=selections(state.countType);
-    const data = !singleGroupFile() && key === 'count' && countTypes.length ? rows.filter(r => countTypes.includes(r.type)) : rows;
-    const parts = C.groupBy(data,singleGroupFile()?'producer':'groupId').flatMap(g => fiscalBuckets(g.rows).map(bucket => ({groupId:g.id,fiscalLabel:bucket.label,label:`${singleGroupFile()?`${t('producer')} ${g.id}`:groupLabel(g.id)} · ${bucket.label}`,value:C.totals(bucket.rows)[key],color:fiscalColor(groupColor(g.id),bucket.nonFiscal)}))).sort((a,b) => b.value-a.value);
-    const itemLabel=p=>singleGroupFile()?esc(p.label):`${groupMarkup(p.groupId)}<span class="rappel-fiscal-label">${esc(p.fiscalLabel)}</span>`;
-    const total = C.totals(data)[key], id = `group-chart-${key}`;
-    const title = `${singleGroupFile()?(lang==='fr'?'Part par producteur':'Aandeel per producent'):t('groupShare')} · ${t(key === 'count' ? 'countByType' : key)}`;
-    const selector = key === 'count' && !singleGroupFile() ? `<div class="life-count-selector" data-html2canvas-ignore>${multiDropdown('countType',t('type'),types(),countTypes)}</div><p class="small">${esc(countTypes.length?countTypes.map(typeLabel).join(', '):t('all'))}</p>` : '';
+  return `<div class="life-chart-grid">${['unweighted','commission'].map((key) => {
+    const data = rows;
+    const parts = C.groupBy(data,singleGroupFile()?'producer':'groupId').map(g => {
+      const subtotal = C.totals(g.rows);
+      return {rows:g.rows,groupId:g.id,label:singleGroupFile()?`${t('producer')} ${g.id}`:groupLabel(g.id),value:subtotal[key],color:groupColor(g.id)};
+    }).sort((a,b) => b.value-a.value);
+    const itemLabel=p=>singleGroupFile()?esc(p.label):groupMarkup(p.groupId);
+    const total = C.totals(data)[key], maxValue = Math.max(0,...parts.map(part=>part.value)), id = `group-chart-${key}`;
+    const title = `${singleGroupFile()?(lang==='fr'?'Part par producteur':'Aandeel per producent'):t('groupShare')} · ${t(key)}`;
     const mode=state.chartModes[key];
     const controls=`<select class="life-chart-mode" data-chart-mode="${key}" aria-label="${esc(title)}: ${lang==='fr'?'type de graphique':'grafiektype'}" data-html2canvas-ignore><option value="pie" ${mode==='pie'?'selected':''}>${lang==='fr'?'Camembert':'Taartgrafiek'}</option><option value="bar" ${mode==='bar'?'selected':''}>${lang==='fr'?'Barres':'Balkgrafiek'}</option></select>`;
-    const figure=mode==='bar'?`<div class="life-group-bars">${parts.map(p=>`<div class="life-group-bar-row"><div class="life-bar-label"><strong>${itemLabel(p)}</strong></div><div class="life-bar-track" role="img" aria-label="${esc(p.label)}: ${key==='count'?fmt(p.value):money(p.value)} (${percent(p.value,total)})"><span style="background:${p.color};width:${Math.max(0,Math.min(100,C.share(p.value,total)||0))}%"></span><strong class="life-bar-value">${key==='count'?fmt(p.value):money(p.value)} (${percent(p.value,total)})</strong></div></div>`).join('')||`<p>${t('noData')}</p>`}</div>`:donut(parts,total,key,title);
-    const legend=mode==='pie'?`<table class="life-legend"><caption class="small">${t(singleGroupFile()?'producer':'group')} · ${t(key)} · ${t('share')}</caption><tbody>${parts.map(p => `<tr><td><div class="life-legend-group"><span class="life-swatch" style="background:${p.color}"></span>${itemLabel(p)}</div></td><td>${key === 'count' ? fmt(p.value) : money(p.value)} (${percent(p.value,total)})</td></tr>`).join('') || `<tr><td>${t('noData')}</td></tr>`}</tbody></table>`:'';
-    return card(id,title,`${selector}<div class="life-chart-body ${mode==='pie'?'life-pie-split':'life-bar-full'}">${figure}${legend}</div>`,controls);
+    const rate = p => percent(p.value,total);
+    const amount = money;
+    const typeLegend = `<div class="rappel-stack-legend">${types().map((code,i)=>`<span><i class="life-swatch" style="background:${colors[i%colors.length]}"></i>${esc(typeLabel(code))}</span>`).join('')}</div>`;
+    const figure=mode==='bar'?`${typeLegend}<div class="life-group-bars">${parts.map(p=>{
+      const segments=types().map((code,i)=>{
+        const subtotal=C.totals(p.rows.filter(row=>row.type===code)), value=subtotal[key];
+        if(value<=0)return '';
+        const percentage=key==='commission'?`${t('commissionShare')}: ${percent(value,total)}`:percent(value,p.value);
+        const tooltip=esc(`${p.label} · ${typeLabel(code)}\n${t(key)}: ${amount(value)} · ${percentage}`);
+        return `<span class="rappel-bar-segment" style="background:${colors[i%colors.length]};width:${Math.max(0,Math.min(100,C.share(value,p.value)||0))}%" tabindex="0" data-chart-tooltip="${tooltip}" aria-label="${tooltip}"></span>`;
+      }).join('');
+      return `<div class="life-group-bar-row"><div class="life-bar-label"><strong>${itemLabel(p)}</strong></div><div class="rappel-bar-content"><span class="rappel-group-total">${amount(p.value)} · ${key==='commission'?`${t('share')}: `:''}${rate(p)}</span><div class="life-bar-track"><div class="rappel-bar-stack" style="width:${Math.max(0,Math.min(100,C.share(p.value,maxValue)||0))}%">${segments}</div></div></div></div>`;
+    }).join('')||`<p>${t('noData')}</p>`}</div>`:donut(parts,total,key,title);
+    const legend=mode==='pie'?`<table class="life-legend"><caption class="small">${t(singleGroupFile()?'producer':'group')} · ${t(key)} · ${t(key==='commission'?'commissionShare':'share')}</caption><tbody>${parts.map(p => `<tr><td><div class="life-legend-group"><span class="life-swatch" style="background:${p.color}"></span>${itemLabel(p)}</div></td><td>${amount(p.value)}<small>${key==='commission'?`${t('share')}: `:''}${rate(p)}</small></td></tr>`).join('') || `<tr><td>${t('noData')}</td></tr>`}</tbody></table>`:'';
+    return card(id,title,`<div class="life-chart-body ${mode==='pie'?'life-pie-split':'life-bar-full'}">${figure}${legend}</div>`,controls);
   }).join('')}</div>`;
 }
 function multiDropdown(key,label,ids,values,open=false) {
-  const text=id=>['detailFiscal','groupFiscal'].includes(key)?t(id):key==='groupId'?groupLabel(id):['countType','groupProductionTypes','detailProductionTypes'].includes(key)?typeLabel(id):id;
+  const text=id=>key==='detailFiscal'?t(id):key==='groupId'?groupLabel(id):['groupProductionTypes','detailProductionTypes'].includes(key)?typeLabel(id):id;
   const summary=values.length===1?text(values[0]):values.length?`${values.length} ${t('selected')}`:t('all');
-  return `<div class="life-filter-field"><span>${esc(label)}</span><details class="life-multiselect" id="multi-${key}" ${open?'open':''}><summary>${esc(summary)}<span aria-hidden="true">⌄</span></summary><div class="life-multiselect-options" role="group" aria-label="${esc(label)}"><button type="button" class="life-button" data-multi-clear="${key}">${t('all')}</button>${ids.map(id=>`<label><input type="checkbox" data-multi="${key}" value="${esc(id)}" ${values.includes(id)?'checked':''}>${key==='groupId'?groupMarkup(id):`<span>${esc(text(id))}</span>`}</label>`).join('')}</div></details></div>`;
+  return `<div class="life-filter-field"><span>${esc(label)}</span><details class="life-multiselect" id="multi-${key}" ${open?'open':''}><summary>${esc(summary)}<span aria-hidden="true">⌄</span></summary><div class="life-multiselect-options" role="group" aria-label="${esc(label)}"><div class="life-multiselect-tools"><input type="search" data-multi-search="${key}" aria-label="${esc(label)}: ${lang==='fr'?'Rechercher':'Zoeken'}" placeholder="${lang==='fr'?'Rechercher…':'Zoeken…'}"><div><button type="button" class="life-button" data-multi-all="${key}">${t('all')}</button><button type="button" class="life-button" data-multi-clear="${key}">${lang==='fr'?'Effacer la sélection':'Wis selectie'}</button></div></div>${ids.map(id=>`<label><input type="checkbox" data-multi="${key}" value="${esc(id)}" ${values.includes(id)?'checked':''}>${key==='groupId'?groupMarkup(id):`<span>${esc(text(id))}</span>`}</label>`).join('')}</div></details></div>`;
 }
 function renderFilters(openKey='') {
   const singleGroup=singleGroupFile();
@@ -305,11 +348,20 @@ function renderFilters(openKey='') {
     return multiDropdown(key,t(key==='groupId'?'group':key),ids,selections(state.filters[key]),openKey===key);
   }).join('') + (producerOnly?'':`<label>${t('search')}<input type="search" data-filter="search" value="${esc(state.filters.search)}" placeholder="${esc(t('search'))}"></label>`) + `<button class="life-button" id="reset">${t('reset')}</button>`;
 }
+function filterMultiOptions(menu) {
+  const query=menu.querySelector('[data-multi-search]').value.trim().toLocaleLowerCase();
+  menu.querySelectorAll('.life-multiselect-options > label').forEach(label=>{label.hidden=!`${label.textContent} ${label.querySelector('input').value}`.toLocaleLowerCase().includes(query);});
+}
 function setMultiSelection(key,values) {
-  if(key==='countType')state.countType=values;
-  else if(key==='groupProducts')state.groupProducts=values;
+  const menu=$('multi-'+key), panel=menu?.querySelector('.life-multiselect-options');
+  const scrollTop=panel?.scrollTop||0, query=menu?.querySelector('[data-multi-search]')?.value||'';
+  const focused=document.activeElement;
+  const focusValue=focused?.dataset.multi===key?focused.value:null;
+  const focusAction=focused?.hasAttribute('data-multi-all')?'[data-multi-all]':focused?.hasAttribute('data-multi-clear')?'[data-multi-clear]':null;
+  const windowY=window.scrollY;
+
+  if(key==='groupProducts')state.groupProducts=values;
   else if(key==='groupProductionTypes')state.groupProductionTypes=values;
-  else if(key==='groupFiscal')state.groupFiscal=values;
   else if(key==='detailProducts')state.detailProducts=values;
   else if(key==='detailProductionTypes')state.detailProductionTypes=values;
   else if(key==='detailFiscal')state.detailFiscal=values;
@@ -319,11 +371,16 @@ function setMultiSelection(key,values) {
     renderFilters(key);
   }
   state.page=0;renderData();
-  if(key==='countType')$('multi-countType').open=true;
-  if(key==='groupProducts')$('multi-groupProducts').open=true;
-  if(key==='groupProductionTypes')$('multi-groupProductionTypes').open=true;
-  if(key==='groupFiscal')$('multi-groupFiscal').open=true;
-  if(['detailProducts','detailProductionTypes','detailFiscal'].includes(key))$('multi-'+key).open=true;
+  const updated=$('multi-'+key);
+  if(updated){
+    updated.open=true;
+    updated.querySelector('[data-multi-search]').value=query;
+    filterMultiOptions(updated);
+    const focusTarget=focusAction?updated.querySelector(focusAction):[...updated.querySelectorAll('[data-multi]')].find(input=>input.value===focusValue);
+    focusTarget?.focus({preventScroll:true});
+    updated.querySelector('.life-multiselect-options').scrollTop=scrollTop;
+    window.scrollTo({top:windowY,behavior:'instant'});
+  }
 }
 function filterDetailRows(rows){return rows.filter(r=>(!state.detailProducts.length||state.detailProducts.includes(r.product))&&(!state.detailProductionTypes.length||state.detailProductionTypes.includes(r.type))&&(!state.detailFiscal.length||state.detailFiscal.includes(C.isNonFiscal(r)?'nonFiscal':'fiscal')));}
 function detailHeading(key) {
@@ -354,10 +411,10 @@ function renderData() {
   $('headline').querySelector(':scope > .life-section-head')?.remove();
   $('headline').insertAdjacentHTML('afterbegin', head(t('total'),'headline'));
   $('headlineKpis').innerHTML = metrics(total,rows);
-  $('summary').innerHTML = summaryCharts(rows) + card('summary-types',t('byType'),typeCards(rows)) + card('summary-table',t('summary'),aggregateTable(rows,'type'));
+  $('summary').innerHTML = summaryCharts(rows) + card('summary-table',t('summary'),aggregateTable(rows,'type'));
   const productOptions=[...new Set(state.records.map(r=>r.product))].sort((a,b)=>a.localeCompare(b,lang==='fr'?'fr-BE':'nl-BE'));
-  const groupRows=rows.filter(r=>(!state.groupProducts.length||state.groupProducts.includes(r.product))&&(!state.groupProductionTypes.length||state.groupProductionTypes.includes(r.type))&&(!state.groupFiscal.length||state.groupFiscal.includes(C.isNonFiscal(r)?'nonFiscal':'fiscal')));
-  const productFilter=`<div class="life-group-table-filters rappel-table-filters" data-html2canvas-ignore>${multiDropdown('groupFiscal',t('fiscalStatus'),['fiscal','nonFiscal'],state.groupFiscal)}${multiDropdown('groupProducts',t('product'),productOptions,state.groupProducts)}${multiDropdown('groupProductionTypes',t('type'),types(),state.groupProductionTypes)}<button type="button" class="life-button" id="resetGroupFilters">${t('reset')}</button></div><p class="small">${t('fiscalStatus')}: ${esc(state.groupFiscal.length?state.groupFiscal.map(t).join(', '):t('all'))} · ${t('product')}: ${esc(state.groupProducts.length?state.groupProducts.join(', '):t('all'))} · ${t('type')}: ${esc(state.groupProductionTypes.length?state.groupProductionTypes.map(typeLabel).join(', '):t('all'))}</p>`;
+  const groupRows=rows.filter(r=>(!state.groupProducts.length||state.groupProducts.includes(r.product))&&(!state.groupProductionTypes.length||state.groupProductionTypes.includes(r.type)));
+  const productFilter=`<div class="life-group-table-filters rappel-table-filters" data-html2canvas-ignore>${multiDropdown('groupProducts',t('product'),productOptions,state.groupProducts)}${multiDropdown('groupProductionTypes',t('type'),types(),state.groupProductionTypes)}<button type="button" class="life-button" id="resetGroupFilters">${t('reset')}</button></div><p class="small">${t('product')}: ${esc(state.groupProducts.length?state.groupProducts.join(', '):t('all'))} · ${t('type')}: ${esc(state.groupProductionTypes.length?state.groupProductionTypes.map(typeLabel).join(', '):t('all'))}</p>`;
   const distributionRows=singleGroupFile()?state.records.filter(r=>!selections(state.filters.producer).length||selections(state.filters.producer).includes(r.producer)):rows;
   $('groups').innerHTML = singleGroupFile()?card('groups-table',lang==='fr'?'Totaux par producteur':'Producenttotalen',aggregateTable(distributionRows,'producer'))+charts(distributionRows):card('groups-table',t('groupTotal'),productFilter+aggregateTable(groupRows,'groupId'))+charts(rows);
   renderDetail(rows);
@@ -444,12 +501,10 @@ function commit() {
   if (!state.pending) return;
   state.records = state.pending.records; state.source = state.pending.name; state.sheet = state.pending.sheet;
   state.pending = null; state.workbook = null; state.filters = {groupId:'',policy:'',type:'',product:'',producer:'',search:''}; state.page = 0;
-  state.countType = '';
   state.chartModes = {unweighted:'bar',count:'bar',commission:'bar'};
   state.sorts.summary = {key:null,direction:'asc'};
   state.groupProducts = [];
   state.groupProductionTypes = [];
-  state.groupFiscal = [];
   state.detailProducts = [];state.detailProductionTypes = [];state.detailFiscal = [];
   $('source').textContent = state.source + (state.sheet ? ` · ${state.sheet}` : '');
   $('importPreview').classList.add('hidden'); $('intro').classList.add('hidden'); $('empty').classList.add('hidden'); $('dashboard').classList.remove('hidden');
@@ -519,6 +574,7 @@ function prepareRappelPrintBlock(source) {
   block.classList.add('rappelPrintBlock');
   block.removeAttribute('id');
   block.querySelectorAll('[data-html2canvas-ignore],.life-export,.life-pagination').forEach(node => node.remove());
+  block.querySelectorAll('.rappel-kpi-pane[hidden]').forEach(node=>node.remove());
   block.querySelectorAll('[id]').forEach(node => node.removeAttribute('id'));
   block.querySelectorAll('.life-sort-button').forEach(button => button.replaceWith(document.createTextNode(button.firstChild.textContent)));
   // Print every filtered detail record, independently of the on-screen page of 50 rows.
@@ -663,13 +719,16 @@ function init() {
   $('cancel').addEventListener('click',()=>{++importRequest;state.pending=null;state.workbook=null;$('importPreview').classList.add('hidden');message(state.records.length?t('loaded'):t('ready'));});
   $('sheet').addEventListener('change',e=>{try{const records=C.parseGrid(sheetGrid(state.workbook.Sheets[e.target.value]));state.pending.records=records;state.pending.sheet=e.target.value;preview();$('commit').disabled=false;message(t('preview'));}catch(err){$('commit').disabled=true;message(err.message,true);}});
   $('language').addEventListener('change',e=>{lang=e.target.value;renderStatic();});
-  document.addEventListener('change',e=>{const key=e.target.dataset.multi;if(!key)return;const values=selections(['countType','groupProducts','groupProductionTypes','groupFiscal','detailProducts','detailProductionTypes','detailFiscal'].includes(key)?state[key]:state.filters[key]);setMultiSelection(key,e.target.checked?[...new Set([...values,e.target.value])]:values.filter(v=>v!==e.target.value));});
-  document.addEventListener('click',e=>{const button=e.target.closest('[data-multi-clear]');if(button)setMultiSelection(button.dataset.multiClear,[]);});
+  document.addEventListener('change',e=>{const key=e.target.dataset.multi;if(!key)return;const values=selections(['groupProducts','groupProductionTypes','detailProducts','detailProductionTypes','detailFiscal'].includes(key)?state[key]:state.filters[key]);setMultiSelection(key,e.target.checked?[...new Set([...values,e.target.value])]:values.filter(v=>v!==e.target.value));});
+  document.addEventListener('click',e=>{const button=e.target.closest('[data-multi-clear],[data-multi-all]');if(!button)return;const key=button.dataset.multiClear||button.dataset.multiAll;setMultiSelection(key,button.hasAttribute('data-multi-all')?[...button.closest('.life-multiselect').querySelectorAll('[data-multi]')].map(input=>input.value):[]);});
+  document.addEventListener('input',e=>{if(e.target.hasAttribute('data-multi-search'))filterMultiOptions(e.target.closest('.life-multiselect'));});
   document.addEventListener('click',e=>{if(!e.target.closest('.life-multiselect'))document.querySelectorAll('.life-multiselect[open]').forEach(menu=>menu.open=false);});
   $('filters').addEventListener('input',e=>{if(e.target.dataset.filter==='search'){state.filters.search=e.target.value;state.page=0;renderData();}});
   $('filters').addEventListener('click',e=>{if(e.target.id==='reset'){state.filters={groupId:'',policy:'',type:'',product:'',producer:'',search:''};state.page=0;renderFilters();renderData();}});
   $('tabs').addEventListener('click',e=>{const button=e.target.closest('[data-tab]');if(button){state.tab=button.dataset.tab;$('tabs').querySelectorAll('[data-tab]').forEach(x=>x.setAttribute('aria-pressed',x===button));renderFilters();renderData();}});
   document.addEventListener('click',e=>{
+    const viewButton=e.target.closest('[data-kpi-view]');
+    if(viewButton){state.headlineView=viewButton.dataset.kpiView==='overview'?'overview':'compact';renderData();document.querySelector(`[data-kpi-view="${state.headlineView}"]`)?.focus();return;}
     const button=e.target.closest('[data-sort-table]');if(!button)return;
     const sort=state.sorts[button.dataset.sortTable],key=button.dataset.sortKey;
     sort.direction=sort.key===key?(sort.direction==='asc'?'desc':'asc'):'desc';sort.key=key;
@@ -677,7 +736,7 @@ function init() {
   });
   document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.excel)exportDetailExcel();if(b.dataset.png)exportImage(b.dataset.png,false);if(b.dataset.copy)exportImage(b.dataset.copy,true);if(b.dataset.page){state.page+=Number(b.dataset.page);renderDetail(selected());}});
   $('groups').addEventListener('change',e=>{const key=e.target.dataset.chartMode;if(key){state.chartModes[key]=e.target.value;renderData();}});
-  $('groups').addEventListener('click',e=>{if(e.target.closest('#resetGroupFilters')){state.groupProducts=[];state.groupProductionTypes=[];state.groupFiscal=[];renderData();}});
+  $('groups').addEventListener('click',e=>{if(e.target.closest('#resetGroupFilters')){state.groupProducts=[];state.groupProductionTypes=[];renderData();}});
   $('detail').addEventListener('click',e=>{if(e.target.closest('#resetDetailFilters')){state.detailProducts=[];state.detailProductionTypes=[];state.detailFiscal=[];state.page=0;renderData();}});
   $('csv').addEventListener('click',csvExport);$('print').addEventListener('click',printPdf);
   $('pdfSelectAll').addEventListener('click',()=>selectPdfSections(true));
