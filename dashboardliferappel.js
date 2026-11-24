@@ -165,7 +165,7 @@ function groupMarkup(id) {
 function scopeHtml() { return ''; }
 function actions(id) {
   const svg = paths => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths}</svg>`;
-  if(id==='detail-table'||id==='groups-table')return `<div class="life-export blockExportActions" data-html2canvas-ignore><button type="button" class="blockExportBtn life-excel-export" data-excel="${id==='groups-table'?'groups':'detail'}" aria-label="Export naar Excel" title="Export naar Excel">${svg('<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="m8 12 6 6m0-6-6 6M17 12h1m-1 3h1m-1 3h1"/>')}</button><button type="button" class="blockExportBtn blockExportCopy" data-copy="${id}" aria-label="Copy naar geheugen" title="Copy naar geheugen">${svg('<rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>')}</button></div>`;
+  if(['detail-table','groups-table','summary-table'].includes(id))return `<div class="life-export blockExportActions" data-html2canvas-ignore><button type="button" class="blockExportBtn life-excel-export" data-excel="${id==='groups-table'?'groups':id==='summary-table'?'summary':'detail'}" aria-label="Export naar Excel" title="Export naar Excel">${svg('<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="m8 12 6 6m0-6-6 6M17 12h1m-1 3h1m-1 3h1"/>')}</button><button type="button" class="blockExportBtn blockExportCopy" data-copy="${id}" aria-label="Copy naar geheugen" title="Copy naar geheugen">${svg('<rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>')}</button></div>`;
   return `<div class="life-export blockExportActions" data-html2canvas-ignore><button type="button" class="blockExportBtn blockExportDownload" data-png="${id}" aria-label="${esc(t('download'))}" title="${esc(t('download'))}">${svg('<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>')}</button><button type="button" class="blockExportBtn blockExportCopy" data-copy="${id}" aria-label="${esc(t('copy'))}" title="${esc(t('copy'))}">${svg('<rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>')}</button></div>`;
 }
 function head(title,id,level='h2',controls='') {
@@ -547,11 +547,12 @@ function exportDetailExcel() {
     saveBlob(new Blob([buffer],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}),'dashboardliferappel-detail.xlsx');
   }catch(error){message(error.message,true);}
 }
-function groupsWorkbook() {
-  const rows=distributionTableRows(), single=singleGroupFile(), total=C.totals(rows);
-  const columns=[...(single?['producer']:['groupNo','groupName']),'shortCount','countShare','unweighted','unweightedShare','commission','commissionShare'];
-  const aggregates=aggregateRows(rows,single?'producer':'groupId');
-  const values=a=>[...(single?[a.id]:[a.id,rows.find(r=>r.groupId===a.id)?.groupName||'']),a.count,C.share(a.count,total.count)==null?null:C.share(a.count,total.count)/100,a.unweighted/100,C.share(a.unweighted,total.unweighted)==null?null:C.share(a.unweighted,total.unweighted)/100,a.commission/100,C.share(a.commission,total.commission)==null?null:C.share(a.commission,total.commission)/100];
+function totalsWorkbook(scope='groups') {
+  const summary=scope==='summary', rows=summary?selected():distributionTableRows(), single=singleGroupFile(), total=C.totals(rows);
+  const columns=[...(summary?['type','fiscalStatus']:single?['producer']:['groupNo','groupName']),'shortCount','countShare','unweighted','unweightedShare','commission',summary?'averageRappel':'commissionShare'];
+  const aggregates=aggregateRows(rows,summary?'type':single?'producer':'groupId');
+  const fraction=(value,denominator)=>C.share(value,denominator)==null?null:C.share(value,denominator)/100;
+  const values=a=>[...(summary?[typeLabel(a.id),a.fiscalLabel||'']:single?[a.id]:[a.id,rows.find(r=>r.groupId===a.id)?.groupName||'']),a.count,fraction(a.count,total.count),a.unweighted/100,fraction(a.unweighted,total.unweighted),a.commission/100,fraction(a.commission,summary?a.unweighted:total.commission)];
   const footer=values({...total,id:t('total')});
   const sheet=XLSX.utils.aoa_to_sheet([columns.map(t),...aggregates.map(values),footer]);
   sheet['!cols']=columns.map(key=>({wch:key==='groupName'?38:key.endsWith('Share')?32:22}));
@@ -559,17 +560,17 @@ function groupsWorkbook() {
   for(let r=1;r<=aggregates.length+1;r++)columns.forEach((key,c)=>{
     const cell=sheet[XLSX.utils.encode_cell({r,c})];if(!cell)return;
     if(['unweighted','commission'].includes(key))cell.z='#,##0.00 "€"';
-    else if(key.endsWith('Share'))cell.z='0.00%';
+    else if(key.endsWith('Share')||key==='averageRappel')cell.z='0.00%';
     else if(['producer','groupNo'].includes(key))cell.z='@';
     else if(key==='shortCount')cell.z='0';
   });
-  const workbook=XLSX.utils.book_new();XLSX.utils.book_append_sheet(workbook,sheet,single?'Producenttotalen':'Groepstotalen');return workbook;
+  const workbook=XLSX.utils.book_new();XLSX.utils.book_append_sheet(workbook,sheet,summary?'Samenvatting':single?'Producenttotalen':'Groepstotalen');return workbook;
 }
-function exportGroupsExcel() {
+function exportTotalsExcel(scope='groups') {
   try {
     if(!window.XLSX)throw new Error('Excel-bibliotheek ontbreekt.');
-    const buffer=XLSX.write(groupsWorkbook(),{type:'array',bookType:'xlsx'});
-    saveBlob(new Blob([buffer],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}),`dashboardliferappel-${singleGroupFile()?'producenttotalen':'groepstotalen'}.xlsx`);
+    const buffer=XLSX.write(totalsWorkbook(scope),{type:'array',bookType:'xlsx'});
+    saveBlob(new Blob([buffer],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}),`dashboardliferappel-${scope==='summary'?'samenvatting':singleGroupFile()?'producenttotalen':'groepstotalen'}.xlsx`);
   }catch(error){message(error.message,true);}
 }
 async function canvasFor(id) {
@@ -766,7 +767,7 @@ function init() {
     sort.direction=sort.key===key?(sort.direction==='asc'?'desc':'asc'):'desc';sort.key=key;
     state.page=0;renderData();
   });
-  document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.excel==='detail')exportDetailExcel();if(b.dataset.excel==='groups')exportGroupsExcel();if(b.dataset.png)exportImage(b.dataset.png,false);if(b.dataset.copy)exportImage(b.dataset.copy,true);if(b.dataset.page){state.page+=Number(b.dataset.page);renderDetail(selected());}});
+  document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.excel==='detail')exportDetailExcel();if(['groups','summary'].includes(b.dataset.excel))exportTotalsExcel(b.dataset.excel);if(b.dataset.png)exportImage(b.dataset.png,false);if(b.dataset.copy)exportImage(b.dataset.copy,true);if(b.dataset.page){state.page+=Number(b.dataset.page);renderDetail(selected());}});
   $('groups').addEventListener('change',e=>{const key=e.target.dataset.chartMode;if(key){state.chartModes[key]=e.target.value;renderData();}});
   $('groups').addEventListener('click',e=>{if(e.target.closest('#resetGroupFilters')){state.groupProducts=[];state.groupProductionTypes=[];renderData();}});
   $('detail').addEventListener('click',e=>{if(e.target.closest('#resetDetailFilters')){state.detailProducts=[];state.detailProductionTypes=[];state.detailFiscal=[];state.page=0;renderData();}});
