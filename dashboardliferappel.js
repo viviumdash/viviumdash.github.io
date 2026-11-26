@@ -94,17 +94,19 @@ const words = {
   preview:['Import controleren','Vérifier l’import'],commit:['Import bevestigen','Confirmer l’import'],cancel:['Annuleren','Annuler'],sheet:['Werkblad','Feuille'],source:['Excel import & controle','Import Excel et contrôle'],importAction:['Importeer','Importer'],importOk:['Importcontrole OK','Contrôle d’import OK'],
   csv:['Download CSV','Télécharger CSV'],pdf:['Exporteer PDF','Exporter PDF'],pdfSections:['PDF-secties','Sections PDF'],allSelect:['Alles selecteren','Tout sélectionner'],noneSelect:['Niets selecteren','Tout désélectionner'],print:['Print naar PDF','Imprimer en PDF'],
   dashboardView:['Dashboardweergave','Vue du tableau de bord'],
+  rappelDisclaimer:['* gemiddelde rappel: rappelcommissie / {premium}','* rappel moyen : commission de rappel / {premium}'],
   summary:['Samenvatting','Résumé'],groups:['Verdelingen','Répartitions'],detail:['Detail','Détail'],
-  count:['Aantal productieregels','Nombre de lignes de production'],shortCount:['Aantal','Nombre'],unweighted:['Premie voor weging','Prime avant pondération'],weighted:['Premie na weging','Prime après pondération'],commission:['Rappelcommissie','Commission de rappel'],policies:['Aantal unieke polissen','Nombre de polices distinctes'],rappelRate:['Rappelpercentage','Pourcentage de rappel'],
+  count:['Aantal productieregels','Nombre de lignes de production'],shortCount:['Aantal','Nombre'],unweighted:['Adviesbasis (voor weging)','Base de conseil (avant pondération)'],weighted:['Adviesbasis (na weging)','Base de conseil (après pondération)'],commission:['Rappelcommissie','Commission de rappel'],policies:['Aantal unieke polissen','Nombre de polices distinctes'],rappelRate:['Rappelpercentage','Pourcentage de rappel'],
   fiscalStatus:['Fiscaal / niet-fiscaal','Fiscal / non fiscal'],fiscal:['Fiscaal','Fiscal'],nonFiscal:['Niet-fiscaal','Non fiscal'],
-  productionPie:['Verdeling premie per type productie','Répartition des primes par type de production'],commissionPie:['Verdeling rappelcommissie per type','Répartition des commissions de rappel par type'],
+  adviceBasis:['Adviesbasis','Base de conseil'],beforeWeighting:['Voor weging','Avant pondération'],afterWeighting:['Na weging','Après pondération'],
+  productionPie:['Verdeling per type productie','Répartition par type de production'],commissionPie:['Verdeling rappelcommissie per type','Répartition des commissions de rappel par type'],
   all:['Alle','Tous'],group:['Groep','Groupe'],type:['Type productie','Type de production'],product:['Product','Produit'],producer:['Producentnummer','Numéro de producteur'],search:['Zoek polis of klant','Rechercher police ou client'],reset:['Filters wissen','Effacer les filtres'],
   NZ:['Nieuwe zaken','Affaires nouvelles'],VH:['Verhogingen','Augmentations'],KP:['Koopsom','Prime unique'],KO:['Koopsom','Prime unique'],NK:['Nieuwe koopsom','Nouvelle prime unique'],selected:['geselecteerd','sélectionnés'],
-  total:['Totaal Life','Total Vie'],byType:['Productie per type','Production par type'],share:['Aandeel','Part'],countShare:['Aandeel aantal','Part du nombre'],unweightedShare:['Aandeel tov totale premie','Part de la prime totale'],weightedShare:['Aandeel premie na weging','Part prime après pondération'],
-  commissionShare:['Aandeel tov totale rappelcommissie','Part de la commission de rappel totale'],
+  total:['Totaal Life','Total Vie'],byType:['Productie per type','Production par type'],share:['Aandeel','Part'],countShare:['Aandeel aantal','Part du nombre'],unweightedShare:['Aandeel adviesbasis (voor weging)','Part base de conseil (avant pondération)'],weightedShare:['Aandeel totale adviesbasis (na weging)','Part de la base de conseil totale (après pondération)'],
+  commissionShare:['Aandeel rappelcommissie','Part commission de rappel'],
   averageRappel:['Gemiddelde rappel','Rappel moyen'],
-  premiumShareLabel:['Aandeel tov totale premie','Part de la prime totale'],
-  commissionPieNote:['Taartdelen: verdeling rappelcommissie. Percentages: gemiddelde rappel (rappelcommissie / premie vóór weging).','Secteurs : répartition des commissions de rappel. Pourcentages : rappel moyen (commission de rappel / prime avant pondération).'],
+  premiumShareLabel:['Aandeel totale adviesbasis','Part de la base de conseil totale'],
+  commissionPieNote:['Taartdelen: verdeling rappelcommissie. Percentages: gemiddelde rappel (rappelcommissie / adviesbasis (voor weging)).','Secteurs : répartition des commissions de rappel. Pourcentages : rappel moyen (commission de rappel / base de conseil (avant pondération)).'],
   recordNote:['Aantallen = productieregels; meerdere regels per polis blijven behouden.','Nombre = lignes de production ; les lignes multiples d’une police sont conservées.'],
   scope:['',''],allGroups:['Alle groepen samen','Tous les groupes réunis'],basis:['Maatstaf','Mesure'],groupShare:['Aandeel per groep','Part par groupe'],countByType:['Aantal per type','Nombre par type'],
   pieNote:['Aandeel per groep binnen dit productietype. Alle groepen staan afzonderlijk in de legenda.','Part de chaque groupe au sein de ce type de production. Tous les groupes figurent séparément dans la légende.'],
@@ -124,14 +126,14 @@ const fmt = n => new Intl.NumberFormat(lang === 'fr' ? 'fr-BE' : 'nl-BE').format
 const money = cents => new Intl.NumberFormat(lang === 'fr' ? 'fr-BE' : 'nl-BE', {style:'currency',currency:'EUR',minimumFractionDigits:0,maximumFractionDigits:0}).format(Math.trunc(cents / 100));
 const pct = n => n == null ? '—' : new Intl.NumberFormat(lang === 'fr' ? 'fr-BE' : 'nl-BE',{maximumFractionDigits:2,minimumFractionDigits:1}).format(n) + '%';
 const colors = ['#0d1473','#ff934c','#007e97','#8064a2','#437bb4','#b65f40','#418d69','#be6a92','#717e2a','#377d91','#a06d18','#6956a3','#4b6c45','#b04c60','#6876bd','#aa7a49','#357e72','#8e6382','#667a8c','#a65e1f'];
-const state = {records:[],pending:null,workbook:null,source:'',sheet:'',tab:'summary',metric:'unweighted',headlineView:'compact',page:0,
+const state = {records:[],pending:null,workbook:null,source:'',sheet:'',tab:'summary',metric:'unweighted',premiumBasis:'unweighted',headlineView:'compact',page:0,
   filters:{groupId:'',policy:'',type:'',product:'',producer:'',search:''},groupProducts:[],groupProductionTypes:[],detailProducts:[],detailProductionTypes:[],detailFiscal:[],chartModes:{unweighted:'bar',commission:'bar'},
   sorts:{summary:{key:null,direction:'asc'},groups:{key:'unweighted',direction:'desc'},detail:{key:'policy',direction:'asc'}}};
 const sections = ['summary','groups','detail'];
 function singleGroupFile(){return state.records[0]?.sourceLayout==='single-group';}
 function visibleSections(){return sections.filter(id=>id!=='groups'||!singleGroupFile()||new Set(state.records.map(r=>r.producer).filter(Boolean)).size>1);}
-const visibleFields = keys => keys.filter(key => !['weighted','weightedShare'].includes(key)&&(!singleGroupFile()||!['groupNo','groupName'].includes(key)));
-function detailColumns(){return visibleFields(['policy','client','type',...(singleGroupFile()?['productionMonth']:[]),'unweighted','weighted','rate','commission','groupNo','groupName','producer','product']);}
+const visibleFields = keys => keys.filter(key => ![state.premiumBasis === 'unweighted' ? 'weighted' : 'unweighted',state.premiumBasis === 'unweighted' ? 'weightedShare' : 'unweightedShare'].includes(key)&&(!singleGroupFile()||!['groupNo','groupName'].includes(key)));
+function detailColumns(){return ['policy','client','type',...(singleGroupFile()?['productionMonth']:[]),'unweighted','weighted','rate','commission','groupNo','groupName','producer','product'].filter(key=>!singleGroupFile()||!['groupNo','groupName'].includes(key));}
 function types() { return [...C.TYPES, ...new Set(state.records.map(r => r.type).filter(x => !C.TYPES.includes(x)))]; }
 function typeLabel(code) { return [...C.TYPES,'KO'].includes(code) ? t(code) : code; }
 const selections=value=>Array.isArray(value)?value:value?[value]:[];
@@ -177,17 +179,43 @@ function head(title,id,level='h2',controls='') {
 }
 function card(id,title,html,controls='') { return `<article class="card exportable" id="${id}">${head(title,id,'h2',controls)}${html}</article>`; }
 function percent(value,total) { return pct(C.share(value,total)); }
+function kpiAverageLabel() {
+  return state.premiumBasis === 'unweighted' ? (lang === 'fr' ? 'Rappel moy. (pond. incluse)' : 'Gem.rappel (incl weging)') : t('averageRappel');
+}
+function basisHeading(key, fiscal = '') {
+  const title = [t('adviceBasis'),fiscal].filter(Boolean).join(' ');
+  const weighting = t(key === 'weighted' ? 'afterWeighting' : 'beforeWeighting').toLowerCase();
+  return `<span class="rappel-basis-title">${esc(title)}</span><span class="rappel-basis-weighting">(${esc(weighting)})</span>`;
+}
+function weightingMarkup(text) {
+  return esc(text).replace(/\((?:voor weging|na weging|avant pondération|après pondération)\)/gi, value => `<span class="rappel-weighting-text">${value.toLowerCase()}</span>`);
+}
+function aggregateHeading(key) {
+  const labels = {unweighted:[t('adviceBasis'),`(${t('beforeWeighting').toLowerCase()})`],weighted:[t('adviceBasis'),`(${t('afterWeighting').toLowerCase()})`],unweightedShare:[lang==='fr'?'Part base de conseil':'Aandeel adviesbasis',`(${t('beforeWeighting').toLowerCase()})`],countShare:lang==='fr'?['Part du','nombre']:['Aandeel','aantal'],averageRappel:lang==='fr'?['Rappel','moyen']:['Gemiddelde','rappel'],commissionShare:lang==='fr'?['Part commission','de rappel']:['Aandeel','rappelcommissie']};
+  return `<span class="life-column-title">${(labels[key] || [t(key)]).map(weightingMarkup).join('<br>')}</span>`;
+}
+function rappelDualBasisKpi(rows, fiscal = '') {
+  const total = C.totals(rows);
+  const suffix = fiscal === 'fiscal' ? t('fiscal') : fiscal === 'nonFiscal' ? t('nonFiscal') : '';
+  const totals = ['unweighted','weighted'].map(key => `<div class="rappel-dual-total" data-basis="${key}"><div class="label rappel-dual-heading">${basisHeading(key,suffix)}</div><div class="value rappel-dual-amount"><span class="rappel-commission-amount">${money(total[key])}</span></div></div>`).join('');
+  const contributions = types().map((code,i) => {
+    const subtotal = C.totals(rows.filter(row => row.type === code));
+    return `<div class="life-kpi-contribution rappel-dual-contribution"><div class="rappel-dual-type"><i style="background:${colors[i % colors.length]}"></i>${esc(typeLabel(code))}</div><div class="rappel-dual-values">${['unweighted','weighted'].map(key=>`<div class="rappel-dual-line" data-basis="${key}" title="${esc(t(key))}" aria-label="${esc(t(key))}"><small class="rappel-basis-label">${key === 'unweighted' ? (lang === 'fr' ? 'Avant pond.' : 'Voor weging') : (lang === 'fr' ? 'Après pond.' : 'Na weging')}</small><span class="rappel-premium-amount">${money(subtotal[key])}</span></div>`).join('')}</div></div>`;
+  }).join('');
+  return `<div class="kpi rappel-commission-kpi rappel-dual-basis${fiscal ? ' rappel-component summaryComponentKpi' : ' rappel-total summaryTotalKpi'}" data-rappel-kpi="unweighted-${fiscal || 'total'}"${fiscal ? ` data-equation="${fiscal === 'fiscal' ? '=' : '+'}"` : ''}>${totals}<div class="life-kpi-contributions">${contributions}</div></div>`;
+}
 function rappelAmountKpi(rows, key, fiscal = '') {
+  if (key === 'unweighted') return rappelDualBasisKpi(rows, fiscal);
   const totals = C.totals(rows);
   const total = totals[key];
   const isCommission = key === 'commission';
   const averageLabel = lang === 'fr' ? 'rappel moy.' : 'gem.rappel';
-  const formula = lang === 'fr' ? 'Commission de rappel / prime avant pondération' : 'Rappelcommissie / premie voor weging';
+  const formula = `${t('commission')} / ${t(state.premiumBasis).toLowerCase()}`;
   const suffix = fiscal === 'fiscal' ? (lang === 'fr' ? 'FISCAL' : 'FISCAAL') : fiscal === 'nonFiscal' ? (lang === 'fr' ? 'NON FISCAL' : 'NIET-FISCAAL') : '';
   const contributions = types().map((code, i) => {
     const subtotal = C.totals(rows.filter(row => row.type === code));
     const amount = subtotal[key];
-    const share = C.share(amount, isCommission ? subtotal.unweighted : total);
+    const share = C.share(amount, isCommission ? subtotal[state.premiumBasis] : total);
     if (isCommission) {
       const label = `${typeLabel(code)}: ${money(amount)} / ${averageLabel} ${pct(share)} (${formula})`;
       return `<div class="life-kpi-contribution" title="${esc(label)}"><div class="rappel-commission-detail"><div class="rappel-commission-line"><span class="rappel-commission-type"><i style="background:${colors[i % colors.length]}"></i>${esc(typeLabel(code))}</span><span class="rappel-commission-amount">${money(amount)}</span><span class="rappel-commission-average">${pct(share)}</span></div></div></div>`;
@@ -195,8 +223,8 @@ function rappelAmountKpi(rows, key, fiscal = '') {
     const label = `${typeLabel(code)}: ${money(amount)} (${pct(share)})`;
     return `<div class="life-kpi-contribution" title="${esc(label)}"><div class="life-kpi-contribution-label"><span><i style="background:${colors[i % colors.length]}"></i>${esc(typeLabel(code))}</span><span class="rappel-premium-amount">${money(amount)}</span><span class="rappel-premium-share">${pct(share)}</span></div></div>`;
   }).join('');
-  const heading = `<div class="label rappel-commission-head"><span>${t(key).replace('Rappelcommissie','Rappel&shy;commissie')}${suffix ? `<br>${suffix}` : ''}</span><span>${isCommission ? t('averageRappel') : t('share')}</span></div>`;
-  const rate = isCommission ? C.share(total, totals.unweighted) : C.share(total, total);
+  const heading = `<div class="label rappel-commission-head"><span>${t(key).replace('Rappelcommissie','Rappel&shy;commissie')}${suffix ? `<br>${suffix}` : ''}</span><span>${isCommission ? kpiAverageLabel() : t('share')}</span></div>`;
+  const rate = isCommission ? C.share(total, totals[state.premiumBasis]) : C.share(total, total);
   const value = `<div class="value rappel-commission-total"><span class="rappel-commission-amount">${money(total)}</span><span class="rappel-commission-average"${isCommission ? ` title="${formula}"` : ''}>${pct(rate)}</span></div>`;
   return `<div class="kpi rappel-commission-kpi${fiscal ? ' rappel-component summaryComponentKpi' : ' rappel-total summaryTotalKpi'}" data-rappel-kpi="${key}-${fiscal || 'total'}"${fiscal ? ` data-equation="${fiscal === 'fiscal' ? '=' : '+'}"` : ''}>${heading}${value}<div class="life-kpi-contributions">${contributions}</div></div>`;
 }
@@ -207,25 +235,25 @@ function metrics(total, rows) {
   const label = lang === 'fr' ? 'Vue des indicateurs' : 'KPI-weergave';
   const choices = [['compact',"KPI’s"],['overview',lang === 'fr' ? 'Tableau' : 'Tabel']];
   const switcher = `<div class="rappel-view-switch" data-html2canvas-ignore><div role="group" aria-label="${label}">${choices.map(([id,title])=>`<button type="button" data-kpi-view="${id}" aria-pressed="${state.headlineView === id}" aria-controls="rappelKpi${id}">${title}</button>`).join('')}</div></div>`;
-  return `${switcher}<div id="rappelKpicompact" class="rappel-kpi-pane rappel-compact-mode"${compact?'':' hidden'}><div class="life-kpis rappel-headline-rows">${row('unweighted')}${row('commission')}</div></div><div id="rappelKpioverview" class="rappel-kpi-pane"${compact?' hidden':''}>${rappelOverview(rows)}</div>`;
+  return `<div class="rappel-headline-controls">${switcher}</div><div id="rappelKpicompact" class="rappel-kpi-pane rappel-compact-mode"${compact?'':' hidden'}><div class="life-kpis rappel-headline-rows">${row('unweighted')}${row('commission')}</div></div><div id="rappelKpioverview" class="rappel-kpi-pane"${compact?' hidden':''}>${rappelOverview(rows)}</div>`;
 }
 function rappelOverview(rows) {
   const split = C.fiscalTotals(rows);
   const scopes = [{id:'all',label:lang==='fr'?'Toute la production':'Alle productie',suffix:'',rows},
     {id:'fiscal',label:t('fiscal'),suffix:t('fiscal'),rows:split.fiscal},
     {id:'nonFiscal',label:t('nonFiscal'),suffix:t('nonFiscal'),rows:split.nonFiscal}];
-  const average = lang === 'fr' ? 'Rappel moyen' : 'Gemiddelde rappel';
-  const formula = lang === 'fr' ? 'Commission de rappel / prime avant pondération' : 'Rappelcommissie / premie voor weging';
+  const average = kpiAverageLabel();
+  const formula = `${t('commission')} / ${t(state.premiumBasis).toLowerCase()}`;
   const cards = scopes.map(scope=>{
     const total = C.totals(scope.rows);
     const suffix = scope.suffix ? `<br>${esc(scope.suffix)}` : '';
-    return `<section class="kpi rappel-overview-card ${scope.id==='all'?'summaryTotalKpi':'summaryComponentKpi'}" data-kpi-scope="${scope.id}"><div class="rappel-overview-amounts"><div><div class="label">${t('unweighted')}${suffix}</div><div class="value">${money(total.unweighted)}</div></div><div><div class="label">${t('commission').replace('Rappelcommissie','Rappel&shy;commissie')}${suffix}</div><div class="value">${money(total.commission)}</div></div></div><div class="rappel-overview-average" title="${formula}"><span>${average}</span><strong>${pct(C.share(total.commission,total.unweighted))}</strong></div></section>`;
+    return `<section class="kpi rappel-overview-card ${scope.id==='all'?'summaryTotalKpi':'summaryComponentKpi'}" data-kpi-scope="${scope.id}"><div class="rappel-overview-amounts">${['unweighted','weighted'].map(key=>`<div data-basis="${key}"><div class="label">${basisHeading(key,scope.suffix)}</div><div class="value">${money(total[key])}</div></div>`).join('')}</div><div class="rappel-overview-commission"><div><div class="label">${t('commission').replace('Rappelcommissie','Rappel&shy;commissie')}${suffix}</div><div class="value">${money(total.commission)}</div></div><div class="rappel-overview-average" title="${formula}"><span>${average}</span><strong>${pct(C.share(total.commission,total.unweighted))}</strong></div></div></section>`;
   }).join('');
   const tableRows = types().map((code,i)=>`<tr><th scope="row"><span class="rappel-overview-type"><i style="background:${colors[i%colors.length]}"></i>${esc(typeLabel(code))}</span></th>${scopes.map(scope=>{
     const subtotal = C.totals(scope.rows.filter(row=>row.type===code));
-    return `<td class="rappel-overview-group-start" data-scope="${scope.id}" data-metric="unweighted">${money(subtotal.unweighted)}</td><td data-scope="${scope.id}" data-metric="commission">${money(subtotal.commission)}</td><td data-scope="${scope.id}" data-metric="rate" title="${formula}">${pct(C.share(subtotal.commission,subtotal.unweighted))}</td>`;
+    return `<td class="rappel-overview-group-start" data-scope="${scope.id}" data-metric="${state.premiumBasis}">${money(subtotal[state.premiumBasis])}</td><td data-scope="${scope.id}" data-metric="commission">${money(subtotal.commission)}</td><td data-scope="${scope.id}" data-metric="rate" title="${formula}">${pct(C.share(subtotal.commission,subtotal[state.premiumBasis]))}</td>`;
   }).join('')}</tr>`).join('');
-  return `<div class="life-kpis rappel-overview-summaries">${cards}</div><div class="rappel-overview-table-wrap"><table class="rappel-overview-table"><colgroup><col style="width:16%">${scopes.map(()=>'<col style="width:9.25%"><col style="width:9.25%"><col style="width:9.5%">').join('')}</colgroup><thead><tr><th rowspan="2" scope="col">${t('type')}</th>${scopes.map(scope=>`<th colspan="3" scope="colgroup" class="rappel-overview-group-start" data-scope="${scope.id}">${esc(scope.label)}</th>`).join('')}</tr><tr>${scopes.map(scope=>`<th scope="col" class="rappel-overview-group-start" data-scope="${scope.id}">${t('unweighted')}</th><th scope="col" data-scope="${scope.id}">${t('commission').replace('Rappelcommissie','Rappel&shy;commissie')}</th><th scope="col" data-scope="${scope.id}" class="rappel-average-heading">${average.replace(' ','<br>')}</th>`).join('')}</tr></thead><tbody>${tableRows}</tbody></table></div>`;
+  return `<div class="life-kpis rappel-overview-summaries">${cards}</div><div class="rappel-overview-table-wrap"><table class="rappel-overview-table"><colgroup><col style="width:16%">${scopes.map(()=>'<col style="width:9.25%"><col style="width:9.25%"><col style="width:9.5%">').join('')}</colgroup><thead><tr><th rowspan="2" scope="col">${t('type')}</th>${scopes.map(scope=>`<th colspan="3" scope="colgroup" class="rappel-overview-group-start" data-scope="${scope.id}">${esc(scope.label)}</th>`).join('')}</tr><tr>${scopes.map(scope=>`<th scope="col" class="rappel-overview-group-start" data-scope="${scope.id}">${weightingMarkup(t(state.premiumBasis))}</th><th scope="col" data-scope="${scope.id}">${t('commission').replace('Rappelcommissie','Rappel&shy;commissie')}</th><th scope="col" data-scope="${scope.id}" class="rappel-average-heading">${average.replace(' ','<br>')}</th>`).join('')}</tr></thead><tbody>${tableRows}</tbody></table></div>`;
 }
 function sortedRows(rows,tableId) {
   const {key,direction}=state.sorts[tableId];
@@ -241,25 +269,25 @@ function sortedRows(rows,tableId) {
 function table(headers,rows,footer='',sort=null) {
   const colgroup = sort?.widths ? `<colgroup>${sort.widths.map(width=>`<col style="width:${width}%">`).join('')}</colgroup>` : '';
   return `<div class="life-table-wrap"><table class="life-table${sort?.compact ? ' life-koepel-detail' : ''}">${colgroup}<thead><tr>${headers.map((x,i) => {
-    if(!sort)return `<th scope="col"${i===0?' class="life-text-heading"':''}>${esc(x)}</th>`;
+    if(!sort)return `<th scope="col"${i===0?' class="life-text-heading"':''}>${weightingMarkup(x)}</th>`;
     const key=sort.keys[i],current=state.sorts[sort.id],active=current.key===key;
     const direction=active?(current.direction==='asc'?'ascending':'descending'):'none';
     const textColumn=['id','policy','client','type','groupNo','groupName','product'].includes(key)||(key==='producer'&&sort.id!=='detail');
-    return `<th scope="col"${textColumn?' class="life-text-heading"':''} aria-sort="${direction}"><button type="button" class="life-sort-button" data-sort-table="${sort.id}" data-sort-key="${key}">${esc(x)}<span aria-hidden="true">${active?(current.direction==='asc'?'▲':'▼'):'↕'}</span></button></th>`;
+    return `<th scope="col"${textColumn?' class="life-text-heading"':''} aria-sort="${direction}"><button type="button" class="life-sort-button" data-sort-table="${sort.id}" data-sort-key="${key}">${sort.headerHtml?.[i] || `<span class="rappel-header-text">${weightingMarkup(x)}</span>`}<span aria-hidden="true">${active?(current.direction==='asc'?'▲':'▼'):'↕'}</span></button></th>`;
   }).join('')}</tr></thead><tbody>${rows.length ? rows.join('') : `<tr><td colspan="${headers.length}">${t('noData')}</td></tr>`}</tbody>${footer ? `<tfoot>${footer}</tfoot>` : ''}</table></div>`;
 }
 function aggregateRows(rows,key) {
   const total = C.totals(rows);
   const grouped = key === 'type' ? types().map(id => ({id,rows:rows.filter(r => r.type === id)})) : C.groupBy(rows,key);
   const split = key === 'type' ? grouped.flatMap(group => fiscalBuckets(group.rows).map(bucket => ({id:group.id,fiscalLabel:bucket.label,...C.totals(bucket.rows)}))) : grouped.map(group=>({id:group.id,...C.totals(group.rows)}));
-  return sortedRows(split.map(g=>({...g,countShare:C.share(g.count,total.count),unweightedShare:C.share(g.unweighted,total.unweighted),weightedShare:C.share(g.weighted,total.weighted),commissionShare:C.share(g.commission,total.commission),averageRappel:C.share(g.commission,g.unweighted)})),key === 'type' ? 'summary' : 'groups');
+  return sortedRows(split.map(g=>({...g,countShare:C.share(g.count,total.count),unweightedShare:C.share(g.unweighted,total.unweighted),weightedShare:C.share(g.weighted,total.weighted),commissionShare:C.share(g.commission,total.commission),averageRappel:C.share(g.commission,g[state.premiumBasis])})),key === 'type' ? 'summary' : 'groups');
 }
 function aggregateTable(rows,key) {
   const total=C.totals(rows), aggregates=aggregateRows(rows,key);
-  const fields = visibleFields(['shortCount','countShare','unweighted','unweightedShare','weighted','weightedShare','commission',key === 'type' ? 'averageRappel' : 'commissionShare']);
-  const dataCells = a => `<td>${fmt(a.count)}</td><td>${percent(a.count,total.count)}</td><td>${money(a.unweighted)}</td><td>${percent(a.unweighted,total.unweighted)}</td><td>${money(a.commission)}</td><td>${percent(a.commission,key === 'type' ? a.unweighted : total.commission)}</td>`;
+  const fields = ['shortCount','countShare','unweighted',key === 'type' ? 'weighted' : 'unweightedShare','commission',key === 'type' ? 'averageRappel' : 'commissionShare'];
+  const dataCells = a => `<td>${fmt(a.count)}</td><td>${percent(a.count,total.count)}</td><td>${money(a[state.premiumBasis])}</td><td>${key === 'type' ? money(a.weighted) : percent(a.unweighted,total.unweighted)}</td><td>${money(a.commission)}</td><td>${percent(a.commission,key === 'type' ? a[state.premiumBasis] : total.commission)}</td>`;
   return table([t(key === 'groupId' ? (singleGroupFile()?'fileTotal':'group') : key),...fields.map(t)],
-    aggregates.map(a => `<tr><td>${key === 'groupId' ? groupMarkup(a.id) : esc(key === 'type' ? typeLabel(a.id) : a.id)}${key === 'type' ? `<span class="rappel-fiscal-label">${esc(a.fiscalLabel)}</span>` : ''}</td>${dataCells(a)}</tr>`),`<tr><td>${t('total')}</td>${dataCells(total)}</tr>`,{id:key === 'type' ? 'summary' : 'groups',keys:['id',...fields]});
+    aggregates.map(a => `<tr><td>${key === 'groupId' ? groupMarkup(a.id) : esc(key === 'type' ? typeLabel(a.id) : a.id)}${key === 'type' ? `<span class="rappel-fiscal-label">${esc(a.fiscalLabel)}</span>` : ''}</td>${dataCells(a)}</tr>`),`<tr><td>${t('total')}</td>${dataCells(total)}</tr>`,{id:key === 'type' ? 'summary' : 'groups',keys:['id',...fields],headerHtml:[esc(t(key === 'groupId' ? (singleGroupFile()?'fileTotal':'group') : key)),...fields.map(aggregateHeading)],widths:key === 'type'?[24,8,10,15,15,15,13]:[24,7,10,14,18,13,14]});
 }
 function fiscalBuckets(rows) {
   return [false,true].map(nonFiscal => ({nonFiscal,label:nonFiscal ? (lang === 'fr' ? 'Non fiscal' : 'Niet-fiscaal') : (lang === 'fr' ? 'Fiscal' : 'Fiscaal'),rows:rows.filter(row => C.isNonFiscal(row) === nonFiscal)})).filter(bucket => bucket.rows.length);
@@ -275,13 +303,13 @@ function bars(rows,key) {
   }).join('')}</div>`;
 }
 function groupColor(id) { const ids = [...new Set(state.records.map(r => singleGroupFile()?r.producer:r.groupId))].sort(); const i = ids.indexOf(id); return i < colors.length ? colors[i] : `hsl(${(i * 137.508) % 360},48%,44%)`; }
-function donut(parts,total,metric = state.metric,label = t('groupShare'),centerLabel = t('total')) {
+function donut(parts,total,metric = state.metric,label = t('groupShare'),centerLabel = t('total'),centerBasis = '') {
   if (total <= 0 || parts.some(p => p.value < 0)) return `<div class="life-empty-chart">${t('noPie')}</div>`;
   let angle = -Math.PI / 2;
   const positive = parts.filter(p => p.value > 0);
   const paths = positive.map(p => {
     const start = angle, delta = p.value / total * Math.PI * 2; angle += delta;
-    const percentage = 'averageRappel' in p ? `${t('averageRappel')}: ${pct(p.averageRappel)}` : `${t(metric === 'unweighted' ? 'premiumShareLabel' : 'share')}: ${percent(p.value,total)}`;
+    const percentage = 'averageRappel' in p ? `${t('averageRappel')}: ${pct(p.averageRappel)}` : `${t(['unweighted','weighted'].includes(metric) ? 'premiumShareLabel' : 'share')}: ${percent(p.value,total)}`;
     const tooltip = esc(`${p.label}\n${t(metric)}: ${metric === 'count' ? fmt(p.value) : money(p.value)}\n${percentage}`);
     const mid = start + delta / 2;
     const offset = positive.length === 1 ? 0 : 6;
@@ -289,21 +317,23 @@ function donut(parts,total,metric = state.metric,label = t('groupShare'),centerL
     if (positive.length === 1) return `<circle cx="100" cy="100" r="86" fill="${p.color}" ${attributes}></circle>`;
     return `<path d="M100,100 L${100+86*Math.cos(start)},${100+86*Math.sin(start)} A86,86 0 ${delta > Math.PI ? 1 : 0},1 ${100+86*Math.cos(angle)},${100+86*Math.sin(angle)} Z" fill="${p.color}" stroke="white" stroke-width="1" ${attributes}></path>`;
   }).join('');
-  return `<svg class="life-donut" viewBox="0 0 200 200" role="img" aria-label="${esc(label)}">${paths}<g pointer-events="none"><circle cx="100" cy="100" r="53" fill="white"/><text x="100" y="94" text-anchor="middle" fill="#4d4d4d" font-size="10" font-family="Arial">${esc(centerLabel)}</text><text x="100" y="115" text-anchor="middle" fill="#0d1473" font-size="13" font-weight="bold" font-family="Arial">${esc(metric === 'count' ? fmt(total) : money(total))}</text></g></svg>`;
+  return `<svg class="life-donut" viewBox="0 0 200 200" role="img" aria-label="${esc(label)}">${paths}<g pointer-events="none"><circle cx="100" cy="100" r="53" fill="white"/><text x="100" y="${centerBasis ? 84 : 94}" text-anchor="middle" fill="#4d4d4d" font-size="10" font-family="Arial">${esc(centerLabel)}</text>${centerBasis ? `<text x="100" y="99" text-anchor="middle" fill="#4d4d4d" font-size="8" font-family="Arial">${esc(centerBasis)}</text>` : ''}<text x="100" y="${centerBasis ? 119 : 115}" text-anchor="middle" fill="#0d1473" font-size="13" font-weight="bold" font-family="Arial">${esc(metric === 'count' ? fmt(total) : money(total))}</text></g></svg>`;
 }
 function summaryCharts(rows) {
   return `<div class="life-chart-grid life-summary-charts">${['unweighted','commission'].map(key => {
-    const title = t(key === 'unweighted' ? 'productionPie' : 'commissionPie');
+    const isBasis = key === 'unweighted';
+    const title = isBasis ? `${t('productionPie')} · ${t('adviceBasis')}` : t('commissionPie');
     const parts = types().flatMap((code,i) => fiscalBuckets(rows.filter(r=>r.type===code)).map(bucket => {
       const subtotal = C.totals(bucket.rows);
-      return {typeLabel:typeLabel(code),fiscalLabel:bucket.label,label:`${typeLabel(code)} · ${bucket.label}`,count:bucket.rows.length,value:subtotal[key],color:fiscalColor(colors[i % colors.length],bucket.nonFiscal),...(key === 'commission' ? {averageRappel:C.share(subtotal.commission,subtotal.unweighted)} : {})};
+      return {typeLabel:typeLabel(code),fiscalLabel:bucket.label,label:`${typeLabel(code)} · ${bucket.label}`,count:bucket.rows.length,value:subtotal[key],weighted:subtotal.weighted,color:fiscalColor(colors[i % colors.length],bucket.nonFiscal),...(isBasis ? {} : {averageRappel:C.share(subtotal.commission,subtotal.unweighted)})};
     }));
     const total = C.totals(rows)[key];
-    return card(`summary-pie-${key}`,title,`<div class="life-chart-body">${donut(parts,total,key,title,key==='unweighted'?(lang==='fr'?'Prime':'Premie'):t('commission'))}<table class="life-legend life-summary-legend"><thead><tr><th>${t('type')}</th><th>${t('shortCount')}</th><th>${t(key)}</th></tr></thead><tbody>${parts.map(p => `<tr><td><span class="life-swatch" style="background:${p.color}"></span>${esc(p.typeLabel)}<span class="rappel-fiscal-label">${esc(p.fiscalLabel)}</span></td><td>${fmt(p.count)}</td><td>${money(p.value)}<small>${key === 'commission' ? `${t('averageRappel')}: ${pct(p.averageRappel)}` : `${t('premiumShareLabel')}: ${percent(p.value,total)}`}</small></td></tr>`).join('')}</tbody></table></div>`);
+    const legend = `<table class="life-legend life-summary-legend"><colgroup><col style="width:36%"><col style="width:16%"><col style="width:48%"></colgroup><thead><tr><th>${t('type')}</th><th>${t('shortCount')}</th><th>${t(isBasis ? 'adviceBasis' : key)}</th></tr></thead><tbody>${parts.map(p => `<tr><td><span class="life-swatch" style="background:${p.color}"></span>${esc(p.typeLabel)}<span class="rappel-fiscal-label">${esc(p.fiscalLabel)}</span></td><td>${fmt(p.count)}</td><td>${isBasis ? `${t('beforeWeighting')}: ${money(p.value)}<small>${t('afterWeighting')}: ${money(p.weighted)}</small>` : `${money(p.value)}<small>${t('averageRappel')}: ${pct(p.averageRappel)}</small>`}</td></tr>`).join('')}</tbody></table>`;
+    return card(`summary-pie-${key}`,title,`<div class="life-chart-body">${donut(parts,total,key,title,isBasis?t('adviceBasis'):t('commission'),isBasis?t('beforeWeighting'):'')}${legend}</div>`);
   }).join('')}</div>`;
 }
 function charts(rows) {
-  return `<div class="life-chart-grid">${['unweighted','commission'].map((key) => {
+  return `<div class="life-chart-grid">${[state.premiumBasis,'commission'].map((key) => {
     const data = rows;
     const parts = C.groupBy(data,singleGroupFile()?'producer':'groupId').map(g => {
       const subtotal = C.totals(g.rows);
@@ -312,7 +342,7 @@ function charts(rows) {
     const itemLabel=p=>singleGroupFile()?esc(p.label):groupMarkup(p.groupId);
     const total = C.totals(data)[key], maxValue = Math.max(0,...parts.map(part=>part.value)), id = `group-chart-${key}`;
     const title = `${singleGroupFile()?(lang==='fr'?'Part par producteur':'Aandeel per producent'):t('groupShare')} · ${t(key)}`;
-    const mode=state.chartModes[key];
+    const mode=state.chartModes[key] || 'bar';
     const controls=`<select class="life-chart-mode" data-chart-mode="${key}" aria-label="${esc(title)}: ${lang==='fr'?'type de graphique':'grafiektype'}" data-html2canvas-ignore><option value="pie" ${mode==='pie'?'selected':''}>${lang==='fr'?'Camembert':'Taartgrafiek'}</option><option value="bar" ${mode==='bar'?'selected':''}>${lang==='fr'?'Barres':'Balkgrafiek'}</option></select>`;
     const rate = p => percent(p.value,total);
     const amount = money;
@@ -395,7 +425,7 @@ function renderDetail(rows) {
   const size = 50, maxPage = Math.max(0,Math.ceil(rows.length/size)-1); state.page = Math.min(state.page,maxPage);
   const subset = sortedRows(rows,'detail').slice(state.page*size,(state.page+1)*size);
   const columns=detailColumns();
-  const widths = {policy:9,client:14,type:9,unweighted:9,rate:6,commission:9,groupNo:8,groupName:15,producer:6,product:15};
+  const widths = {policy:9,client:12,type:9,unweighted:10,weighted:10,rate:6,commission:9,groupNo:7,groupName:11,producer:5,product:12};
   const html = table(columns.map(detailHeading),subset.map(r => `<tr>${columns.map(key=>{
     const value=key==='type'?typeLabel(r.type):key==='groupNo'?r.groupId:['unweighted','weighted','commission'].includes(key)?money(r[key]):key==='rate'?pct(r.rate):r[key];
     return `<td${['client','type','groupNo','groupName','product'].includes(key)?' class="text"':''}>${esc(value)}</td>`;
@@ -412,12 +442,12 @@ function renderData() {
   if (!state.records.length) return;
   if(!visibleSections().includes(state.tab))state.tab='summary';
   $('chartTooltip').classList.add('hidden');
-  Object.values(state.sorts).forEach(sort=>{if(['weighted','weightedShare'].includes(sort.key))sort.key=sort.key==='weighted'?'unweighted':'unweightedShare';});
   const rows = selected(), total = C.totals(rows);
   total.policies = new Set(rows.map(r => r.policy)).size;
   $('headline').querySelector(':scope > .life-section-head')?.remove();
   $('headline').insertAdjacentHTML('afterbegin', head(t('total'),'headline'));
   $('headlineKpis').innerHTML = metrics(total,rows);
+  $('rappelDisclaimer').textContent = t('rappelDisclaimer').replace('{premium}',t(state.premiumBasis).toLowerCase());
   $('summary').innerHTML = summaryCharts(rows) + card('summary-table',t('summary'),aggregateTable(rows,'type'));
   const productOptions=[...new Set(state.records.map(r=>r.product))].sort((a,b)=>a.localeCompare(b,lang==='fr'?'fr-BE':'nl-BE'));
   const groupRows=distributionTableRows();
@@ -431,6 +461,7 @@ function renderStatic() {
   if(!visibleSections().includes(state.tab))state.tab='summary';
   document.documentElement.lang = lang;
   $('dashboardViewLabel').textContent = t('dashboardView');
+  $('rappelDisclaimer').textContent = t('rappelDisclaimer').replace('{premium}',t(state.premiumBasis).toLowerCase());
   $('heroEyebrow').textContent = t('eyebrow');
   $('replace').textContent = t('importAction');
   $('lifeTop').setAttribute('aria-label',lang==='fr'?'Retour en haut':'Ga naar boven');
@@ -549,17 +580,17 @@ function exportDetailExcel() {
 }
 function totalsWorkbook(scope='groups') {
   const summary=scope==='summary', rows=summary?selected():distributionTableRows(), single=singleGroupFile(), total=C.totals(rows);
-  const columns=[...(summary?['type','fiscalStatus']:single?['producer']:['groupNo','groupName']),'shortCount','countShare','unweighted','unweightedShare','commission',summary?'averageRappel':'commissionShare'];
+  const columns=[...(summary?['type','fiscalStatus']:single?['producer']:['groupNo','groupName']),'shortCount','countShare',state.premiumBasis,summary?'weighted':state.premiumBasis+'Share','commission',summary?'averageRappel':'commissionShare'];
   const aggregates=aggregateRows(rows,summary?'type':single?'producer':'groupId');
   const fraction=(value,denominator)=>C.share(value,denominator)==null?null:C.share(value,denominator)/100;
-  const values=a=>[...(summary?[typeLabel(a.id),a.fiscalLabel||'']:single?[a.id]:[a.id,rows.find(r=>r.groupId===a.id)?.groupName||'']),a.count,fraction(a.count,total.count),a.unweighted/100,fraction(a.unweighted,total.unweighted),a.commission/100,fraction(a.commission,summary?a.unweighted:total.commission)];
+  const values=a=>[...(summary?[typeLabel(a.id),a.fiscalLabel||'']:single?[a.id]:[a.id,rows.find(r=>r.groupId===a.id)?.groupName||'']),a.count,fraction(a.count,total.count),a[state.premiumBasis]/100,summary?a.weighted/100:fraction(a[state.premiumBasis],total[state.premiumBasis]),a.commission/100,fraction(a.commission,summary?a[state.premiumBasis]:total.commission)];
   const footer=values({...total,id:t('total')});
   const sheet=XLSX.utils.aoa_to_sheet([columns.map(t),...aggregates.map(values),footer]);
   sheet['!cols']=columns.map(key=>({wch:key==='groupName'?38:key.endsWith('Share')?32:22}));
   sheet['!autofilter']={ref:XLSX.utils.encode_range({s:{r:0,c:0},e:{r:aggregates.length,c:columns.length-1}})};
   for(let r=1;r<=aggregates.length+1;r++)columns.forEach((key,c)=>{
     const cell=sheet[XLSX.utils.encode_cell({r,c})];if(!cell)return;
-    if(['unweighted','commission'].includes(key))cell.z='#,##0.00 "€"';
+    if(['unweighted','weighted','commission'].includes(key))cell.z='#,##0.00 "€"';
     else if(key.endsWith('Share')||key==='averageRappel')cell.z='0.00%';
     else if(['producer','groupNo'].includes(key))cell.z='@';
     else if(key==='shortCount')cell.z='0';
@@ -609,7 +640,7 @@ function prepareRappelPrintBlock(source) {
   block.querySelectorAll('[data-html2canvas-ignore],.life-export,.life-pagination').forEach(node => node.remove());
   block.querySelectorAll('.rappel-kpi-pane[hidden]').forEach(node=>node.remove());
   block.querySelectorAll('[id]').forEach(node => node.removeAttribute('id'));
-  block.querySelectorAll('.life-sort-button').forEach(button => button.replaceWith(document.createTextNode(button.firstChild.textContent)));
+  block.querySelectorAll('.life-sort-button').forEach(button => button.replaceWith(button.querySelector('.life-column-title,.rappel-header-text')?.cloneNode(true) || document.createTextNode(button.firstChild.textContent)));
   // Print every filtered detail record, independently of the on-screen page of 50 rows.
   if (source.id === 'detail-table') {
     const columns = detailColumns();

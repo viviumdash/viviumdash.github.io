@@ -3599,3 +3599,204 @@ body:not(.topInfoReady) #intro #introStatus {
   display: block;
   margin-bottom: 8px;
 }
+
+/* Zelfstandige huisstijl: lettertypes, basisopmaak en somkaarten voor deze pagina. */
+@font-face {font-family:Lato;src:url('libs/fonts/LatoWeb-Regular.ttf') format('truetype');font-weight:400;font-style:normal;font-display:swap}
+
+@font-face {font-family:Lato;src:url('libs/fonts/LatoWeb-Bold.ttf') format('truetype');font-weight:700 950;font-style:normal;font-display:swap}
+
+@font-face {font-family:'Open Sans';src:url('libs/fonts/OpenSans-Regular.ttf') format('truetype');font-weight:400;font-style:normal;font-display:swap}
+
+@font-face {font-family:'Open Sans';src:url('libs/fonts/OpenSans-Bold.ttf') format('truetype');font-weight:700;font-style:normal;font-display:swap}
+:root {
+  --bg: #f4f4f4;
+  --card: #fff;
+  --ink: #0d1473;
+  --muted: #4d4d4d;
+  --line: #c5d6e5;
+  --blue: #0d1473;
+  --blue2: #c5d6e5;
+  --blue3: #043c93;
+  --orange: #ff934c;
+  --shadow: 0 3px 12px rgba(13,20,115,.045);
+  --radius: 14px;
+  --stack-gap: 11px;
+  --dashboard-font-family: Lato, Arial, sans-serif;
+  --dashboard-body-text-size: 16px;
+  --dashboard-intro-text-size: 16px;
+  --dashboard-section-title-size: 22px;
+  --dashboard-card-title-size: 18px;
+  --dashboard-kpi-label-size: 11px;
+  --dashboard-kpi-value-size: 26px;
+}
+
+body {
+  font-family: var(--dashboard-font-family);
+  font-size: var(--dashboard-body-text-size);
+}
+
+body:not(.topInfoReady) .hero .panel {
+  position: static;
+  padding: 48px 54px 40px;
+  border-right: 1px solid rgba(214,228,242,.72);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+
+.dashboard-footer {
+  margin: 10px 0 18px;
+  color: #4d4d4d;
+  font: 700 12px/1.5 var(--dashboard-font-family);
+  text-align: center;
+  opacity: .78;
+  white-space: normal;
+}
+
+body:not(.topInfoReady) .hero .panel .lead {
+  flex: 1 0 auto;
+}
+
+@media (max-width: 640px) {
+  body:not(.topInfoReady) .hero .panel { padding: 34px 24px; }
+}
+
+@media (max-width: 980px) {
+  body:not(.topInfoReady) .hero .panel { border-right: 0; border-bottom: 1px solid rgba(214,228,242,.72); }
+}
+
+/* Gedeelde somkaarten voor kerncijfers life en rappelcijfers life. */
+.summaryTotalKpi {
+  border: 2px solid rgba(245,130,32,.72) !important;
+  background: linear-gradient(135deg,#fff4e8 0%,#ffffff 58%,#edf5fc 100%) !important;
+  box-shadow: 0 18px 34px rgba(245,130,32,.16) !important;
+}
+
+.summaryTotalKpi .value {
+  color: var(--blue) !important;
+}
+
+.summaryComponentKpi {
+  border-color: #c7ddf2 !important;
+  background: linear-gradient(180deg,#edf5fc 0%,#f8fbff 100%) !important;
+  overflow: visible !important;
+}
+
+.summaryComponentKpi:after {
+  position: absolute;
+  left: -7px;
+  top: 50%;
+  transform: translate(-50%,-50%);
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  border: 2px solid #fff;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  line-height: 1;
+  font-weight: 950;
+  box-shadow: 0 7px 16px rgba(0,59,113,.14);
+  z-index: 25;
+  pointer-events: none;
+}
+
+.summaryComponentKpi:nth-child(2):after {
+  content: "=";
+  background: var(--orange);
+}
+
+.summaryComponentKpi:nth-child(3):after,.summaryComponentKpi:nth-child(4):after {
+  content: "+";
+  background: #8fb4dc;
+}
+
+
+/* Premiebasis en KPI-weergave boven de eerste KPI. */
+.rappel-headline-controls { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
+
+.rappel-disclaimer { margin: 10px 0 0; font-family: var(--dashboard-font-family); font-size: 13px; font-weight: 400; line-height: 1.4; color: #9299a3; }
+.rappelPrintRoot .rappel-disclaimer { margin: 10px 0 0; font-size: 9px; }
+
+/* Beide adviesbasissen zonder aandeelkolommen in de KPI’s. */
+.rappel-headline-controls { justify-content: flex-end; }
+.rappel-dual-basis::before { display: none; }
+.rappel-compact-mode .life-headline-kpis > .rappel-dual-basis { grid-template-columns: repeat(2,minmax(0,1fr)); column-gap: 12px; }
+.rappel-dual-total { display: grid; grid-template-rows: subgrid; grid-row: 1 / span 2; min-width: 0; border-bottom: 1px solid var(--line); padding-bottom: 10px; }
+.rappel-dual-total:first-child { grid-column: 1; }
+.rappel-dual-total + .rappel-dual-total { grid-column: 2; margin-top: 0; }
+.rappel-dual-basis .life-kpi-contribution { grid-column: 1 / -1; }
+.rappel-dual-basis .rappel-dual-heading { min-height: 30px; }
+.rappel-dual-basis .rappel-dual-amount { display: block; margin-top: 6px; text-align: left; }
+.rappel-compact-mode .rappel-dual-contribution { display: grid; grid-template-columns: minmax(0,44fr) minmax(0,56fr); align-items: start; min-height: 48px; }
+.rappel-dual-type { display: flex; align-items: center; gap: 6px; padding-right: 6px; color: var(--muted); font-family: var(--dashboard-font-family); font-size: var(--rappel-type-text-size); line-height: 1.45; }
+.rappel-dual-type i { width: 8px; height: 8px; flex: 0 0 8px; border-radius: 2px; }
+.rappel-dual-line { display: grid; grid-template-columns: minmax(0,1fr) auto; align-items: baseline; gap: 8px; color: var(--blue); text-align: right; font-size: var(--rappel-detail-text-size); line-height: 1.45; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.rappel-dual-line + .rappel-dual-line { margin-top: 3px; }
+.rappel-dual-line .rappel-basis-label { color: var(--muted); font-size: var(--rappel-type-text-size); text-align: left; }
+.rappel-dual-line .rappel-premium-amount { padding-right: 0; }
+.rappel-overview-amounts .label { min-height: 30px; }
+.rappel-overview-commission { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); align-items: start; gap: 12px; margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--line); }
+.rappel-overview-commission .label, .rappel-overview-commission .rappel-overview-average > span { min-height: 30px; }
+.rappel-overview-commission .rappel-overview-average { display: block; border: 0; padding: 0; margin: 0; }
+.rappel-overview-commission .rappel-overview-average > span { display: block; font-size: 13px; font-weight: 700; line-height: 1.15; text-transform: uppercase; }
+.rappel-overview-commission .rappel-overview-average strong { display: block; margin-top: 7px; font-size: 24px; }
+.rappelPrintRoot .life-kpis .rappel-dual-basis .rappel-dual-heading { min-height: 28px !important; white-space: normal; overflow-wrap: anywhere; }
+.rappelPrintRoot .life-kpis .rappel-dual-basis .rappel-dual-amount { margin-top: 4px; font-size: 14px !important; }
+.rappelPrintRoot .rappel-dual-total { padding-bottom: 7px; }
+.rappelPrintRoot .rappel-dual-total + .rappel-dual-total { margin-top: 0; }
+.rappelPrintRoot .rappel-compact-mode .rappel-dual-contribution { min-height: 32px; }
+.rappelPrintRoot .rappel-dual-type { font-size: 9px; }
+.rappelPrintRoot .rappel-dual-line { font-size: 9px; gap: 4px; }
+.rappelPrintRoot .rappel-dual-line .rappel-basis-label { font-size: 9px; }
+.rappelPrintRoot .rappel-dual-line + .rappel-dual-line { margin-top: 2px; }
+.rappelPrintRoot .rappel-overview-commission { margin-top: 10px; padding-top: 8px; }
+.rappelPrintRoot .rappel-overview-commission .rappel-overview-average > span { min-height: 28px; font-size: 8px; }
+.rappelPrintRoot .rappel-overview-commission .rappel-overview-average strong { font-size: 16px; margin-top: 7px; }
+
+/* Gelijke titel-, toelichtings- en grafiekhoogte voor de twee samenvattingstaarten. */
+.life-summary-charts > .card { display: grid; grid-template-rows: subgrid; grid-row: span 2; row-gap: 0; align-content: start; }
+
+/* Deel de label- en bedragrijen over de drie bovenste tabel-KPI’s. */
+.life-kpis.rappel-overview-summaries > .rappel-overview-card { display: grid; grid-template-columns: minmax(0,1fr); grid-template-rows: subgrid; grid-row: span 4; row-gap: 0; justify-content: stretch; }
+.rappel-overview-card > .rappel-overview-amounts, .rappel-overview-card > .rappel-overview-commission { display: grid; grid-template-rows: subgrid; grid-row: span 2; row-gap: 0; }
+.rappel-overview-amounts > div, .rappel-overview-commission > div, .rappel-overview-commission > .rappel-overview-average { display: grid; grid-template-rows: subgrid; grid-row: span 2; row-gap: 0; }
+.life-kpis .rappel-overview-amounts .label { min-height: 30px !important; }
+.life-kpis .rappel-overview-commission .label, .rappel-overview-commission .rappel-overview-average > span { min-height: 30px !important; }
+.rappel-overview-commission .rappel-overview-average strong { margin-top: 8px; line-height: 1.08; }
+.rappelPrintRoot .life-kpis .rappel-overview-amounts .label { min-height: 28px !important; }
+.rappelPrintRoot .life-kpis .rappel-overview-commission .label, .rappelPrintRoot .rappel-overview-commission .rappel-overview-average > span { min-height: 30px !important; }
+.rappelPrintRoot .rappel-overview-commission .rappel-overview-average strong { margin-top: 8px; }
+
+.life-summary-legend { table-layout: fixed; }
+.rappelPrintRoot [data-print-source^="summary-pie-"] .life-chart-body { align-items: start; }
+.rappelPrintRoot [data-print-source^="summary-pie-"] .life-donut { margin: 0 auto !important; }
+
+.rappelPrintRoot .life-summary-legend th { font-size: 10px !important; }
+
+/* Vaste tweede regel voor de weging, met dezelfde lettergrootte als de KPI-kop. */
+.life-kpis .rappel-dual-basis .rappel-dual-heading, .life-kpis .rappel-overview-amounts .label { letter-spacing: 0 !important; }
+.rappel-basis-title, .rappel-basis-weighting { white-space: nowrap; }
+.life-headline-kpis .life-kpi-contributions > .life-kpi-contribution + .life-kpi-contribution { border-top: 1px dashed rgba(13,20,115,.16); padding-top: 7px; margin-top: 7px; }
+#summary-table .life-table, #groups-table .life-table { width: 100%; min-width: 0; table-layout: fixed; }
+#summary-table .life-table :is(th,td), #groups-table .life-table :is(th,td) { min-width: 0; padding: 10px 8px; }
+#summary-table .life-table th, #groups-table .life-table th { white-space: normal; letter-spacing: 0; }
+#summary-table .life-table td:first-child, #groups-table .life-table td:first-child { white-space: normal; overflow-wrap: anywhere; }
+.life-table .life-sort-button .life-column-title { flex: 1; min-width: 0; font: inherit; color: inherit; white-space: nowrap; }
+#summary-table .life-sort-button, #groups-table .life-sort-button { gap: 5px; min-width: 0; }
+.rappelPrintRoot .life-headline-kpis .life-kpi-contributions > .life-kpi-contribution + .life-kpi-contribution { padding-top: 4px; margin-top: 4px; }
+
+.rappelPrintRoot .life-kpis .rappel-overview-amounts .label { font-size: 7px !important; }
+
+/* Alleen de wegingtekst blijft in kleine letters binnen hoofdletterkoppen. */
+.kpi .label .rappel-basis-weighting, .rappel-weighting-text { text-transform: none !important; }
+.life-sort-button .rappel-header-text, .life-sort-button .rappel-weighting-text { font: inherit; color: inherit; min-width: 0; flex-shrink: 1; }
+
+/* De grote KPI-bedragen en koppen volgen dezelfde twee kolommen als Tabel. */
+.rappel-compact-mode .rappel-commission-kpi:not(.rappel-dual-basis)::before { display: none; }
+.rappel-compact-mode .rappel-commission-kpi > .rappel-commission-head, .rappel-compact-mode .rappel-commission-kpi > .rappel-commission-total { grid-template-columns: repeat(2,minmax(0,1fr)); column-gap: 12px; }
+.rappel-compact-mode .rappel-commission-kpi > .rappel-commission-head > span:first-child, .rappel-compact-mode .rappel-commission-kpi > .rappel-commission-total > .rappel-commission-amount { grid-column: 1; padding-right: 0; text-align: left; }
+.rappel-compact-mode .rappel-commission-kpi > .rappel-commission-head > span:last-child, .rappel-compact-mode .rappel-commission-kpi > .rappel-commission-total > .rappel-commission-average { grid-column: 2; padding-left: 0; text-align: left; }

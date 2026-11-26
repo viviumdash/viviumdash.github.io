@@ -4,14 +4,13 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Dashboard rappelcijfers life</title>
-  <link rel="stylesheet" href="dashboardliferappel.css?v=20261124-contained-kpi-gradients">
-<link rel="stylesheet" href="libs/dashboard-shared.css?v=20261123-kpi-equations">
+  <link rel="stylesheet" href="dashboardliferappel.css?v=20261126-kpi-alignment">
   <script defer src="libs/xlsx.full.min.js"></script>
   <script defer src="libs/html2canvas.min.js"></script>
-  <script defer src="dashboardliferappel.js?v=20261124-summary-excel"></script>
+  <script defer src="dashboardliferappel.js?v=20261126-kpi-alignment"></script>
 </head>
 <body>
-  <button class="appVersion" id="version">v24.11.2026</button>
+  <button class="appVersion" id="version">v26.11.2026</button>
   <div class="wrap">
     <div class="languageSwitch life-language" id="languageSwitch"><label for="language">Taal / Langue</label><select id="language"><option value="nl">NL</option><option value="fr">FR</option></select></div>
     <div id="intro" class="hero">
@@ -49,6 +48,7 @@
       <div id="headline" class="kpiExportWrap exportable">
         <div class="life-filters" id="filters" data-html2canvas-ignore></div>
         <div id="headlineKpis"></div>
+        <p id="rappelDisclaimer" class="rappel-disclaimer">* gemiddelde rappel: rappelcommissie / adviesbasis (voor weging)</p>
       </div>
       <nav class="life-navigation" aria-labelledby="dashboardViewLabel">
         <span class="life-navigation-label" id="dashboardViewLabel"></span>
@@ -62,6 +62,6 @@
     <footer class="dashboard-footer" id="footer">Ontwikkeld door Hans von der Crone - data wordt niet online bewaard</footer>
   </div>
   <div id="chartTooltip" class="life-chart-tooltip hidden" role="tooltip" data-html2canvas-ignore></div>
-  <dialog id="release"><h2>v24.11.2026</h2><p>v24.11.2026: Commissie-KPI’s tonen per productietype en voor het totaal de verhouding rappelcommissie / premie voor weging als gemiddeld rappel. Bedragen en percentages zijn in vaste kolommen uitgelijnd. KPI’s kunnen wisselen tussen KPI’s en Tabel.</p><p>v23.11.2026: Premie voor weging en rappelcommissie opgesplitst in fiscaal en niet-fiscaal. Drie rappelpercentages: totaal, fiscaal en niet-fiscaal, telkens rappelcommissie gedeeld door premie voor weging. Fiscale detailfilter toegevoegd. Fiscale indeling van koepelbestanden hersteld via de kolom Groep.</p><p id="releaseText"></p><p>v19.11.2026: Aantal unieke klanten vervangen door Rappelpercentage per productietype, met bovenaan het rekenkundig gemiddelde van de ingevulde percentages binnen de actieve selectie. Bron: kolom J bij groepen en kolom G bij koepels. De productietypes staan verticaal uitgelijnd met de andere KPI’s.</p><p>v18.11.2026</p><form method="dialog"><button class="life-button">OK</button></form></dialog>
+  <dialog id="release"><h2>v26.11.2026</h2><p>v26.11.2026: Weging staat op een vaste tweede KPI-kopregel. Categorieën zijn gescheiden door subtiele stippellijnen. De samenvattingstabel toont beide adviesbasissen zonder horizontale schuifbalk; de verdelingskoppen zijn ingekort. De toelichtingen boven de taarten zijn verwijderd.</p><p>v26.11.2026: Detail toont beide adviesbasissen naast elkaar, ook in exports. De bovenste tabel-KPI’s delen uitgelijnde label- en bedragrijen.</p><p>v26.11.2026: De adviesbasislegende toont per type de bedragen voor en na weging. De samenvattingstaarten en hun legendes zijn onderling uitgelijnd.</p><p>v26.11.2026: Beide adviesbasissen staan in de KPI’s zonder aandeelkolommen of wegingkeuze. De categoriebedragen hebben aparte labels voor en na weging. Ook de bovenste KPI’s in de tabelweergave tonen beide adviesbasissen; de tabel behoudt de adviesbasis voor weging.</p><p>v26.11.2026: Keuze tussen Adviesbasis (voor weging) en Adviesbasis (na weging) in KPI’s, tabellen, grafieken en exports. Het commissiebedrag blijft gelijk; het gemiddelde rappel is de rappelcommissie gedeeld door de gekozen adviesbasis.</p><p>v25.11.2026: De huisstijl staat volledig in de eigen CSS; geen gedeeld CSS-bestand meer nodig.</p><p>v24.11.2026: Commissie-KPI’s tonen per productietype en voor het totaal de verhouding rappelcommissie / premie voor weging als gemiddeld rappel. Bedragen en percentages zijn in vaste kolommen uitgelijnd. KPI’s kunnen wisselen tussen KPI’s en Tabel.</p><p>v23.11.2026: Premie voor weging en rappelcommissie opgesplitst in fiscaal en niet-fiscaal. Drie rappelpercentages: totaal, fiscaal en niet-fiscaal, telkens rappelcommissie gedeeld door premie voor weging. Fiscale detailfilter toegevoegd. Fiscale indeling van koepelbestanden hersteld via de kolom Groep.</p><p id="releaseText"></p><p>v19.11.2026: Aantal unieke klanten vervangen door Rappelpercentage per productietype, met bovenaan het rekenkundig gemiddelde van de ingevulde percentages binnen de actieve selectie. Bron: kolom J bij groepen en kolom G bij koepels. De productietypes staan verticaal uitgelijnd met de andere KPI’s.</p><p>v18.11.2026</p><form method="dialog"><button class="life-button">OK</button></form></dialog>
 </body>
 </html>
