@@ -98,7 +98,7 @@ const words = {
   summary:['Samenvatting','Résumé'],groups:['Verdelingen','Répartitions'],detail:['Detail','Détail'],
   count:['Aantal productieregels','Nombre de lignes de production'],shortCount:['Aantal','Nombre'],unweighted:['Adviesbasis (voor weging)','Base de conseil (avant pondération)'],weighted:['Adviesbasis (na weging)','Base de conseil (après pondération)'],commission:['Rappelcommissie','Commission de rappel'],policies:['Aantal unieke polissen','Nombre de polices distinctes'],rappelRate:['Rappelpercentage','Pourcentage de rappel'],
   fiscalStatus:['Fiscaal / niet-fiscaal','Fiscal / non fiscal'],fiscal:['Fiscaal','Fiscal'],nonFiscal:['Niet-fiscaal','Non fiscal'],
-  adviceBasis:['Adviesbasis','Base de conseil'],beforeWeighting:['Voor weging','Avant pondération'],afterWeighting:['Na weging','Après pondération'],
+  adviceBasis:['Adviesbasis','Base de conseil'],beforeWeighting:['voor weging','avant pondération'],afterWeighting:['na weging','après pondération'],
   productionPie:['Verdeling per type productie','Répartition par type de production'],commissionPie:['Verdeling rappelcommissie per type','Répartition des commissions de rappel par type'],
   all:['Alle','Tous'],group:['Groep','Groupe'],type:['Type productie','Type de production'],product:['Product','Produit'],producer:['Producentnummer','Numéro de producteur'],search:['Zoek polis of klant','Rechercher police ou client'],reset:['Filters wissen','Effacer les filtres'],
   NZ:['Nieuwe zaken','Affaires nouvelles'],VH:['Verhogingen','Augmentations'],KP:['Koopsom','Prime unique'],KO:['Koopsom','Prime unique'],NK:['Nieuwe koopsom','Nouvelle prime unique'],selected:['geselecteerd','sélectionnés'],
@@ -179,8 +179,9 @@ function head(title,id,level='h2',controls='') {
 }
 function card(id,title,html,controls='') { return `<article class="card exportable" id="${id}">${head(title,id,'h2',controls)}${html}</article>`; }
 function percent(value,total) { return pct(C.share(value,total)); }
-function kpiAverageLabel() {
-  return state.premiumBasis === 'unweighted' ? (lang === 'fr' ? 'Rappel moy. (pond. incluse)' : 'Gem.rappel (incl weging)') : t('averageRappel');
+function kpiAverageHeading() {
+  const suffix = lang === 'fr' ? '(pond. incluse)' : '(incl weging)';
+  return `<span class="rappel-average-title">${esc(t('averageRappel'))}</span><span class="rappel-average-weighting">${esc(suffix)}</span>`;
 }
 function basisHeading(key, fiscal = '') {
   const title = [t('adviceBasis'),fiscal].filter(Boolean).join(' ');
@@ -200,7 +201,7 @@ function rappelDualBasisKpi(rows, fiscal = '') {
   const totals = ['unweighted','weighted'].map(key => `<div class="rappel-dual-total" data-basis="${key}"><div class="label rappel-dual-heading">${basisHeading(key,suffix)}</div><div class="value rappel-dual-amount"><span class="rappel-commission-amount">${money(total[key])}</span></div></div>`).join('');
   const contributions = types().map((code,i) => {
     const subtotal = C.totals(rows.filter(row => row.type === code));
-    return `<div class="life-kpi-contribution rappel-dual-contribution"><div class="rappel-dual-type"><i style="background:${colors[i % colors.length]}"></i>${esc(typeLabel(code))}</div><div class="rappel-dual-values">${['unweighted','weighted'].map(key=>`<div class="rappel-dual-line" data-basis="${key}" title="${esc(t(key))}" aria-label="${esc(t(key))}"><small class="rappel-basis-label">${key === 'unweighted' ? (lang === 'fr' ? 'Avant pond.' : 'Voor weging') : (lang === 'fr' ? 'Après pond.' : 'Na weging')}</small><span class="rappel-premium-amount">${money(subtotal[key])}</span></div>`).join('')}</div></div>`;
+    return `<div class="life-kpi-contribution rappel-dual-contribution"><div class="rappel-dual-type"><i style="background:${colors[i % colors.length]}"></i>${esc(typeLabel(code))}</div><div class="rappel-dual-values">${['unweighted','weighted'].map(key=>`<div class="rappel-dual-line" data-basis="${key}" title="${esc(t(key))}" aria-label="${esc(t(key))}"><small class="rappel-basis-label">${key === 'unweighted' ? (lang === 'fr' ? 'avant pond.' : 'voor weging') : (lang === 'fr' ? 'après pond.' : 'na weging')}</small><span class="rappel-premium-amount">${money(subtotal[key])}</span></div>`).join('')}</div></div>`;
   }).join('');
   return `<div class="kpi rappel-commission-kpi rappel-dual-basis${fiscal ? ' rappel-component summaryComponentKpi' : ' rappel-total summaryTotalKpi'}" data-rappel-kpi="unweighted-${fiscal || 'total'}"${fiscal ? ` data-equation="${fiscal === 'fiscal' ? '=' : '+'}"` : ''}>${totals}<div class="life-kpi-contributions">${contributions}</div></div>`;
 }
@@ -223,7 +224,7 @@ function rappelAmountKpi(rows, key, fiscal = '') {
     const label = `${typeLabel(code)}: ${money(amount)} (${pct(share)})`;
     return `<div class="life-kpi-contribution" title="${esc(label)}"><div class="life-kpi-contribution-label"><span><i style="background:${colors[i % colors.length]}"></i>${esc(typeLabel(code))}</span><span class="rappel-premium-amount">${money(amount)}</span><span class="rappel-premium-share">${pct(share)}</span></div></div>`;
   }).join('');
-  const heading = `<div class="label rappel-commission-head"><span>${t(key).replace('Rappelcommissie','Rappel&shy;commissie')}${suffix ? `<br>${suffix}` : ''}</span><span>${isCommission ? kpiAverageLabel() : t('share')}</span></div>`;
+  const heading = `<div class="label rappel-commission-head"><span>${t(key).replace('Rappelcommissie','Rappel&shy;commissie')}${suffix ? `<br>${suffix}` : ''}</span><span>${isCommission ? kpiAverageHeading() : t('share')}</span></div>`;
   const rate = isCommission ? C.share(total, totals[state.premiumBasis]) : C.share(total, total);
   const value = `<div class="value rappel-commission-total"><span class="rappel-commission-amount">${money(total)}</span><span class="rappel-commission-average"${isCommission ? ` title="${formula}"` : ''}>${pct(rate)}</span></div>`;
   return `<div class="kpi rappel-commission-kpi${fiscal ? ' rappel-component summaryComponentKpi' : ' rappel-total summaryTotalKpi'}" data-rappel-kpi="${key}-${fiscal || 'total'}"${fiscal ? ` data-equation="${fiscal === 'fiscal' ? '=' : '+'}"` : ''}>${heading}${value}<div class="life-kpi-contributions">${contributions}</div></div>`;
@@ -242,7 +243,7 @@ function rappelOverview(rows) {
   const scopes = [{id:'all',label:lang==='fr'?'Toute la production':'Alle productie',suffix:'',rows},
     {id:'fiscal',label:t('fiscal'),suffix:t('fiscal'),rows:split.fiscal},
     {id:'nonFiscal',label:t('nonFiscal'),suffix:t('nonFiscal'),rows:split.nonFiscal}];
-  const average = kpiAverageLabel();
+  const average = kpiAverageHeading();
   const formula = `${t('commission')} / ${t(state.premiumBasis).toLowerCase()}`;
   const cards = scopes.map(scope=>{
     const total = C.totals(scope.rows);
@@ -253,7 +254,7 @@ function rappelOverview(rows) {
     const subtotal = C.totals(scope.rows.filter(row=>row.type===code));
     return `<td class="rappel-overview-group-start" data-scope="${scope.id}" data-metric="${state.premiumBasis}">${money(subtotal[state.premiumBasis])}</td><td data-scope="${scope.id}" data-metric="commission">${money(subtotal.commission)}</td><td data-scope="${scope.id}" data-metric="rate" title="${formula}">${pct(C.share(subtotal.commission,subtotal[state.premiumBasis]))}</td>`;
   }).join('')}</tr>`).join('');
-  return `<div class="life-kpis rappel-overview-summaries">${cards}</div><div class="rappel-overview-table-wrap"><table class="rappel-overview-table"><colgroup><col style="width:16%">${scopes.map(()=>'<col style="width:9.25%"><col style="width:9.25%"><col style="width:9.5%">').join('')}</colgroup><thead><tr><th rowspan="2" scope="col">${t('type')}</th>${scopes.map(scope=>`<th colspan="3" scope="colgroup" class="rappel-overview-group-start" data-scope="${scope.id}">${esc(scope.label)}</th>`).join('')}</tr><tr>${scopes.map(scope=>`<th scope="col" class="rappel-overview-group-start" data-scope="${scope.id}">${weightingMarkup(t(state.premiumBasis))}</th><th scope="col" data-scope="${scope.id}">${t('commission').replace('Rappelcommissie','Rappel&shy;commissie')}</th><th scope="col" data-scope="${scope.id}" class="rappel-average-heading">${average.replace(' ','<br>')}</th>`).join('')}</tr></thead><tbody>${tableRows}</tbody></table></div>`;
+  return `<div class="life-kpis rappel-overview-summaries">${cards}</div><div class="rappel-overview-table-wrap"><table class="rappel-overview-table"><colgroup><col style="width:16%">${scopes.map(()=>'<col style="width:9.25%"><col style="width:9.25%"><col style="width:9.5%">').join('')}</colgroup><thead><tr><th rowspan="2" scope="col">${t('type')}</th>${scopes.map(scope=>`<th colspan="3" scope="colgroup" class="rappel-overview-group-start" data-scope="${scope.id}">${esc(scope.label)}</th>`).join('')}</tr><tr>${scopes.map(scope=>`<th scope="col" class="rappel-overview-group-start" data-scope="${scope.id}">${weightingMarkup(t(state.premiumBasis))}</th><th scope="col" data-scope="${scope.id}">${t('commission').replace('Rappelcommissie','Rappel&shy;commissie')}</th><th scope="col" data-scope="${scope.id}" class="rappel-average-heading">${t('averageRappel').replace(' ','<br>')}</th>`).join('')}</tr></thead><tbody>${tableRows}</tbody></table></div>`;
 }
 function sortedRows(rows,tableId) {
   const {key,direction}=state.sorts[tableId];

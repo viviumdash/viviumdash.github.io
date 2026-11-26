@@ -3731,7 +3731,7 @@ body:not(.topInfoReady) .hero .panel .lead {
 .rappel-dual-basis .life-kpi-contribution { grid-column: 1 / -1; }
 .rappel-dual-basis .rappel-dual-heading { min-height: 30px; }
 .rappel-dual-basis .rappel-dual-amount { display: block; margin-top: 6px; text-align: left; }
-.rappel-compact-mode .rappel-dual-contribution { display: grid; grid-template-columns: minmax(0,44fr) minmax(0,56fr); align-items: start; min-height: 48px; }
+.rappel-compact-mode .rappel-dual-contribution { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); column-gap: 12px; align-items: start; min-height: 48px; }
 .rappel-dual-type { display: flex; align-items: center; gap: 6px; padding-right: 6px; color: var(--muted); font-family: var(--dashboard-font-family); font-size: var(--rappel-type-text-size); line-height: 1.45; }
 .rappel-dual-type i { width: 8px; height: 8px; flex: 0 0 8px; border-radius: 2px; }
 .rappel-dual-line { display: grid; grid-template-columns: minmax(0,1fr) auto; align-items: baseline; gap: 8px; color: var(--blue); text-align: right; font-size: var(--rappel-detail-text-size); line-height: 1.45; white-space: nowrap; font-variant-numeric: tabular-nums; }
@@ -3748,7 +3748,7 @@ body:not(.topInfoReady) .hero .panel .lead {
 .rappelPrintRoot .life-kpis .rappel-dual-basis .rappel-dual-amount { margin-top: 4px; font-size: 14px !important; }
 .rappelPrintRoot .rappel-dual-total { padding-bottom: 7px; }
 .rappelPrintRoot .rappel-dual-total + .rappel-dual-total { margin-top: 0; }
-.rappelPrintRoot .rappel-compact-mode .rappel-dual-contribution { min-height: 32px; }
+.rappelPrintRoot .rappel-compact-mode .rappel-dual-contribution { grid-template-columns: minmax(0,44fr) minmax(0,56fr); column-gap: 0; min-height: 32px; }
 .rappelPrintRoot .rappel-dual-type { font-size: 9px; }
 .rappelPrintRoot .rappel-dual-line { font-size: 9px; gap: 4px; }
 .rappelPrintRoot .rappel-dual-line .rappel-basis-label { font-size: 9px; }
@@ -3800,3 +3800,8 @@ body:not(.topInfoReady) .hero .panel .lead {
 .rappel-compact-mode .rappel-commission-kpi > .rappel-commission-head, .rappel-compact-mode .rappel-commission-kpi > .rappel-commission-total { grid-template-columns: repeat(2,minmax(0,1fr)); column-gap: 12px; }
 .rappel-compact-mode .rappel-commission-kpi > .rappel-commission-head > span:first-child, .rappel-compact-mode .rappel-commission-kpi > .rappel-commission-total > .rappel-commission-amount { grid-column: 1; padding-right: 0; text-align: left; }
 .rappel-compact-mode .rappel-commission-kpi > .rappel-commission-head > span:last-child, .rappel-compact-mode .rappel-commission-kpi > .rappel-commission-total > .rappel-commission-average { grid-column: 2; padding-left: 0; text-align: left; }
+
+
+/* Gemiddelde rappel: volledige titel met weging op een vaste tweede regel. */
+.rappel-average-title, .rappel-average-weighting { display: block; white-space: nowrap; }
+.kpi .label .rappel-average-weighting, .rappel-overview-average .rappel-average-weighting, .rappel-average-heading .rappel-average-weighting { text-transform: none !important; }
