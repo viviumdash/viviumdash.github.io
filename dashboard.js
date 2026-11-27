@@ -1033,6 +1033,23 @@ $('pdfFile').addEventListener('change', async e => {
   const files = Array.from(e.target.files || []);
   if (!files.length) return;
   const generation = ++pdfImportGeneration;
+  if (files.some(file => /\.xlsx?$/i.test(file.name))) {
+    pendingPdfBusy = false;
+    pendingPdfSources = [];
+    $('multiImportPanel').classList.add('hidden');
+    if (!files.every(file => /\.xlsx?$/i.test(file.name))) {
+      setStatus(multiText('Importeer PDF en Excel afzonderlijk.', 'Importez les PDF et les fichiers Excel séparément.'), true);
+      return;
+    }
+    setStatus(msg('processing'));
+    try {
+      await importCustomerFiles(files, () => generation === pdfImportGeneration);
+      if (generation === pdfImportGeneration) setStatus(multiText('Klantentop 10 ingelezen.', 'Top 10 des clients importé.'));
+    } catch (err) {
+      if (generation === pdfImportGeneration) setStatus(msg('error') + err.message, true);
+    }
+    return;
+  }
   pendingPdfSources = files.map(file => ({ name: file.name, file }));
   pendingPdfSingleImport = files.length === 1;
   pendingPdfBusy = true;
@@ -1399,6 +1416,8 @@ function buildPdfHeader() {
 
 function normalizePdfSummaryBars(page, targetMaxHeight) {
   page.querySelectorAll('.prodBarGrid').forEach(grid => {
+    // Signed bars already use percentages around the shared centre, including at print sizes.
+    if (grid.closest('.signedVerticalChart')) return;
     const bars = Array.from(grid.querySelectorAll('.prodBarStick'));
     const heights = bars.map(bar => parseFloat(String(bar.style.height || '').replace('px', ''))).filter(v => Number.isFinite(v) && v > 0);
     const maxRaw = Math.max(1, ...heights);
@@ -2834,8 +2853,8 @@ function summaryComparisonHtml(prev, curr, prevP, currP, type, lowerIsBetter) {
   const arrow = d > 0 ? '↑' : d < 0 ? '↓' : '→';
   return `<span class="summaryComparison ${cls(d, lowerIsBetter)}" title="${esc(fmtPeriod(currP) + ' ' + msg('vs') + ' ' + fmtPeriod(prevP))}">${arrow} ${text}</span>`;
 }
-function summaryVerticalChartHtml(title, prevP, currP, bars, deltas, labels) {
-  return `<div class="prodBarChart summaryVerticalChart" style="--summary-category-count:${bars.length}">
+function summaryVerticalChartHtml(title, prevP, currP, bars, deltas, labels, signed = false) {
+  return `<div class="prodBarChart summaryVerticalChart${signed ? ' signedVerticalChart' : ''}" style="--summary-category-count:${bars.length}">
     ${summaryChartHeaderHtml(title, prevP, currP)}
     <div class="summaryVerticalPlot"><div class="summaryVerticalPlotContent">
       <div class="prodBarGrid">${bars.join('')}</div>
@@ -2849,16 +2868,17 @@ function renderSummaryHorizontalBars(items, prevP, currP, title, type = 'money',
   const counts = items.flatMap(item => [item.prevCount, item.currCount]).filter(count => count != null);
   const countWidth = counts.length ? Math.max(10, ...counts.map(count => num.format(count).length + 4)) : 0;
   const max = Math.max(1, ...items.flatMap(item => [Math.abs(item.prev), Math.abs(item.curr)]));
+  const signed = items.some(item => item.prev < 0 || item.curr < 0);
   const line = (item, period, current) => {
     const value = current ? item.curr : item.prev;
     const count = current ? item.currCount : item.prevCount;
     const countHtml = count == null ? '' : ' <span class="summaryCaseCount" title="' + esc(msg('aantalZaken')) + '">(# ' + num.format(count) + ')</span>';
     const year = String(period).match(/\d{4}$/)?.[0] || fmtPeriod(period);
-    return '<div class="barline"><div class="period" title="' + esc(fmtPeriod(period)) + '">' + esc(year) + '</div><div class="track"><div class="fill ' + (current ? 'currPeriod' : 'prevPeriod') + '" style="width:' + Math.abs(value) / max * 100 + '%"></div></div><div class="value"><span>' + fmt(value, type) + '</span>' + countHtml + '</div></div>';
+    return '<div class="barline"><div class="period" title="' + esc(fmtPeriod(period)) + '">' + esc(year) + '</div>' + comparisonTrackHtml(value, max, signed, current ? 'currPeriod' : 'prevPeriod') + '<div class="value"><span>' + fmt(value, type) + '</span>' + countHtml + '</div></div>';
   };
   return '<div class="miniCard summaryHorizontalChart' + (counts.length ? ' hasCaseCounts' : '') + '" style="--summary-count-width:' + countWidth + 'ch">' + summaryChartHeaderHtml(title, prevP, currP) + '<div class="bars">' + sortedItems.map(item => {
     const delta = summaryComparisonHtml(item.prev, item.curr, prevP, currP, type, lowerIsBetter);
-    return '<div class="barrow" data-category="' + esc(item.key || item.label) + '"><div class="summaryHorizontalRowHead"><div class="barlabel">' + esc(item.label) + '</div>' + delta + '</div><div class="bararea">' + line(item, currP, true) + line(item, prevP, false) + '</div></div>';
+    return '<div class="barrow" data-category="' + esc(item.key || item.label) + '"><div class="summaryHorizontalRowHead"><div class="barlabel">' + esc(item.label) + '</div>' + delta + '</div><div class="bararea">' + (signed ? comparisonZeroLabelHtml() : '') + line(item, currP, true) + line(item, prevP, false) + '</div></div>';
   }).join('') + '</div></div>';
 }
 function renderPremiumBarChart(data, prevP, currP, field, lowerIsBetter = false) {
@@ -2891,18 +2911,19 @@ function renderPremiumBarChart(data, prevP, currP, field, lowerIsBetter = false)
 
   const max = Math.max(1, ...items.flatMap(item => [Math.abs(item.prev), Math.abs(item.curr)]));
   const chartHeight = 120;
+  const signed = items.some(item => item.prev < 0 || item.curr < 0);
   const bars = [], deltas = [], labels = [];
   items.forEach(item => {
     const hPrev = Math.max(2, Math.round(Math.abs(item.prev) / max * chartHeight));
     const hCurr = Math.max(2, Math.round(Math.abs(item.curr) / max * chartHeight));
     bars.push(`<div class="prodBarCol"><div class="prodBarPair">
-      <div class="prodBarStick currPeriod" style="height:${hCurr}px" data-amount="${euro.format(item.curr)}" data-period="${esc(currP)}" onmouseenter="showProdBarTip(event,this)" onmouseleave="hideProdBarTip()"></div>
-      <div class="prodBarStick prevPeriod" style="height:${hPrev}px" data-amount="${euro.format(item.prev)}" data-period="${esc(prevP)}" onmouseenter="showProdBarTip(event,this)" onmouseleave="hideProdBarTip()"></div>
+      <div class="prodBarStick currPeriod" style="${summaryBarStyle(item.curr, max, hCurr, signed)}" data-amount="${euro.format(item.curr)}" data-period="${esc(currP)}" onmouseenter="showProdBarTip(event,this)" onmouseleave="hideProdBarTip()"></div>
+      <div class="prodBarStick prevPeriod" style="${summaryBarStyle(item.prev, max, hPrev, signed)}" data-amount="${euro.format(item.prev)}" data-period="${esc(prevP)}" onmouseenter="showProdBarTip(event,this)" onmouseleave="hideProdBarTip()"></div>
     </div></div>`);
     deltas.push(`<div class="prodBarDeltaCol">${summaryComparisonHtml(item.prev, item.curr, prevP, currP, 'money', lowerIsBetter)}</div>`);
     labels.push(`<div class="prodBarLabelCol" title="${esc(item.label)}">${compactProdBarLabelHtml(item.label)}</div>`);
   });
-  return summaryVerticalChartHtml(title, prevP, currP, bars, deltas, labels);
+  return summaryVerticalChartHtml(title, prevP, currP, bars, deltas, labels, signed);
 }
 function renderProdBarChart(data, prevP, currP) {
   return renderPremiumBarChart(data, prevP, currP, cols.prodPremie);
@@ -2952,6 +2973,7 @@ function renderSpBarChart(data, prevP, currP, field, cellIndex) {
 
   const max = Math.max(1, ...items.flatMap(x => [Math.abs(x.prev), Math.abs(x.curr)]));
   const CHART_H = 120;
+  const signed = items.some(item => item.prev < 0 || item.curr < 0);
   const barHtml = [];
   const deltaHtml = [];
   const labelHtml = [];
@@ -2962,13 +2984,13 @@ function renderSpBarChart(data, prevP, currP, field, cellIndex) {
     barHtml.push(`<div class="prodBarCol">
       <div class="prodBarPair">
         <div class="prodBarStick currPeriod"
-             style="height:${hCurr}px"
+             style="${summaryBarStyle(x.curr, max, hCurr, signed)}"
              data-amount="${pct.format(x.curr)}%"
              data-period="${esc(currP)}"
              onmouseenter="showProdBarTip(event,this)"
              onmouseleave="hideProdBarTip()"></div>
         <div class="prodBarStick prevPeriod"
-             style="height:${hPrev}px"
+             style="${summaryBarStyle(x.prev, max, hPrev, signed)}"
              data-amount="${pct.format(x.prev)}%"
              data-period="${esc(prevP)}"
              onmouseenter="showProdBarTip(event,this)"
@@ -2980,7 +3002,7 @@ function renderSpBarChart(data, prevP, currP, field, cellIndex) {
     labelHtml.push(`<div class="prodBarLabelCol" title="${esc(x.label)}">${compactProdBarLabelHtml(x.label)}</div>`);
   });
 
-  return summaryVerticalChartHtml(title, prevP, currP, barHtml, deltaHtml, labelHtml);
+  return summaryVerticalChartHtml(title, prevP, currP, barHtml, deltaHtml, labelHtml, signed);
 }
 
 function showProdBarTip(e, el) {
@@ -4039,7 +4061,7 @@ function kpiCompareHtml(x, prevP, currP) {
       let track;
       if (zeroBased) {
         const width = Math.min(48, Math.abs(value) / max * 48);
-        const widthStyle = value >= 0 ? `left:50%;width:${width}%` : `right:50%;width:${width}%`;
+        const widthStyle = (value >= 0 ? `left:50%;width:${width}%` : `right:50%;width:${width}%`) + (value === 0 ? ';display:none' : '');
         track = `<div class="kpiCompareZeroTrack"><div class="kpiCompareZeroFill prev" style="${widthStyle}"></div></div>`;
       } else {
         const width = Math.min(100, Math.abs(value) / max * 100);
@@ -4049,14 +4071,14 @@ function kpiCompareHtml(x, prevP, currP) {
     }).join('');
     return `<div class="kpiCompareHistory">${rows}</div>`;
   };
-  if (x.zeroCompare) {
+  if (x.zeroCompare || prev < 0 || curr < 0 || historyValues.some(value => value < 0)) {
     const max = Math.max(1, Math.abs(prev), Math.abs(curr), ...historyValues.map(Math.abs));
     const prevW = Math.min(48, Math.abs(prev) / max * 48);
     const currW = Math.min(48, Math.abs(curr) / max * 48);
     const currSide = curr >= 0 ? 'pos' : 'neg';
     const prevStyle = prev >= 0 ? `left:50%;width:${prevW}%` : `right:50%;width:${prevW}%`;
     const currStyle = curr >= 0 ? `left:50%;width:${currW}%` : `right:50%;width:${currW}%`;
-    const zeroLine = (period, value, widthStyle, clsName) => `<div class="kpiCompareZeroLine"><div class="kpiComparePeriod">${fmtPeriod(period)}</div><div class="kpiCompareZeroTrack"><div class="kpiCompareZeroFill ${clsName}" style="${widthStyle}"></div></div><div class="kpiCompareAmount">${kpiCompareValueText(value, type)}</div></div>`;
+    const zeroLine = (period, value, widthStyle, clsName) => `<div class="kpiCompareZeroLine"><div class="kpiComparePeriod">${fmtPeriod(period)}</div><div class="kpiCompareZeroTrack"><div class="kpiCompareZeroFill ${clsName}" style="${widthStyle}${value === 0 ? ';display:none' : ''}"></div></div><div class="kpiCompareAmount">${kpiCompareValueText(value, type)}</div></div>`;
     return `<div class="kpiCompare zero"><div class="kpiCompareZeroRows">${zeroLine(currP, curr, currStyle, `curr ${currSide}`)}${zeroLine(prevP, prev, prevStyle, 'prev')}</div>${footer(`<div class="kpiCompareBubble ${kpiCompareClass(x)}">${kpiCompareBubbleText(x)}</div>`)}${historyHtml(max, true)}</div>`;
   }
   const max = Math.max(1, Math.abs(prev), Math.abs(curr), ...historyValues.map(Math.abs));
@@ -4233,8 +4255,36 @@ function spValueClass(value, threshold, label) {
   return '';
 }
 
+function comparisonTrackHtml(value, max, signed, periodClass = '', fillClass = '') {
+  const v = Number(value) || 0;
+  const width = Math.abs(v) / max * (signed ? 48 : 100);
+  const position = signed ? (v < 0 ? 'right:50%;left:auto;' : 'left:50%;') : '';
+  return `<div class="track${signed ? ' signedTrack' : ''}"><div class="fill ${periodClass} ${fillClass}${signed && v < 0 ? ' signedNegative' : ''}" style="${position}width:${width}%;${signed && v === 0 ? 'display:none;' : ''}"></div></div>`;
+}
+function comparisonZeroLabelHtml() {
+  return '<div class="barline comparisonZeroLabel" aria-hidden="true"><span></span><span class="comparisonZeroLabels"><span>−</span><span>0</span><span>+</span></span></div>';
+}
+function summaryBarStyle(value, max, normalHeight, signed) {
+  if (!signed) return `height:${normalHeight}px`;
+  const height = Math.abs(value) / max * 48;
+  return `height:${height}%;bottom:${value < 0 ? 50 - height : 50}%;${value === 0 ? 'display:none;' : ''}`;
+}
 function barCompareHtml(labels, a, b, la, lb, type, color, parentCategory = '', options = {}) {
   const isPct = type === 'pct';
+  const signed = [...a, ...b].some(value => value < 0);
+
+  if (signed) {
+    const max = Math.max(isPct ? 100 : 1, ...a.map(Math.abs), ...b.map(Math.abs));
+    return '<div class="bars">' + labels.map((label, i) => {
+      const delta = options.showDelta ? (options.absolutePctDelta ? barAbsolutePctDeltaTextHtml(a[i], b[i], !!options.invertDelta) : barDeltaTextHtml(a[i], b[i], !!options.invertDelta)) : '';
+      const line = (period, value, periodClass, difference = '') => {
+        const threshold = spThresholdForLabel(label, parentCategory);
+        const valueClass = isPct ? spValueClass(value, threshold, label) : '';
+        return `<div class="barline"><div class="period">${fmtPeriod(period)}</div>${comparisonTrackHtml(value, max, true, periodClass, isPct ? spVisualClass(value) : '')}<div class="barDeltaSlot">${difference}</div><div class="value ${valueClass}">${fmt(value, type)}</div></div>`;
+      };
+      return `<div class="barrow"><div class="barlabel">${label}</div><div class="bararea">${comparisonZeroLabelHtml()}${line(lb, b[i], 'currPeriod')}${line(la, a[i], 'prevPeriod', delta)}</div></div>`;
+    }).join('') + '</div>';
+  }
 
   if (isPct) {
     // Vaste schaal: elke helft = 0–100%. Balkkleur blijft periodegebonden; waarden >100% krijgen een rode invulling.
@@ -4307,6 +4357,7 @@ function barCompareHtmlWithPreviousYears(labels, a, b, la, lb, type, color, pare
   if (!previousYearsMode || !previousYears.length) return barCompareHtml(labels, a, b, la, lb, type, color, parentCategory, options);
   const isPct = type === 'pct';
   const max = Math.max(isPct ? 100 : 1, ...a.map(Math.abs), ...b.map(Math.abs), ...previousYears.flatMap(x => x.values.map(v => Math.abs(v || 0))));
+  const signed = [...a, ...b, ...previousYears.flatMap(year => year.values)].some(value => value < 0);
   return `<div class="bars">` + labels.map((l, i) => {
     const delta = options?.showDelta ? (options.absolutePctDelta ? barAbsolutePctDeltaTextHtml(a[i], b[i], !!options.invertDelta) : barDeltaTextHtml(a[i], b[i], !!options.invertDelta)) : '';
     const yearLines = previousYears.map((year, yearIndex) => {
@@ -4315,11 +4366,11 @@ function barCompareHtmlWithPreviousYears(labels, a, b, la, lb, type, color, pare
       const yearDelta = previous ? (isPct || options?.absolutePctDelta ? ppDelta(previous, value) : yoy(previous, value)) : null;
       const yearDeltaText = isPct || options?.absolutePctDelta ? signedPointDelta(yearDelta) : `${yearDelta >= 0 ? '+' : ''}${pct.format(yearDelta)}%`;
       const yearDeltaHtml = yearDelta === null ? '' : `<span class="previousYearsDelta ${cls(yearDelta, !!options?.invertDelta)}">${yearDeltaText}</span>`;
-      return `<div class="barline previousYearLine"><div class="period">${esc(fmtPeriod(year.period))}</div><div class="track"><div class="fill" style="width:${Math.abs(value) / max * 100}%"></div></div><div class="barDeltaSlot">${yearDeltaHtml}</div><div class="value">${fmt(value, type)}</div></div>`;
+      return `<div class="barline previousYearLine"><div class="period">${esc(fmtPeriod(year.period))}</div>${comparisonTrackHtml(value, max, signed)}<div class="barDeltaSlot">${yearDeltaHtml}</div><div class="value">${fmt(value, type)}</div></div>`;
     }).reverse().join('');
-    return `<div class="barrow"><div class="barlabel">${l}</div><div class="bararea">` +
-    `<div class="barline"><div class="period">${lb}</div><div class="track"><div class="fill currPeriod" style="width:${Math.abs(b[i]) / max * 100}%"></div></div><div class="barDeltaSlot"></div><div class="value">${fmt(b[i], type)}</div></div>` +
-    `<div class="barline"><div class="period">${la}</div><div class="track"><div class="fill prevPeriod" style="width:${Math.abs(a[i]) / max * 100}%"></div></div><div class="barDeltaSlot">${delta}</div><div class="value">${fmt(a[i], type)}</div></div>` +
+    return `<div class="barrow"><div class="barlabel">${l}</div><div class="bararea">` + (signed ? comparisonZeroLabelHtml() : '') +
+    `<div class="barline"><div class="period">${lb}</div>${comparisonTrackHtml(b[i], max, signed, 'currPeriod')}<div class="barDeltaSlot"></div><div class="value">${fmt(b[i], type)}</div></div>` +
+    `<div class="barline"><div class="period">${la}</div>${comparisonTrackHtml(a[i], max, signed, 'prevPeriod')}<div class="barDeltaSlot">${delta}</div><div class="value">${fmt(a[i], type)}</div></div>` +
     yearLines +
     `</div></div>`;
   }).join('') + `</div>`;
@@ -5648,7 +5699,7 @@ function renderSchadeCat(cat, rows, prevP, currP) {
         zone.classList.remove('dragging');
         var files=e.dataTransfer && e.dataTransfer.files;
         if(!files || !files.length) return;
-        var isPdf=Array.from(files).every(file => file.type === 'application/pdf' || /\.pdf$/i.test(file.name || ''));
+        var isPdf=Array.from(files).every(file => file.type === 'application/pdf' || /\.(pdf|xlsx?)$/i.test(file.name || ''));
         if(!isPdf){
           setStatus(currentLang === 'fr' ? 'Veuillez sélectionner un fichier PDF.' : 'Selecteer een PDF-bestand.',true);
           return;

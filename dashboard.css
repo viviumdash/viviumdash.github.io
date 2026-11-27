@@ -10681,3 +10681,264 @@ body.pdfPrintPreparing .pdfExportRoot .portfolioBarFill {
 .pdfExportRoot .pdfTestPage .summaryVerticalChart .summaryComparison { padding: 2px 4px; font-size: 8px; }
 .pdfExportRoot .pdfTestPage .prodBarChart.summaryVerticalChart .prodBarStick.currPeriod { background: linear-gradient(180deg,#ff934c,#fff4ed) !important; }
 .pdfExportRoot .pdfTestPage .prodBarChart.summaryVerticalChart .prodBarStick.prevPeriod { background: linear-gradient(180deg,#0d1473,#c5d6e5) !important; }
+
+/* Zelfstandige huisstijl: lettertypes, basisopmaak en somkaarten voor deze pagina. */
+@font-face {font-family:Lato;src:url('libs/fonts/LatoWeb-Regular.ttf') format('truetype');font-weight:400;font-style:normal;font-display:swap}
+
+@font-face {font-family:Lato;src:url('libs/fonts/LatoWeb-Bold.ttf') format('truetype');font-weight:700 950;font-style:normal;font-display:swap}
+
+@font-face {font-family:'Open Sans';src:url('libs/fonts/OpenSans-Regular.ttf') format('truetype');font-weight:400;font-style:normal;font-display:swap}
+
+@font-face {font-family:'Open Sans';src:url('libs/fonts/OpenSans-Bold.ttf') format('truetype');font-weight:700;font-style:normal;font-display:swap}
+:root {
+  --bg: #f4f4f4;
+  --card: #fff;
+  --ink: #0d1473;
+  --muted: #4d4d4d;
+  --line: #c5d6e5;
+  --blue: #0d1473;
+  --blue2: #c5d6e5;
+  --blue3: #043c93;
+  --orange: #ff934c;
+  --shadow: 0 3px 12px rgba(13,20,115,.045);
+  --radius: 14px;
+  --stack-gap: 11px;
+  --dashboard-font-family: Lato, Arial, sans-serif;
+  --dashboard-body-text-size: 16px;
+  --dashboard-intro-text-size: 16px;
+  --dashboard-section-title-size: 22px;
+  --dashboard-card-title-size: 18px;
+  --dashboard-kpi-label-size: 11px;
+  --dashboard-kpi-value-size: 26px;
+}
+
+body {
+  font-family: var(--dashboard-font-family);
+  font-size: var(--dashboard-body-text-size);
+}
+
+body:not(.topInfoReady) .hero .panel {
+  position: static;
+  padding: 48px 54px 40px;
+  border-right: 1px solid rgba(214,228,242,.72);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+
+.dashboard-footer {
+  margin: 10px 0 18px;
+  color: #4d4d4d;
+  font: 700 12px/1.5 var(--dashboard-font-family);
+  text-align: center;
+  opacity: .78;
+  white-space: normal;
+}
+
+body:not(.topInfoReady) .hero .panel .lead {
+  flex: 1 0 auto;
+}
+
+@media (max-width: 640px) {
+  body:not(.topInfoReady) .hero .panel { padding: 34px 24px; }
+}
+
+@media (max-width: 980px) {
+  body:not(.topInfoReady) .hero .panel { border-right: 0; border-bottom: 1px solid rgba(214,228,242,.72); }
+}
+
+/* Gedeelde somkaarten voor kerncijfers life en rappelcijfers life. */
+.summaryTotalKpi {
+  border: 2px solid rgba(245,130,32,.72) !important;
+  background: linear-gradient(135deg,#fff4e8 0%,#ffffff 58%,#edf5fc 100%) !important;
+  box-shadow: 0 18px 34px rgba(245,130,32,.16) !important;
+}
+
+.summaryTotalKpi .value {
+  color: var(--blue) !important;
+}
+
+.summaryComponentKpi {
+  border-color: #c7ddf2 !important;
+  background: linear-gradient(180deg,#edf5fc 0%,#f8fbff 100%) !important;
+  overflow: visible !important;
+}
+
+.summaryComponentKpi:after {
+  position: absolute;
+  left: -7px;
+  top: 50%;
+  transform: translate(-50%,-50%);
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  border: 2px solid #fff;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  line-height: 1;
+  font-weight: 950;
+  box-shadow: 0 7px 16px rgba(0,59,113,.14);
+  z-index: 25;
+  pointer-events: none;
+}
+
+.summaryComponentKpi:nth-child(2):after {
+  content: "=";
+  background: var(--orange);
+}
+
+.summaryComponentKpi:nth-child(3):after,.summaryComponentKpi:nth-child(4):after {
+  content: "+";
+  background: #8fb4dc;
+}
+
+
+
+/* Non-life: klantentabellen bij Excel-import. */
+#customerTopDialog {
+  width: min(1180px, calc(100% - 32px));
+  max-height: calc(100dvh - 32px);
+  padding: 28px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  color: var(--ink);
+  background: var(--card);
+  font: inherit;
+  overflow: auto;
+}
+#customerTopDialog::backdrop { background: rgb(13 20 115 / 35%); }
+body.customerTopOpen { overflow: hidden; }
+#customerTopDialog h2 { font-size: var(--dashboard-section-title-size); margin: 0; overflow-wrap: anywhere; }
+#customerTopDialog h3 { font-size: var(--dashboard-card-title-size); margin: 0 0 12px; }
+#customerTopDialog p { color: var(--muted); line-height: 1.5; }
+.customerTopHead { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.customerTopHead > div { display: flex; align-items: center; justify-content: flex-end; gap: 8px; flex-wrap: wrap; }
+.customerTopLimitLabel { display: flex; align-items: center; gap: 8px; }
+#customerTopLimit { font: inherit; padding: 9px; color: var(--ink); border: 1px solid var(--line); border-radius: 8px; background: white; }
+.customerTopHead button, .customerTopCopy { font: inherit; padding: 9px 14px; border: 1px solid var(--line); border-radius: 8px; background: var(--green2); color: var(--ink); cursor: pointer; }
+.customerTopCopy { flex-shrink: 0; }
+.customerTopCopy:disabled { cursor: wait; opacity: .65; }
+.customerTopCapture { position: fixed; left: -10000px; top: 0; width: 1120px; padding: 20px; background: white; }
+.customerTopCapture .customerTopScroll { overflow: visible; }
+.customerTopReport { margin-top: 26px; padding-top: 22px; border-top: 1px solid var(--line); }
+.customerTopTable { margin-top: 24px; }
+.customerTopScroll { overflow-x: auto; }
+#customerTopDialog table { width: 100%; table-layout: fixed; border-collapse: collapse; font-size: var(--dashboard-body-text-size); }
+#customerTopDialog th, #customerTopDialog td { padding: 12px 10px; text-align: left; border-bottom: 1px solid var(--line); vertical-align: top; overflow-wrap: anywhere; }
+#customerTopDialog th { background: var(--green2); }
+#customerTopDialog th:first-child { white-space: nowrap; }
+#customerTopDialog tbody.customerTopClient:nth-of-type(even) { background: #f7faff; }
+#customerTopDialog .customerTopTotal { font-weight: 700; }
+#customerTopDialog .customerTopAmount { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+@media (max-width: 640px) {
+  #customerTopDialog { padding: 16px; width: calc(100% - 16px); max-height: calc(100dvh - 16px); }
+  .customerTopHead { align-items: flex-start; flex-direction: column; }
+  .customerTopHead > div { justify-content: flex-start; }
+  #customerTopDialog table { min-width: 1000px; }
+}
+@media print {
+  @page customer-top { size: A4 portrait; margin: 12mm; }
+  body.customerTopOpen { page: customer-top; overflow: visible !important; background: white; }
+  body.customerTopOpen > :not(#customerTopDialog) { display: none !important; }
+  body.customerTopOpen #customerTopDialog { page: customer-top; position: static; width: 100%; max-width: none; height: auto; max-height: none; margin: 0; padding: 0; overflow: visible; border: 0; font-size: 10pt; }
+  #customerTopDialog::backdrop { display: none; }
+  .customerTopHead > div { display: none; }
+  .customerTopCopy { display: none; }
+  .customerTopScroll { overflow: visible; }
+  #customerTopDialog table { min-width: 0; font-size: 8pt; }
+  #customerTopDialog h2 { font-size: 14pt; }
+  #customerTopDialog h3 { font-size: 12pt; break-after: avoid; }
+  #customerTopDialog th, #customerTopDialog td { padding: 4px; }
+  #customerTopDialog p { font-size: 9pt; margin: 8px 0; }
+  .customerTopReport { margin-top: 16px; padding-top: 12px; }
+  .customerTopTable { margin-top: 16px; }
+  #customerTopDialog tr { break-inside: avoid; }
+  #customerTopDialog thead { display: table-header-group; }
+  .customerTopReport + .customerTopReport { break-before: page; }
+}
+
+/* Alleen grafieken met negatieve waarden krijgen een gedeeld nulpunt. */
+.signedTrack::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: rgba(98,116,138,.48);
+  pointer-events: none;
+}
+.signedTrack > .fill {
+  left: 50% !important;
+  min-width: 0;
+  max-width: 48%;
+  border-radius: 0 999px 999px 0;
+}
+.signedTrack > .fill.signedNegative {
+  left: auto !important;
+  right: 50% !important;
+  border-radius: 999px 0 0 999px;
+  transform-origin: right center;
+}
+.barline.comparisonZeroLabel {
+  min-height: 0;
+  margin: 0 0 -3px;
+}
+.comparisonZeroLabels {
+  display: flex;
+  justify-content: space-between;
+  color: #62748a;
+  font-size: 10px;
+  font-weight: 400;
+  line-height: 1;
+}
+.signedVerticalChart .prodBarGrid,
+body .pdfExportRoot .pdfTestPage .signedVerticalChart .prodBarGrid {
+  padding-top: 0 !important;
+}
+.signedVerticalChart .prodBarGrid::after,
+body .pdfExportRoot .pdfTestPage .signedVerticalChart .prodBarGrid::after {
+  top: 50% !important;
+  bottom: auto !important;
+  border-top: 1px solid rgba(98,116,138,.48) !important;
+}
+.signedVerticalChart .prodBarGrid::before,
+body .pdfExportRoot .pdfTestPage .signedVerticalChart .prodBarGrid::before {
+  content: '0' !important;
+  top: 50% !important;
+  bottom: auto !important;
+  left: 2px !important;
+  right: auto !important;
+  transform: translateY(-100%);
+  color: #62748a;
+  font-size: 10px;
+  line-height: 1;
+  background: none !important;
+}
+.signedVerticalChart .prodBarStick {
+  position: absolute;
+  min-height: 0;
+}
+.signedVerticalChart .prodBarStick.currPeriod {
+  left: calc(50% - 23px);
+}
+.signedVerticalChart .prodBarStick.prevPeriod {
+  left: calc(50% + 3px);
+}
+.kpiCompare.zero .kpiCompareZeroTrack::before {
+  width: 1px;
+  opacity: .55;
+}
+.pdfExportRoot .signedTrack > .fill {
+  left: 50% !important;
+  min-width: 0 !important;
+  max-width: 48% !important;
+}
+.pdfExportRoot .signedTrack > .fill.signedNegative {
+  left: auto !important;
+  right: 50% !important;
+}
