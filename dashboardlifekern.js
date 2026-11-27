@@ -83,7 +83,6 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
-
 // ─── Zichtbaarheid van dashboardblokken ─────────────
 function toggleDashboardBlockVisibility(block, panelSelector) {
   if (!block) return;
@@ -229,7 +228,7 @@ const I18N = {
     downloadCsv: 'Télécharger CSV', exportPdf: 'Exporter PDF', pdfBusy: 'Création du PDF…', pdfOptionsTitle: 'Sections PDF', pdfNoSections: 'Sélectionnez au moins une section PDF.', noPdf: 'Prêt à traiter vos chiffres clés', processing: '⏳ Traitement du PDF…',
     pdfSelectAll: 'Tout sélectionner', pdfSelectNone: 'Tout désélectionner', printPdf: 'Imprimer en PDF', printPdfDestinationHint: 'Choisissez « Enregistrer au format PDF » comme destination/imprimante dans la fenêtre d’impression.', kpiExport: 'Exporter les indicateurs', imageDownload: 'Télécharger en PNG', imageCopy: 'Copier comme image',
     success: n => '✅ PDF chargé et traité : ' + n + ' lignes de données.', error: '❌ Erreur lors du traitement du PDF : ',
-    broker: 'Courtier', koepelnummer: 'n° coupole', groepsnummer: 'n° groupe', vs: 'vs', main: 'Principal', sub: 'Sous-cat.', lowerPositive: 'baisse positive', lowerBetter: 'sinistres : plus bas est meilleur', viewModeLabel: 'Affichage', viewAll: 'Tout', viewMainOnly: 'Catégories principales', viewSubOnly: 'Sous-catégories', drillDown: 'Affichage limité', drillDownActive: 'Tout afficher', importControlTitle: 'Contrôle import', importControlSub: 'Contrôle rapide de l’interprétation du PDF', importPeriods: 'Nombre de périodes', importLatestPeriod: 'Dernière période trouvée', importTotalProd: 'TOTAL NON VIE production', importTotalSchade: 'TOTAL NON VIE sinistres', importSpPct: 'S/P % lu correctement', importBroker: 'Courtier/n° coupole', yes: 'Oui', no: 'Non', topCompactTitle: 'Import PDF & contrôle', topShow: 'Afficher les informations import', topHide: 'Masquer les informations import', topOk: 'Contrôle import OK', topAttention: n => n + ' point' + (n === 1 ? '' : 's') + ' d’attention', topPeriodsShort: 'périodes', topLatestShort: 'dernière',
+    broker: 'Courtier', koepelnummer: 'n° coupole', groepsnummer: 'n° groupe', vs: 'vs', main: 'Principal', sub: 'Sous-cat.', lowerPositive: 'baisse positive', lowerBetter: 'sinistres : plus bas est meilleur', viewModeLabel: 'Affichage', viewAll: 'Tout', viewMainOnly: 'Catégories principales', viewSubOnly: 'Sous-catégories', drillDown: 'Affichage limité', drillDownActive: 'Tout afficher', importControlTitle: 'Contrôle import', importControlSub: 'Contrôle rapide de l’interprétation du PDF', importPeriods: 'Nombre de périodes', importLatestPeriod: 'Dernière période trouvée', importTotalProd: 'TOTAL VIE production', importTotalSchade: 'TOTAL NON VIE sinistres', importSpPct: 'S/P % lu correctement', importBroker: 'Courtier/n° coupole', yes: 'Oui', no: 'Non', topCompactTitle: 'Import PDF & contrôle', topShow: 'Afficher les informations import', topHide: 'Masquer les informations import', topOk: 'Contrôle import OK', topAttention: n => n + ' point' + (n === 1 ? '' : 's') + ' d’attention', topPeriodsShort: 'périodes', topLatestShort: 'dernière',
     tabSamenvatting: 'Résumé', tabProductie: 'Production', tabVerval: 'Chute', tabTransformatie: 'Transformation', tabProgressie: 'Progression', tabSchade: 'Sinistres', tabPortefeuille: 'Portefeuille', tabDetail: 'Détail', pdfOptDetail: 'Détail par catégorie',
     prodTitle: 'Production', vervalTitle: 'Chute', transTitle: 'Transformation', progTitle: 'Progression', schadeTitle: 'Sinistres', portefeuilleTitle: 'Portefeuille', detailTitle: 'Catégories principales et sous-catégories',
     prodNote: 'Les données ci-dessous affichent d’abord la ligne principale par catégorie, puis toutes les sous-catégories du CSV.', portefeuilleNote: 'Les graphiques ci-dessous affichent la prime acquise au niveau TOTAL NON VIE : d’abord les trois dernières années complètes, puis la dernière période de l’année passée face à la dernière période de cette année.', portefeuilleSub: (a,b) => 'Prime acquise TOTAL NON VIE. Années complètes séparées ; dernière période : ' + a + ' versus ' + b + '.', portefeuilleYears: '3 dernières années', portefeuilleComparison: 'Dernière période A vs A-1', portefeuilleEmpty: 'Aucune donnée portefeuille trouvée.', vorigJaar: 'Année passée', huidigJaar: 'Cette année', vervalNote: 'Les données ci-dessous affichent d’abord la ligne principale par catégorie, puis toutes les sous-catégories du CSV, y compris la chute client et compagnie.', progNote: 'La progression est affichée comme production - chute + transformation, par catégorie principale et sous-catégorie telle que fournie dans le CSV.', schadeNote: 'Interprétation sinistres : une baisse du nombre de sinistres, de la charge sinistre ou du S/P est positive et s’affiche en vert. Une hausse est négative. Les données ci-dessous affichent d’abord la ligne principale par catégorie, puis toutes les sous-catégories du CSV.',
@@ -239,6 +238,75 @@ const I18N = {
     labels: {'Auto':'Auto','Auto Vloten':'Flottes','Auto Niet Vloten':'Non flottes','Particulieren':'Particuliers','Particulieren Brand':'Incendie','Particulieren BA':'RC','Particulieren Overige':'Autres','Ondernemingen':'Entreprises','Ondernemingen Brand':'Incendie','Ondernemingen BA':'RC','Ondernemingen Overige':'Autres','Arbeidsongevallen':'Accidents de travail','Rechtsbijstand':'Protection juridique','Rechtsbijstand Stand Alone':'Protection juridique','TOTAAL NON LIFE':'TOTAL NON VIE'}
   }
 };
+
+Object.assign(I18N.fr.labels, {
+  "Tweede Pijler": "Deuxième Pilier",
+  "IPT": "EIP",
+  "VAPZ": "PLCI",
+  "POZ": "CPTI",
+  "RIZIV": "PLCI INAMI",
+  "Derde Pijler": "Troisième Pilier",
+  "Pensioensparen": "Épargne-pension",
+  "Langetermijnsparen": "Épargne à long terme",
+  "Vierde Pijler": "Quatrième Pilier",
+  "Jeugdplan": "Plan jeunesse",
+  "Overige Particulieren Niet-Fiscaal": "Autres particuliers non fiscaux",
+  "Beleggingsproducten Niet-Fiscaal": "Produits d’investissement non fiscaux",
+  "Verzekeringsbon": "Bon d’assurance",
+  "TOTAAL LEVEN": "TOTAL VIE",
+  "TOTAAL PREMIES": "Total des primes",
+  "Totaal premies": "Total des primes",
+  "Premie productie": "Prime production",
+  "Premie koopsom": "Prime unique",
+  "Premie verhoging": "Prime augmentation",
+  "Reserves": "Réserves",
+  "Productie": "Production",
+  "Koopsommen": "Primes uniques",
+  "Koopsom": "Prime unique",
+  "Verhogingen": "Augmentations",
+  "Verhoging": "Augmentation",
+  "Portefeuillepremie": "Prime portefeuille",
+  "Polissen portefeuille": "Polices en portefeuille",
+  "Aantal polissen portefeuille": "Nombre de polices en portefeuille",
+  "Aantal zaken": "Nombre d’affaires",
+  "Aantal zaken productie": "Nombre d’affaires production",
+  "Hoofd- en subcategorieen": "Catégories principales et sous-catégories",
+  "Hoofd- en subcategorieën": "Catégories principales et sous-catégories",
+  "Vergelijking van de premie productie per hoofdcategorie.": "Comparaison des primes de production par catégorie principale.",
+  "Vergelijking van de premie koopsom per hoofdcategorie.": "Comparaison des primes uniques par catégorie principale.",
+  "Vergelijking van de premie verhoging per hoofdcategorie.": "Comparaison des primes d’augmentation par catégorie principale.",
+  "Productie + verhogingen + 10% van de koopsom.": "Production + augmentations + 10 % des primes uniques.",
+  "Premie productie per pijler": "Prime de production par pilier",
+  "Premie koopsom per pijler": "Prime unique par pilier",
+  "Premie verhoging per pijler": "Prime d’augmentation par pilier",
+  "APE per pijler": "APE par pilier",
+  "Verdeling totaal premies": "Répartition du total des primes",
+  "Verdeling premie productie": "Répartition des primes de production",
+  "Totaal premie productie": "Total des primes de production",
+  "Verdeling koopsommen": "Répartition des primes uniques",
+  "Totaal koopsommen": "Total des primes uniques",
+  "Verdeling verhogingen": "Répartition des augmentations",
+  "Totaal verhogingen": "Total des augmentations",
+  "Verdeling portefeuillepremie": "Répartition de la prime portefeuille",
+  "Totaal portefeuillepremie": "Total de la prime portefeuille",
+  "2e pijler": "2e pilier",
+  "3e pijler": "3e pilier",
+  "4e pijler": "4e pilier",
+  "Geen gegevens gevonden voor de hoofdcategorieën.": "Aucune donnée trouvée pour les catégories principales.",
+  "Geen koopsommen gevonden.": "Aucune prime unique trouvée.",
+  "Geen verhogingen gevonden.": "Aucune augmentation trouvée.",
+  "Aantal prod.": "Nombre prod.",
+  "Δ aantal": "Δ nombre",
+  "Premie prod.": "Prime prod.",
+  "Δ prod.": "Δ prod.",
+  "Δ koopsom": "Δ prime unique",
+  "Δ verhoging": "Δ augmentation",
+  "Polissen port.": "Polices port.",
+  "Δ polissen": "Δ polices",
+  "Δ port.": "Δ port.",
+  "Δ reserves": "Δ réserves"
+});
+Object.assign(I18N.fr, { portefeuilleNote: 'Prime portefeuille par catégorie principale et sous-catégorie.', portefeuilleSub: (a,b) => 'Prime portefeuille. Comparaison ' + a + ' et ' + b + '.', vervalNote: 'Primes uniques par catégorie principale et sous-catégorie.' });
 
 function msg(key, ...args) { const value = I18N[currentLang][key]; return typeof value === 'function' ? value(...args) : (value ?? key); }
 function updateFormatters() {
@@ -257,7 +325,7 @@ function updateFormatters() {
 function setText(id, text) { const el = $(id); if (el) el.textContent = text; }
 function setHtml(id, html) { const el = $(id); if (el) el.innerHTML = html; }
 function updateStaticLanguage() {
-  document.documentElement.lang = currentLang; document.title = 'Dashboard kerncijfers life';
+  document.documentElement.lang = currentLang; document.title = currentLang === 'fr' ? 'Tableau de bord chiffres clés vie' : 'Dashboard kerncijfers life';
   setText('languageLabel', currentLang === 'fr' ? 'Langue' : 'Taal / Langue');
   for (const id of ['pageTitle', 'heroEyebrow', 'heroBenefitAnalysis', 'heroBenefitCompare', 'heroBenefitSafe', 'uploadTitle', 'uploadHint', 'heroUploadButton', 'heroUploadMeta', 'pdfSelectAll', 'pdfSelectNone']) setText(id, msg(id));
   setHtml('pageLead', msg('pageLead'));
@@ -368,7 +436,6 @@ function setDrillMode(on) {
 }
 updateFormatters();
 
-
 // ─── PDF → CSV conversieparameters (uit ok_CSV.html) ─────────────────────────
 const TRANSLATIONS = {
   "Auto": ["Auto"],
@@ -385,20 +452,20 @@ const TRANSLATIONS = {
   "Arbeidsongevallen": ["Arbeidsongevallen", "Accidents de Travail"],
   "Rechtsbijstand": ["Rechtsbijstand Stand Alone", "Rechtsbijstand", "Protection Juridique Stand Alone", "Protection Juridique"],
   "TOTAAL NON LIFE": ["TOTAAL NON LIFE", "TOTAL NON VIE"],
-  "Tweede Pijler": ["Tweede Pijler"],
-  "IPT": ["IPT"],
-  "VAPZ": ["VAPZ"],
-  "POZ": ["POZ"],
-  "RIZIV": ["RIZIV"],
-  "Derde Pijler": ["Derde Pijler"],
-  "Pensioensparen": ["Pensioensparen"],
-  "Langetermijnsparen": ["Langetermijnsparen"],
-  "Vierde Pijler": ["Vierde Pijler"],
-  "Jeugdplan": ["Jeugdplan"],
-  "Overige Particulieren Niet-Fiscaal": ["Overige Particulieren Niet-Fiscaal"],
-  "Beleggingsproducten Niet-Fiscaal": ["Beleggingsproducten Niet-Fiscaal"],
-  "Verzekeringsbon": ["Verzekeringsbon"],
-  "TOTAAL LEVEN": ["TOTAAL LEVEN"]
+  "Tweede Pijler": ["Tweede Pijler", "Deuxième Pilier"],
+  "IPT": ["IPT", "EIP"],
+  "VAPZ": ["VAPZ", "PLCI"],
+  "POZ": ["POZ", "CPTI"],
+  "RIZIV": ["RIZIV", "PLCI INAMI"],
+  "Derde Pijler": ["Derde Pijler", "Troisième Pilier"],
+  "Pensioensparen": ["Pensioensparen", "Epargne-Pension", "Epargne Pension"],
+  "Langetermijnsparen": ["Langetermijnsparen", "Epargne Long Terme"],
+  "Vierde Pijler": ["Vierde Pijler", "Quatrième Pilier"],
+  "Jeugdplan": ["Jeugdplan", "Plan Jeunesse"],
+  "Overige Particulieren Niet-Fiscaal": ["Overige Particulieren Niet-Fiscaal", "Autres Particuliers Non-Fiscal"],
+  "Beleggingsproducten Niet-Fiscaal": ["Beleggingsproducten Niet-Fiscaal", "Produits d'Investissement Non-Fiscal"],
+  "Verzekeringsbon": ["Verzekeringsbon", "Bon d'Assurance"],
+  "TOTAAL LEVEN": ["TOTAAL LEVEN", "TOTAL VIE"]
 };
 
 const SUBCATEGORY_PARENT = {
@@ -429,7 +496,7 @@ const GENERIC_FR_SUBCATEGORY = {
 };
 
 function normText(s) {
-  return String(s || '').replace(/\s+/g, ' ').trim().toLowerCase();
+  return String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[’‘]/g, "'").replace(/\s+/g, ' ').trim().toLowerCase();
 }
 
 function getCategoryMatch(rowText, currentCategory) {
@@ -456,7 +523,6 @@ function getCategoryMatch(rowText, currentCategory) {
   const canonical = matches[0].canonical;
   return { hoofd: SUBCATEGORY_PARENT[canonical] || canonical, sub: canonical };
 }
-
 
 function exportActionsHtml(options = {}) {
   const classes = ['blockExportActions', options.classes || ''].filter(Boolean).join(' ');
@@ -617,15 +683,10 @@ function importControlChecks(data, currP) {
   const latest = currP || periods[periods.length - 1] || '-';
   const prodTotalRow = totalRow(data, 'PRODUCTIE', latest) || {};
   const hasProdTotal = !!prodTotalRow[cols.hoofd];
-  const schadeRows = rowsOf(data, 'SCHADE');
-  const schadeTotalRow = schadeRows.length ? (totalRow(data, 'SCHADE', latest) || {}) : {};
-  const hasSchadeTotal = !!schadeTotalRow[cols.hoofd];
-  const spOk = inspectSpPercentages(data).ok;
-  const issueFlags = [periods.length > 0, latest !== '-', hasProdTotal, hasSchadeTotal, spOk];
+  const brokerOk = !!(brokerInfo.number || brokerInfo.name);
+  const issueFlags = [periods.length > 0, latest !== '-', hasProdTotal, brokerOk];
   return { periods, latest, issues: issueFlags.filter(Boolean).length === issueFlags.length ? 0 : issueFlags.filter(v => !v).length };
 }
-
-
 
 function placeLanguageSwitch() {
   const lang = document.querySelector('.languageSwitch');
@@ -638,10 +699,6 @@ function placeLanguageSwitch() {
   } else if (lang.parentElement !== wrap) {
     wrap.insertBefore(lang, wrap.firstElementChild);
   }
-}
-
-function fixedDashboardHeaderHeight() {
-  return 0;
 }
 
 function renderTopCompactBar() {
@@ -750,7 +807,6 @@ $('pdfFile').addEventListener('change', async e => {
     setStatus(msg('error') + err.message, true);
   }
 });
-
 
 function cleanBrokerName(name) {
   return String(name || '')
@@ -1022,10 +1078,7 @@ function adviceDeathCapitalToken(text) {
     return digits.length >= 4 && digits.length <= 7 && value >= 1000 && value <= 10000000;
   }) || '';
 }
-function adviceTypeFromText(text) {
-  const m = String(text || '').match(/\b(VH|NZ|NK|KP)\b/);
-  return m ? m[1] : '';
-}
+
 function adviceSubcategoryFromText(text) {
   const t = String(text || '').trim();
   if (/^(IPT|VAPZ|RIZIV|POZ)\b/i.test(t)) return t.match(/^(IPT|VAPZ|RIZIV|POZ)\b/i)[1].toUpperCase();
@@ -1212,6 +1265,10 @@ async function pdfToAdviceCsvFromDocument(pdf, adviceType = 'Sparen') {
   return csvRows.join('\n');
 }
 
+function isLifePdfTitle(text) {
+  return /\b(?:kerncijfers\s+leven|chiffres\s+clef?s\s+vie)\b/.test(normText(text));
+}
+
 async function pdfToCsv(file) {
   const buffer = await file.arrayBuffer();
   const pdf = await pdfjsLib.getDocument(new Uint8Array(buffer)).promise;
@@ -1222,7 +1279,7 @@ async function pdfToCsv(file) {
     currentDashboardType = 'adviesvergoeding';
     return pdfToAdviceCsvFromDocument(pdf, adviceMatch[1].toLowerCase() === 'overlijden' ? 'Overlijden' : 'Sparen');
   }
-  if (!/Kerncijfers\s+Leven/i.test(firstText)) throw new Error('Dit dashboard verwacht een kerncijfers life PDF of een opvolging adviesvergoeding sparen PDF.');
+  if (!isLifePdfTitle(firstText)) throw new Error('Dit dashboard verwacht een kerncijfers life PDF (NL of FR) of een opvolging adviesvergoeding sparen PDF.');
   currentDashboardType = 'life';
   return pdfToLifeCsvFromDocument(pdf);
 }
@@ -1236,8 +1293,7 @@ $('downloadCsvBtn').addEventListener('click', () => {
   a.click();
 });
 
-
-// ─── PDF export: naam/kantoor + KPI's + samenvatting over 4 A4 landscape-pagina's ─────────
+// ─── Life-afdruk: geselecteerde blokken op staande A4-pagina’s ──────────────
 function cloneForPdf(id) {
   const el = $(id);
   return el ? el.cloneNode(true) : null;
@@ -1267,64 +1323,6 @@ function buildPdfHeader() {
   return header;
 }
 
-function buildPdfPage(summaryItem) {
-  const page = document.createElement('div');
-  page.className = 'pdfExportPage';
-
-  page.appendChild(buildPdfHeader());
-
-  const kpis = cloneForPdf('kpis');
-  if (kpis) page.appendChild(kpis);
-
-  const summaryWrap = document.createElement('div');
-  summaryWrap.className = 'insightSummary card full';
-  const grid = document.createElement('div');
-  grid.className = 'insightGrid';
-  grid.appendChild(summaryItem.cloneNode(true));
-  summaryWrap.appendChild(grid);
-  page.appendChild(summaryWrap);
-
-  const footer = document.createElement('div');
-  footer.className = 'footer-disclaimer';
-  footer.textContent = 'ontwikkeld door Hans von der Crone';
-  page.appendChild(footer);
-
-  return page;
-}
-
-function buildPdfTestPage(summaryItems, includeHeader = false) {
-  const page = document.createElement('div');
-  page.className = 'pdfExportPage pdfTestPage';
-
-  if (includeHeader) page.appendChild(buildPdfHeader());
-
-  const summaryWrap = document.createElement('div');
-  summaryWrap.className = 'insightSummary card full';
-  const grid = document.createElement('div');
-  grid.className = 'insightGrid';
-  summaryItems.forEach(item => grid.appendChild(item.cloneNode(true)));
-  summaryWrap.appendChild(grid);
-  page.appendChild(summaryWrap);
-
-  return page;
-}
-
-function pdfTestSectionLabel(sectionType) {
-  if (sectionType === 'verval') return msg('tabVerval') || 'Verval';
-  if (sectionType === 'transformatie') return msg('tabTransformatie');
-  if (sectionType === 'schade') return msg('tabSchade') || 'Schade';
-  return msg('tabProductie') || 'Productie';
-}
-
-function addPdfTestSectionLabel(clone, sectionType) {
-  const title = clone.querySelector('.catTitle');
-  if (!title || title.querySelector('.pdfTestSectionName')) return;
-  const label = document.createElement('span');
-  label.className = 'pdfTestSectionName';
-  label.textContent = pdfTestSectionLabel(sectionType);
-  title.appendChild(label);
-}
-
 function addPdfTestPageNumbers(root) {
   const pages = Array.from(root.querySelectorAll('.pdfTestPage'));
   pages.forEach((page, idx) => {
@@ -1333,395 +1331,6 @@ function addPdfTestPageNumbers(root) {
     number.className = 'pdfTestPageNumber';
     number.textContent = `${idx + 1} / ${pages.length}`;
     page.appendChild(number);
-  });
-}
-
-function preparePdfTestCategoryBlock(block, sectionType) {
-  const clone = block.cloneNode(true);
-  clone.classList.remove('manualClosed', 'drillOpen');
-  clone.querySelectorAll('.blockExportActions').forEach(el => el.remove());
-  addPdfTestSectionLabel(clone, sectionType);
-
-  if (sectionType === 'verval') {
-    clone.querySelectorAll('.p-18 > .split').forEach(el => el.remove());
-    clone.querySelectorAll('.vervalExtraDetails').forEach(el => el.remove());
-    clone.querySelectorAll('.miniGrid').forEach(grid => {
-      Array.from(grid.children).forEach((child, idx) => {
-        if (!child.classList.contains('miniCard') || ![0, 1].includes(idx)) child.remove();
-      });
-    });
-  }
-
-  if (sectionType === 'schade') {
-    clone.querySelectorAll('.p-18 > .split').forEach(el => el.remove());
-    clone.querySelectorAll('.miniGrid').forEach(grid => {
-      Array.from(grid.children).forEach((child, idx) => {
-        if (!child.classList.contains('miniCard') || ![1, 3, 4].includes(idx)) child.remove();
-      });
-    });
-  }
-
-  return clone;
-}
-
-function buildPdfTestCategoryPage(blocks, sectionType = 'productie') {
-  const page = document.createElement('div');
-  page.className = `pdfExportPage pdfTestPage pdfTestCategoryPage pdfTest${sectionType.charAt(0).toUpperCase() + sectionType.slice(1)}Page`;
-  const grid = document.createElement('div');
-  grid.className = 'pdfTestCategoryGrid';
-  blocks.forEach(block => {
-    const clone = preparePdfTestCategoryBlock(block, sectionType);
-    grid.appendChild(clone);
-  });
-  page.appendChild(grid);
-  return page;
-}
-
-async function buildPdfTestCategoryPages(root, sourceId, sectionType = 'productie') {
-  const source = $(sourceId);
-  const sourceBlocks = source ? Array.from(source.querySelectorAll(':scope > .cat')) : [];
-  const measurePage = buildPdfTestCategoryPage([], sectionType);
-  root.appendChild(measurePage);
-  await new Promise(resolve => requestAnimationFrame(resolve));
-  const grid = measurePage.querySelector('.pdfTestCategoryGrid');
-  const styles = getComputedStyle(grid);
-  const gap = parseFloat(styles.rowGap || styles.gap || '0') || 0;
-  const maxHeight = grid.clientHeight;
-  let currentBlocks = [];
-  let currentHeight = 0;
-  const pages = [];
-
-  sourceBlocks.forEach(block => {
-    const clone = preparePdfTestCategoryBlock(block, sectionType);
-    grid.appendChild(clone);
-    const h = clone.offsetHeight;
-    clone.remove();
-    const needed = currentBlocks.length ? currentHeight + gap + h : h;
-    if (currentBlocks.length && needed > maxHeight) {
-      pages.push(buildPdfTestCategoryPage(currentBlocks, sectionType));
-      currentBlocks = [block];
-      currentHeight = h;
-    } else {
-      currentBlocks.push(block);
-      currentHeight = needed;
-    }
-  });
-  if (currentBlocks.length) pages.push(buildPdfTestCategoryPage(currentBlocks, sectionType));
-  measurePage.remove();
-  pages.forEach(page => root.appendChild(page));
-}
-
-function preparePdfTestDetailCatBlock(block) {
-  const clone = block.cloneNode(true);
-  clone.classList.remove('manualClosed', 'drillOpen');
-  clone.querySelectorAll('.blockExportActions').forEach(el => el.remove());
-  clone.querySelectorAll('[id]').forEach(el => el.removeAttribute('id'));
-  return clone;
-}
-
-function buildPdfTestDetailPage(section, blocks) {
-  const page = document.createElement('div');
-  page.className = 'pdfExportPage pdfTestPage pdfTestDetailPage';
-  const frame = document.createElement('div');
-  frame.className = 'pdfTestDetailFrame';
-  const detail = section.cloneNode(false);
-  detail.removeAttribute('id');
-  const titleRow = section.querySelector(':scope > .detailSectionTitleRow');
-  if (titleRow) {
-    const title = titleRow.cloneNode(true);
-    title.querySelectorAll('.blockExportActions').forEach(el => el.remove());
-    detail.appendChild(title);
-  }
-  blocks.forEach(block => detail.appendChild(preparePdfTestDetailCatBlock(block)));
-  frame.appendChild(detail);
-  page.appendChild(frame);
-  return page;
-}
-
-async function buildPdfTestDetailPages(root) {
-  const sections = Array.from(document.querySelectorAll('#categoryDetails > .detailSectionBlock'));
-  for (const section of sections) {
-    const sourceBlocks = Array.from(section.querySelectorAll(':scope > .cat'));
-    const measurePage = buildPdfTestDetailPage(section, []);
-    root.appendChild(measurePage);
-    await new Promise(resolve => requestAnimationFrame(resolve));
-    const frame = measurePage.querySelector('.pdfTestDetailFrame');
-    const detail = measurePage.querySelector('.detailSectionBlock');
-    const maxHeight = frame.clientHeight;
-    const baseHeight = detail.offsetHeight;
-    let currentBlocks = [];
-    let currentHeight = baseHeight;
-    const pages = [];
-
-    sourceBlocks.forEach(block => {
-      const clone = preparePdfTestDetailCatBlock(block);
-      detail.appendChild(clone);
-      const h = clone.offsetHeight;
-      clone.remove();
-      const needed = currentBlocks.length ? currentHeight + 8 + h : currentHeight + h;
-      if (currentBlocks.length && needed > maxHeight) {
-        pages.push(buildPdfTestDetailPage(section, currentBlocks));
-        currentBlocks = [block];
-        currentHeight = baseHeight + h;
-      } else {
-        currentBlocks.push(block);
-        currentHeight = needed;
-      }
-    });
-
-    if (currentBlocks.length || !sourceBlocks.length) pages.push(buildPdfTestDetailPage(section, currentBlocks));
-    measurePage.remove();
-    pages.forEach(page => root.appendChild(page));
-  }
-}
-
-function pdfDistributionModeTitle(mode) {
-  if (mode === 'portfolio') return currentLang === 'fr' ? 'Répartition prime acquise' : 'Verdeling verdiende premie';
-  const map = {
-    productie: msg('productionPieTitle'),
-    verval: msg('vervalPieTitle'),
-    schade: msg('schadePieTitle')
-  };
-  return map[mode] || '';
-}
-
-function pdfDistributionCenterText(mode) {
-  if (mode === 'portfolio') return msg('verdiendePremie');
-  if (mode === 'verval') return msg('verval');
-  if (mode === 'schade') return msg('schadelast');
-  return msg('productie');
-}
-
-function pdfDistributionTotalLabel(mode) {
-  if (mode === 'portfolio') return currentLang === 'fr' ? 'Total prime acquise' : 'Totale verdiende premie';
-  return pieComparisonTotalLabel(mode);
-}
-
-function pdfDistributionEmptyText(mode) {
-  if (mode === 'portfolio') return msg('portefeuilleEmpty');
-  const emptyKeyByMode = { productie: 'productionPieEmpty', verval: 'vervalPieEmpty', schade: 'schadePieEmpty' };
-  return msg(emptyKeyByMode[mode] || 'productionPieEmpty');
-}
-
-function pdfDistributionItems(data, mode, period) {
-  const raw = mode === 'portfolio'
-    ? getPortfolioPieItems(data, period)
-    : getProductionPieItems(data, period, mode);
-  return raw.map((x, i) => ({ ...x, color: x.color || pieSegmentColor(x.key, i) }));
-}
-
-function pdfDistributionPeriods(data, mode, currP) {
-  if (mode === 'portfolio') {
-    const yearItems = getPortfolioYearItems(data, 'TOTAAL NON LIFE', currP);
-    return { prev: yearItems.length ? yearItems[yearItems.length - 1].period : '', curr: currP };
-  }
-  return { prev: getPreviousFullYearPeriodForPie(data, currP, mode), curr: currP };
-}
-
-function buildPdfDistributionChart(data, mode, period, kind) {
-  const chart = document.createElement('div');
-  chart.className = 'pdfDistributionChart';
-  const titlePrefix = pdfDistributionModeTitle(mode);
-  const periodTitle = kind === 'prev'
-    ? pieComparisonPanelTitle('prevFull', period)
-    : pieComparisonPanelTitle('curr', period);
-  chart.innerHTML = `<h3>${esc(titlePrefix)}<br><span class="small">${esc(periodTitle)}</span></h3>`;
-
-  const canvasWrap = document.createElement('div');
-  canvasWrap.className = 'pdfDistributionCanvasWrap';
-  const canvas = document.createElement('canvas');
-  canvas.width = 520;
-  canvas.height = 340;
-  canvasWrap.appendChild(canvas);
-  chart.appendChild(canvasWrap);
-
-  const total = document.createElement('div');
-  total.className = 'pdfDistributionTotal';
-  chart.appendChild(total);
-
-  const legend = document.createElement('div');
-  legend.className = 'pieLegend pdfDistributionLegend';
-  chart.appendChild(legend);
-
-  const items = pdfDistributionItems(data, mode, period);
-  renderStaticPieLegend(legend, items, pdfDistributionEmptyText(mode));
-  drawPortfolioPie(canvas, period, items, -1, pdfDistributionCenterText(mode));
-  const totalValue = items.reduce((sum, x) => sum + x.value, 0);
-  total.innerHTML = `${esc(pdfDistributionTotalLabel(mode))}<b>${euro.format(totalValue)}</b>`;
-  return chart;
-}
-
-function buildPdfDistributionPage(data, modes, currP, pageTitle) {
-  const page = document.createElement('div');
-  page.className = 'pdfExportPage pdfTestPage pdfDistributionPage';
-  const title = document.createElement('div');
-  title.className = 'pdfDistributionTitle';
-  title.innerHTML = `<h2>${esc(pageTitle)}</h2><span>${esc(currentLang === 'fr' ? 'Répartitions' : 'Verdelingen')}</span>`;
-  page.appendChild(title);
-  const grid = document.createElement('div');
-  grid.className = 'pdfDistributionGrid';
-  modes.forEach(mode => {
-    const periods = pdfDistributionPeriods(data, mode, currP);
-    grid.appendChild(buildPdfDistributionChart(data, mode, periods.prev, 'prev'));
-    grid.appendChild(buildPdfDistributionChart(data, mode, periods.curr, 'curr'));
-  });
-  page.appendChild(grid);
-  return page;
-}
-
-function buildPdfDistributionPages(root, data, currP) {
-  root.appendChild(buildPdfDistributionPage(data, ['productie', 'verval'], currP, currentLang === 'fr' ? 'Répartitions production et chute' : 'Verdelingen productie en verval'));
-  root.appendChild(buildPdfDistributionPage(data, ['schade', 'portfolio'], currP, currentLang === 'fr' ? 'Répartitions sinistres et prime acquise' : 'Verdelingen schade en verdiende premie'));
-}
-
-function buildPdfTestScreenshotSource() {
-  const root = document.createElement('div');
-  root.className = 'pdfTestScreenshotRoot';
-  const content = document.createElement('div');
-  content.className = 'pdfTestScreenshotContent';
-  const dashboardWidth = Math.max(
-    980,
-    Math.round(($('dashboard')?.getBoundingClientRect().width || document.querySelector('.wrap')?.getBoundingClientRect().width || 1180))
-  );
-  root.style.width = `${dashboardWidth}px`;
-  content.style.width = `${dashboardWidth}px`;
-
-  const broker = cloneForPdf('brokerInfo');
-  if (broker) {
-    broker.classList.remove('hidden');
-    content.appendChild(broker);
-  }
-
-  const summary = cloneForPdf('insightSummary');
-  if (summary) {
-    summary.classList.remove('hidden');
-    summary.querySelectorAll('.blockExportActions').forEach(el => el.remove());
-    content.appendChild(summary);
-  }
-
-  root.appendChild(content);
-  return { root, content };
-}
-
-
-function buildPdfDetailPage(sectionSelector) {
-  const page = document.createElement('div');
-  page.className = 'pdfExportPage pdfDetailPage';
-  page.appendChild(buildPdfHeader());
-
-  const src = document.querySelector(sectionSelector);
-  const fit = document.createElement('div');
-  fit.className = 'pdfDetailFit';
-  if (src) {
-    const detail = src.cloneNode(true);
-    detail.querySelectorAll('.drillOpen,.manualClosed').forEach(el => el.classList.remove('drillOpen','manualClosed'));
-    fit.appendChild(detail);
-  } else {
-    const empty = document.createElement('div');
-    empty.className = 'detailSectionBlock';
-    empty.innerHTML = `<h3 class="detailSectionTitle">Detail per categorie</h3><div class="note">Geen detailgegevens gevonden.</div>`;
-    fit.appendChild(empty);
-  }
-  page.appendChild(fit);
-
-  const footer = document.createElement('div');
-  footer.className = 'footer-disclaimer';
-  footer.textContent = 'ontwikkeld door Hans von der Crone';
-  page.appendChild(footer);
-
-  return page;
-}
-
-
-function copyCanvasToImageInClone(clone, sourceCanvasId, targetCanvasId) {
-  const source = document.getElementById(sourceCanvasId);
-  const target = clone.querySelector('#' + targetCanvasId);
-  if (!source || !target) return;
-  const img = document.createElement('img');
-  img.src = source.toDataURL('image/png');
-  img.alt = '';
-  img.width = source.width;
-  img.height = source.height;
-  target.replaceWith(img);
-}
-
-function buildPdfPortfolioPiePage(panelId, canvasId, titleText) {
-  const page = document.createElement('div');
-  page.className = 'pdfExportPage pdfPortfolioPiePage';
-  page.appendChild(buildPdfHeader());
-
-  const fit = document.createElement('div');
-  fit.className = 'pdfPortfolioPieFit';
-  const card = document.createElement('div');
-  card.className = 'portfolioPieCard';
-  const header = document.createElement('div');
-  header.className = 'portfolioPieHeader';
-  header.innerHTML = `<h2>${esc(currentLang === 'fr' ? 'Répartition prime acquise' : 'Verdeling verdiende premie')}</h2><p class="sub"></p>`;
-  card.appendChild(header);
-
-  const srcPanel = document.getElementById(panelId);
-  if (srcPanel) {
-    const panel = srcPanel.cloneNode(true);
-    panel.querySelectorAll('[id]').forEach(el => el.removeAttribute('id'));
-    const canvas = panel.querySelector('canvas');
-    if (canvas) {
-      const source = document.getElementById(canvasId);
-      if (source) {
-        const img = document.createElement('img');
-        img.src = source.toDataURL('image/png');
-        img.alt = '';
-        img.width = source.width;
-        img.height = source.height;
-        canvas.replaceWith(img);
-      }
-    }
-    card.appendChild(panel);
-  } else {
-    card.innerHTML += `<div class="portfolioPiePanel"><h3>${esc(titleText || '')}</h3><div class="portfolioNoData">${msg('portefeuilleEmpty')}</div></div>`;
-  }
-  fit.appendChild(card);
-  page.appendChild(fit);
-
-  const footer = document.createElement('div');
-  footer.className = 'footer-disclaimer';
-  footer.textContent = 'ontwikkeld door Hans von der Crone';
-  page.appendChild(footer);
-  return page;
-}
-
-function fitPdfPortfolioPiePages(root) {
-  root.querySelectorAll('.pdfPortfolioPiePage').forEach(page => {
-    const fit = page.querySelector('.pdfPortfolioPieFit');
-    if (!fit) return;
-    fit.style.transform = '';
-    fit.style.width = '100%';
-    const available = page.clientHeight
-      - Array.from(page.children).reduce((sum, child) => child === fit ? sum : sum + child.offsetHeight, 0)
-      - 22;
-    const needed = fit.scrollHeight;
-    if (available > 0 && needed > available) {
-      const scale = Math.max(0.86, Math.min(1, available / needed));
-      fit.style.transform = `scale(${scale})`;
-      fit.style.width = `${100 / scale}%`;
-    }
-  });
-}
-
-function fitPdfDetailPages(root) {
-  root.querySelectorAll('.pdfDetailPage').forEach(page => {
-    const fit = page.querySelector('.pdfDetailFit');
-    if (!fit) return;
-    fit.style.transform = '';
-    fit.style.width = '100%';
-    const available = page.clientHeight
-      - Array.from(page.children).reduce((sum, child) => child === fit ? sum : sum + child.offsetHeight, 0)
-      - 36;
-    const needed = fit.scrollHeight;
-    if (available > 0 && needed > available) {
-      const scale = Math.max(0.92, Math.min(1, available / needed));
-      fit.style.transform = `scale(${scale})`;
-      fit.style.width = `${100 / scale}%`;
-    }
   });
 }
 
@@ -1823,7 +1432,7 @@ function lifePdfSummaryKpis() {
   kpis.className = 'kpis pdfLifeKpis';
   kpis.innerHTML = (lastKpiContext?.summary || []).map(item => {
     const delta = yoy(item.o, item.v);
-    return '<div class="kpi"><div class="label">' + esc(item.l) + '<br>ULT. ' + esc(dashboardCurrentPeriod) + '</div><div class="value">' + fmt(item.v,item.type) + '</div><div class="delta ' + cls(delta, item.invert) + '">' + signedPct(delta) + ' ' + msg('vs') + ' ' + esc(dashboardPreviousPeriod) + '</div>' + lifeKpiComparisonHtml(item,dashboardPreviousPeriod,dashboardCurrentPeriod) + '</div>';
+    return '<div class="kpi"><div class="label">' + escLabel(item.l) + '<br>ULT. ' + esc(dashboardCurrentPeriod) + '</div><div class="value">' + fmt(item.v,item.type) + '</div><div class="delta ' + cls(delta, item.invert) + '">' + signedPct(delta) + ' ' + msg('vs') + ' ' + esc(dashboardPreviousPeriod) + '</div>' + lifeKpiComparisonHtml(item,dashboardPreviousPeriod,dashboardCurrentPeriod) + '</div>';
   }).join('');
   return kpis;
 }
@@ -1932,14 +1541,7 @@ function moveDashboardToolbarToActiveSection() {
   $('drillToggleBtn').classList.toggle('hidden', isSummary);
   $('previousYearsControl').classList.toggle('hidden', !['samenvatting', 'productie', 'verval', 'transformatie', 'portefeuille'].includes(activeSection?.id));
 }
-function scrollActiveTabToTop() {
-  // Bij tabwissel terug naar het begin van de actieve tabpagina, zonder fixed scroll-under header.
-  const activeSection = document.querySelector('#dashboard .section.active');
-  const target = activeSection || document.getElementById('dashboard');
-  if (!target) return;
-  const y = Math.max(0, target.getBoundingClientRect().top + window.scrollY - 12);
-  window.scrollTo({ top: y, behavior: 'smooth' });
-}
+
 function motionIsReduced() {
   return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 }
@@ -1970,7 +1572,7 @@ setActiveTabColor(document.querySelector('.tab.active') || document.getElementBy
 placeLanguageSwitch();
 moveDashboardToolbarToActiveSection();
 
-// ─── Dashboard logica (volledig uit dashboard.html) ───────────────────────────
+// ─── Life-gegevensmodel en berekeningen ────────────────────────────────────
 const cols = {
   type: 'Type', hoofd: 'Hoofdcategorie', sub: 'Subcategorie', periode: 'Periode',
   prodAantal: 'Aantal Prod', prodPremie: 'Premie Prod',
@@ -2158,12 +1760,7 @@ function totalRow(data, type, periode) {
   const hasNumericData = r => r && r._cells && r._cells.slice(start).some(x => String(x ?? '').trim() !== '' && n(x) !== 0);
   return all.slice().reverse().find(hasNumericData) || all[all.length - 1] || {};
 }
-function totalNumber(row, field, cellIndex) {
-  const byName = n(row[field]);
-  if (byName !== 0) return byName;
-  if (row && row._cells && row._cells[cellIndex] !== undefined) return n(row._cells[cellIndex]);
-  return byName;
-}
+
 function yoy(oldv, newv) { return oldv ? ((newv - oldv) / Math.abs(oldv)) * 100 : (newv ? 100 : 0) }
 function ppDelta(oldv, newv) { return n(newv) - n(oldv) }
 function cls(v, invert = false) { const x = invert ? -v : v; return x > 0 ? 'pos' : x < 0 ? 'neg' : 'neu' }
@@ -2187,19 +1784,6 @@ function historyComparisonHtml(delta, invert) {
   return `<span class="historyComparison ${cls(delta, invert)}"><svg viewBox="0 0 12 24" aria-hidden="true"><path d="M2 22C12 22 12 2 2 2m3 4L2 2l4-1"/></svg>${delta >= 0 ? '+' : ''}${pct.format(delta)}%</span>`;
 }
 
-function progressBarCompareHtml(labels, a, b, la, lb, type, options = {}) {
-  const max = Math.max(1, ...a.map(x => Math.abs(x || 0)), ...b.map(x => Math.abs(x || 0)));
-  const line = (period, value, periodClass, delta = '') => {
-    const v = Number(value) || 0;
-    const width = Math.min(50, Math.abs(v) / max * 50);
-    const side = v >= 0 ? 'pos' : 'neg';
-    return `<div class="barline progressLine"><div class="period">${period}</div><div class="progressTrack"><div class="progressFill ${side} ${periodClass}" style="width:${width}%"></div></div><div class="barDeltaSlot">${delta}</div><div class="value ${side}">${fmt(v, type)}</div></div>`;
-  };
-  return `<div class="bars">` + labels.map((l, i) => {
-    const delta = options.showDelta ? barDeltaTextHtml(a[i], b[i], !!options.invertDelta) : '';
-    return `<div class="barrow"><div class="barlabel">${l}</div><div class="bararea">${line(la, a[i], 'prevPeriod')}${line(lb, b[i], 'currPeriod', delta)}</div></div>`;
-  }).join('') + `</div>`;
-}
 function esc(s) { return String(s ?? '').replace(/[&<>"]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[m])) }
 function displayLabel(s) {
   const value = String(s ?? '');
@@ -2219,8 +1803,7 @@ function displayLabel(s) {
     .replace(/Auto Non Flottes/gi, I18N[currentLang].labels['Auto Niet Vloten']);
 }
 function escLabel(s) { return esc(displayLabel(s)); }
-function nonTotalRows(data, type) { return rowsOf(data, type).filter(r => !isTotalNonLife(r) && String(r[cols.hoofd] || '').trim().toUpperCase() !== 'TOTAAL NON LIFE' && String(r[cols.sub] || '').trim().toUpperCase() !== 'TOTAAL NON LIFE') }
-function groupedCats(data, type, period) { return [...new Set(nonTotalRows(data, type).filter(r => r[cols.periode] === period).map(r => r[cols.hoofd]).filter(Boolean))] }
+
 function orderedSubs(catRows, cat) { const subAll = [...new Set(catRows.map(r => r[cols.sub]).filter(Boolean))]; const subs = subAll.filter(s => s !== cat); if (!subs.length) return [cat]; return [cat, ...subs]; }
 function categoryRowLabelHtml(s, cat, hasSubs = false) {
   const isMain = s === cat;
@@ -2255,17 +1838,6 @@ function catTitleHtml(cat) {
 }
 
 function totalBlock(html) { return String(html).replace('class="cat"', 'class="cat totalNonLife"') }
-function totalRowsFor(data, type, prevP, currP) {
-  const rows = [totalRow(data, type, prevP), totalRow(data, type, currP)]
-    .filter(r => r && r[cols.hoofd]);
-  const seen = new Set();
-  return rows.filter(r => {
-    const key = `${r[cols.type]}|${r[cols.hoofd]}|${r[cols.sub]}|${r[cols.periode]}|${(r._cells || []).join('|')}`;
-    if (seen.has(key)) return false;
-    seen.add(key);
-    return true;
-  });
-}
 
 function importCheckHtml(label, value, okState, detailHtml = '') {
   const stateClass = okState === true ? 'ok' : (okState === false ? 'warn' : 'neu');
@@ -2307,7 +1879,7 @@ function inspectSpPercentages(data) {
   if (!values.length) return { ok: false, issues: ['Geen numerieke S/P-percentages gevonden in de schade-rijen.'] };
   return { ok: issues.length === 0, issues };
 }
-function validateSpPercentages(data) { return inspectSpPercentages(data).ok; }
+
 function renderImportControl(data, currP) {
   const box = $('importControl');
   if (!box || !data) return;
@@ -2390,27 +1962,7 @@ function adviceAggregateRows(rows, groupFields) {
   });
   return [...map.values()].sort((a, b) => groupFields.map(f => String(a[f] || '').localeCompare(String(b[f] || ''), 'nl')).find(v => v) || 0);
 }
-function adviceAggregateTotalRows(rows, groupFields) {
-  const map = new Map();
-  const moneyRound = v => Math.round((v + Number.EPSILON) * 100) / 100;
-  rows.forEach(r => {
-    const key = groupFields.map(f => String(r[f] || '')).join('|');
-    if (!map.has(key)) {
-      const base = Object.fromEntries(groupFields.map(f => [f, r[f] || '']));
-      map.set(key, { ...base, AdviesbasisOngewogen:0, AdviesbasisGewogen:0, KapitaalOverlijden:0, Adviesvergoeding:0 });
-    }
-    const x = map.get(key);
-    x.AdviesbasisOngewogen += n(r.AdviesbasisOngewogen);
-    x.AdviesbasisGewogen += n(r.AdviesbasisGewogen);
-    x.KapitaalOverlijden += n(r.KapitaalOverlijden);
-    x.Adviesvergoeding += n(r.Adviesvergoeding);
-    x.AdviesbasisOngewogen = moneyRound(x.AdviesbasisOngewogen);
-    x.AdviesbasisGewogen = moneyRound(x.AdviesbasisGewogen);
-    x.KapitaalOverlijden = moneyRound(x.KapitaalOverlijden);
-    x.Adviesvergoeding = moneyRound(x.Adviesvergoeding);
-  });
-  return [...map.values()].sort((a, b) => groupFields.map(f => String(a[f] || '').localeCompare(String(b[f] || ''), 'nl')).find(v => v) || 0);
-}
+
 function adviceTableHtml(rows, columns, emptyText = 'Geen detailregels gevonden.') {
   if (!rows.length) return `<div class="note">${esc(emptyText)}</div>`;
   const hasWidths = columns.some(c => c.width);
@@ -2422,15 +1974,7 @@ function adviceTableHtml(rows, columns, emptyText = 'Geen detailregels gevonden.
   }).join('');
   return `<table class="summary-table${hasWidths ? ' adviceFixedTable' : ''}">${colgroup}<thead>${head}</thead><tbody>${body}</tbody></table>`;
 }
-function adviceAmountColumns(prefix = []) {
-  return [
-    ...prefix,
-    { label:'Aantal', value:r => num.format(n(r.Aantal)) },
-    { label:'Adviesbasis ongewogen', value:r => euro.format(n(r.AdviesbasisOngewogen)) },
-    { label:'Adviesbasis gewogen', value:r => euro.format(n(r.AdviesbasisGewogen)) },
-    { label:'Adviesvergoeding', value:r => euro.format(n(r.Adviesvergoeding)) }
-  ];
-}
+
 function advicePiePath(cx, cy, r, start, end) {
   const sx = cx + r * Math.cos(start), sy = cy + r * Math.sin(start);
   const ex = cx + r * Math.cos(end), ey = cy + r * Math.sin(end);
@@ -2547,18 +2091,7 @@ function cleanAdviceProducerName(name, prodnr) {
   out = out.replace(/^\s*Prodnr\.?\s*/i, '').trim();
   return out;
 }
-function adviceTypeCounts(rows) {
-  const counts = { VH:0, NZ:0, NK:0, KP:0 };
-  rows.forEach(r => { if (counts[String(r.Type || '').trim()] != null) counts[String(r.Type || '').trim()] += 1; });
-  return counts;
-}
-function adviceTypeCountsHtml(rows) {
-  const c = adviceTypeCounts(rows);
-  return `<div class="adviceTypeCounts">${['VH','NZ','NK','KP'].map(t => `<span class="adviceTypeChip">${t}: ${num.format(c[t])}</span>`).join('')}</div>`;
-}
-function adviceMetricSummary(rows, fields = ['Pijler']) {
-  return adviceAggregateRows(rows, fields)[0] || { Aantal:0, AdviesbasisOngewogen:0, AdviesbasisGewogen:0, Adviesvergoeding:0 };
-}
+
 function renderAdviceKpis(rows) {
   const detailRows = (rows || []).filter(r => String(r.Niveau || '').trim() === 'Detail');
   const isDeath = String(detailRows[0]?.AdviesType || '').toLowerCase() === 'overlijden';
@@ -2584,22 +2117,7 @@ function renderAdviceKpis(rows) {
     `<div class="kpi adviceComponentKpi"><div class="label">4e pijler</div><div class="value">${euro.format(n(pijlerTotal('Vierde Pijler').AdviesbasisGewogen))}</div><div class="delta neu">Gewogen adviesbasis</div></div>`
   ].join('');
 }
-function adviceHierarchyHtml(rows, title) {
-  if (!rows.length) return `<div class="note">Geen adviesvergoeding-detailregels gevonden.</div>`;
-  const order = ['Tweede Pijler','Derde Pijler','Vierde Pijler'];
-  const pijlers = [...new Set(rows.map(r => r.Pijler).filter(Boolean))]
-    .sort((a,b) => (order.indexOf(a) < 0 ? 99 : order.indexOf(a)) - (order.indexOf(b) < 0 ? 99 : order.indexOf(b)) || a.localeCompare(b, 'nl'));
-  return pijlers.map(pijler => {
-    const pRows = rows.filter(r => r.Pijler === pijler);
-    const pTotal = adviceAggregateRows(pRows, ['Pijler'])[0] || {};
-    const cats = adviceAggregateRows(pRows, ['Pijler','Subcategorie']);
-    const catBody = cats.map(cat => {
-      const cRows = pRows.filter(r => r.Subcategorie === cat.Subcategorie);
-      return `<tr><td>${esc(cat.Subcategorie)}</td><td>${num.format(n(cat.Aantal))}</td><td>${euro.format(n(cat.AdviesbasisOngewogen))}</td><td>${euro.format(n(cat.AdviesbasisGewogen))}</td><td>${euro.format(n(cat.Adviesvergoeding))}</td><td>${adviceTypeCountsHtml(cRows)}</td></tr>`;
-    }).join('');
-    return `<div class="cat adviceCat"><div class="catHead"><div class="catTitle">${esc(pijler)}</div><div class="small">${esc(title || '')}</div></div><div class="p-18"><div class="split"><div class="metric"><b>Adviesbasis ongewogen</b><span class="metric-val">${euro.format(n(pTotal.AdviesbasisOngewogen))}</span></div><div class="metric"><b>Adviesbasis gewogen</b><span class="metric-val">${euro.format(n(pTotal.AdviesbasisGewogen))}</span></div><div class="metric"><b>Adviesvergoeding</b><span class="metric-val">${euro.format(n(pTotal.Adviesvergoeding))}</span></div></div><table class="summary-table"><thead><tr><th>Categorie</th><th>Aantal</th><th>Adviesbasis ongewogen</th><th>Adviesbasis gewogen</th><th>Adviesvergoeding</th><th>Types</th></tr></thead><tbody>${catBody}</tbody></table></div></div>`;
-  }).join('');
-}
+
 function showAdviceTab(tab) {
   const scrollY = window.scrollY;
   const insightItem = document.querySelector('#insightSummary .insightItem');
@@ -2646,54 +2164,6 @@ document.addEventListener('mouseout', e => {
   const tip = document.getElementById('adviceHoverTip');
   if (tip) tip.style.display = 'none';
 });
-function renderAdviceProducerPanel(prodnr) {
-  const panel = $('adviceProducerContent');
-  if (!panel || !lastData) return;
-  const rows = adviceDetailRows(lastData).filter(r => String(r.Prodnr || '') === String(prodnr || ''));
-  const first = rows[0] || {};
-  const name = cleanAdviceProducerName(first.ProducentNaam, prodnr);
-  const title = `${prodnr || '-'}${name ? ' ' + name : ''}`;
-  panel.innerHTML = `${adviceExtractedAmountsHtml(rows, title)}`;
-}
-
-function buildAdviceDashboard(data) {
-  const first = data[0] || {};
-  const adviceType = first.AdviesType || 'Sparen';
-  const groupTotal = adviceTotalGroup(data);
-  const producerTotals = adviceProducerTotals(data);
-  const producers = [...new Set(data.map(r => r.Prodnr).filter(Boolean))];
-  brokerInfo = {
-    label: String(first.GroepsType || '').toLowerCase().includes('groep') ? 'groepsnummer' : 'koepelnummer',
-    number: first.Groepsnummer || '',
-    name: first.Naam || ''
-  };
-  dashboardPreviousPeriod = null;
-  dashboardCurrentPeriod = null;
-  lastKpiContext = null;
-  $('dashboard').classList.remove('hidden');
-  setDashboardKind('adviesvergoeding');
-  renderBrokerInfo();
-  $('kpis').innerHTML = [
-    `<div class="kpi"><div class="label">Dashboard</div><div class="value">Adviesvergoeding</div><div class="delta neu">${esc(adviceType)}</div></div>`,
-    `<div class="kpi"><div class="label">${esc(first.GroepsType || 'Groepsnummer')}</div><div class="value">${esc(first.Groepsnummer || '-')}</div><div class="delta neu">${esc(first.Naam || '')}</div></div>`,
-    `<div class="kpi"><div class="label">Producenten</div><div class="value">${num.format(producers.length)}</div><div class="delta neu">Prodnrs gevonden</div></div>`,
-    `<div class="kpi"><div class="label">Adviesbasis gewogen</div><div class="value">${euro.format(n(groupTotal.AdviesbasisGewogen))}</div><div class="delta neu">Totaal document</div></div>`,
-    `<div class="kpi"><div class="label">Adviesvergoeding</div><div class="value">${euro.format(n(groupTotal.Adviesvergoeding))}</div><div class="delta neu">Totaal document</div></div>`
-  ].join('');
-  const producerRows = producerTotals.map(r => `<tr><td>${esc(r.Prodnr)}</td><td>${esc(r.ProducentNaam)}</td><td>${euro.format(n(r.AdviesbasisGewogen))}</td><td>${euro.format(n(r.Adviesvergoeding))}</td></tr>`).join('');
-  const pijlerRows = data.filter(r => r.Niveau === 'Pijler').map(r => `<tr><td>${esc(r.Prodnr)}</td><td>${esc(r.Pijler)}</td><td>${euro.format(n(r.AdviesbasisGewogen))}</td><td>${euro.format(n(r.Adviesvergoeding))}</td></tr>`).join('');
-  const metaHtml = [
-    first.TypePartner ? `<li><b>Type partner</b>: ${esc(first.TypePartner)}</li>` : '',
-    first.AMLife ? `<li><b>AM Life</b>: ${esc(first.AMLife)}</li>` : '',
-    first.AMNonLife ? `<li><b>AM Non-Life</b>: ${esc(first.AMNonLife)}</li>` : '',
-    first.EBS ? `<li><b>EBS</b>: ${esc(first.EBS)}</li>` : '',
-    first.CDR ? `<li><b>CDR</b>: ${esc(first.CDR)}</li>` : ''
-  ].filter(Boolean).join('');
-  $('insightSummary').classList.remove('hidden');
-  $('insightSummary').innerHTML = `<div id="insightSummaryExport" class="insightSummaryExport"><div class="insightGrid"><div class="insightItem"><div class="insightItemHeader"><div class="insightItemIcon">💼</div><h3>Adviesvergoeding ${esc(adviceType)}</h3></div><p>Deze PDF werd herkend als opvolging adviesvergoeding ${esc(adviceType).toLowerCase()}. Dit voorlopige dashboard toont enkel de kerninfo; verdere KPI's en analyses kunnen we later toevoegen.</p><ul>${metaHtml}</ul><div class="miniCard"><h3>Totaal per prodnr</h3><table class="summary-table"><thead><tr><th>Prodnr.</th><th>Naam</th><th>Adviesbasis gewogen</th><th>Adviesvergoeding</th></tr></thead><tbody>${producerRows}</tbody></table></div><div class="miniCard"><h3>Totaal per pijler</h3><table class="summary-table"><thead><tr><th>Prodnr.</th><th>Pijler</th><th>Adviesbasis gewogen</th><th>Adviesvergoeding</th></tr></thead><tbody>${pijlerRows}</tbody></table></div></div></div></div>`;
-  formatDisplayedPeriods();
-  triggerMotionRefresh($('samenvatting'));
-}
 
 function buildAdviceDashboard(data) {
   const first = data[0] || {};
@@ -2780,705 +2250,9 @@ function build(data) {
   triggerMotionRefresh();
 }
 
-
-function getCategoryValue(data, type, key, period, field, cellIndex) {
-  if (key === 'TOTAAL NON LIFE') return totalNumber(totalRow(data, type, period), field, cellIndex);
-  const aliases = portfolioCategoryAliases(key).map(normKey);
-  const sourceRows = rowsOfPeriod(data, type, period);
-  const candidates = sourceRows.filter(r => aliases.includes(normKey(r[cols.sub])) || aliases.includes(normKey(r[cols.hoofd])));
-  const withData = candidates.slice().reverse().find(r => n(r[field]) !== 0 || (r._cells && cellIndex != null && n(r._cells[cellIndex]) !== 0));
-  const row = withData || candidates[candidates.length - 1] || {};
-  const byName = n(row[field]);
-  if (byName !== 0) return byName;
-  if (row && row._cells && cellIndex != null && row._cells[cellIndex] !== undefined) return n(row._cells[cellIndex]);
-  return 0;
-}
 function signedPct(d) { return `${d >= 0 ? '+' : ''}${pct.format(d)}%`; }
-function directionWord(d, lowerBetter = false) {
-  if (Math.abs(d) < 0.05) return currentLang === 'fr' ? 'stable' : 'stabiel';
-  if (currentLang === 'fr') return d > 0 ? (lowerBetter ? 'hausse (défavorable)' : 'hausse') : (lowerBetter ? 'baisse (favorable)' : 'baisse');
-  return d > 0 ? (lowerBetter ? 'stijging (ongunstig)' : 'stijging') : (lowerBetter ? 'daling (positief)' : 'daling');
-}
-function trendList(data, type, field, cellIndex, prevP, currP, keys, valueType = 'money') {
-  return keys.map(key => {
-    const oldVal = getCategoryValue(data, type, key, prevP, field, cellIndex);
-    const newVal = getCategoryValue(data, type, key, currP, field, cellIndex);
-    return { key, label: portfolioCategoryLabel(key), oldVal, newVal, d: valueType === 'pct' ? ppDelta(oldVal, newVal) : yoy(oldVal, newVal), absChange: newVal - oldVal, ppChange: newVal - oldVal, valueType };
-  }).filter(x => x.oldVal !== 0 || x.newVal !== 0);
-}
-function addEarnedPremiumContext(data, items, currP) {
-  const totalEarned = Math.abs(getCategoryValue(data, 'SCHADE', 'TOTAAL NON LIFE', currP, cols.verdiend, 15));
-  return items.map(item => {
-    const earnedPremium = Math.abs(getCategoryValue(data, 'SCHADE', item.key, currP, cols.verdiend, 15));
-    const earnedShare = totalEarned ? earnedPremium / totalEarned : 0;
-    return { ...item, earnedPremium, earnedShare };
-  });
-}
-function insightValueFmt(x) {
-  return x.valueType === 'pct' ? `${pct.format(x.oldVal)}% → ${pct.format(x.newVal)}%` : `${euro.format(x.oldVal)} → ${euro.format(x.newVal)}`;
-}
 
-function mainCategoryLabel(key) {
-  const nl = { Auto:'Auto', Particulieren:'Particulieren', Ondernemingen:'Ondernemingen', Arbeidsongevallen:'Arbeidsongevallen', Rechtsbijstand:'Rechtsbijstand' };
-  const fr = { Auto:'Auto', Particulieren:'Particuliers', Ondernemingen:'Entreprises', Arbeidsongevallen:'Accidents de travail', Rechtsbijstand:'Protection juridique' };
-  return (currentLang === 'fr' ? fr : nl)[key] || displayLabel(key);
-}
-function insightMainItems(data, type, field, cellIndex, prevP, currP, keys, valueType = 'money') {
-  return keys.map(key => {
-    const oldVal = getCategoryValue(data, type, key, prevP, field, cellIndex);
-    const newVal = getCategoryValue(data, type, key, currP, field, cellIndex);
-    return { key, label: mainCategoryLabel(key), oldVal, newVal, d: valueType === 'pct' ? ppDelta(oldVal, newVal) : yoy(oldVal, newVal), valueType };
-  }).filter(x => x.oldVal !== 0 || x.newVal !== 0);
-}
-function joinInsightParts(parts) {
-  if (!parts.length) return '';
-  if (parts.length === 1) return parts[0];
-  return parts.slice(0, -1).join(', ') + (currentLang === 'fr' ? ' et ' : ' en ') + parts[parts.length - 1];
-}
-function moneyOrPctValue(x) {
-  return x.valueType === 'pct' ? `${pct.format(x.oldVal)}% → ${pct.format(x.newVal)}%` : `${signedPct(x.d)}`;
-}
-function mainCategorySummary(items, opts = {}) {
-  const threshold = opts.threshold ?? (opts.valueType === 'pct' ? 3 : 5);
-  const valueType = opts.valueType || 'money';
-  const metric = opts.metric || '';
-  const ups = items.filter(x => x.d >= threshold).sort((a,b) => b.d - a.d).slice(0,3);
-  const downs = items.filter(x => x.d <= -threshold).sort((a,b) => a.d - b.d).slice(0,3);
-  const fmt = x => `<span class="insightStrong">${esc(x.label)}</span> (${moneyOrPctValue({...x, valueType})})`;
-  if (currentLang === 'fr') {
-    const upTxt = ups.length ? `une hausse ${metric ? 'du ' + metric + ' ' : ''}en ${joinInsightParts(ups.map(fmt))}` : '';
-    const downTxt = downs.length ? `une baisse ${metric ? 'du ' + metric + ' ' : ''}en ${joinInsightParts(downs.map(fmt))}` : '';
-    if (upTxt && downTxt) return `Par branche principale, on observe ${upTxt}, ainsi que ${downTxt}.`;
-    if (upTxt) return `Par branche principale, on observe surtout ${upTxt}.`;
-    if (downTxt) return `Par branche principale, on observe surtout ${downTxt}.`;
-    return `Par branche principale, les évolutions restent limitées.`;
-  }
-  const upTxt = ups.length ? `een stijging ${metric ? 'van ' + metric + ' ' : ''}in ${joinInsightParts(ups.map(fmt))}` : '';
-  const downTxt = downs.length ? `een daling ${metric ? 'van ' + metric + ' ' : ''}in ${joinInsightParts(downs.map(fmt))}` : '';
-  if (upTxt && downTxt) return `Op hoofdtakniveau zien we ${upTxt}, naast ${downTxt}.`;
-  if (upTxt) return `Op hoofdtakniveau zien we vooral ${upTxt}.`;
-  if (downTxt) return `Op hoofdtakniveau zien we vooral ${downTxt}.`;
-  return `Op hoofdtakniveau blijven de bewegingen eerder beperkt.`;
-}
-function detailHighlights(items, opts = {}) {
-  const threshold = opts.threshold ?? (opts.valueType === 'pct' ? 3 : 5);
-  const valueType = opts.valueType || 'money';
-  const ups = items.filter(x => x.d >= threshold).sort((a,b) => b.d - a.d).slice(0,2);
-  const downs = items.filter(x => x.d <= -threshold).sort((a,b) => a.d - b.d).slice(0,2);
-  const fmt = x => `<span class="insightStrong">${esc(x.label)}</span> (${valueType === 'pct' ? insightValueFmt(x) : signedPct(x.d)})`;
-  if (currentLang === 'fr') {
-    const parts = [];
-    if (ups.length) parts.push(`hausses marquées: ${joinInsightParts(ups.map(fmt))}`);
-    if (downs.length) parts.push(`baisses marquées: ${joinInsightParts(downs.map(fmt))}`);
-    return parts.length ? `Au niveau détaillé, ${parts.join('; ')}.` : `Au niveau détaillé, aucune variation très marquée ne ressort.`;
-  }
-  const parts = [];
-  if (ups.length) parts.push(`duidelijke stijgingen: ${joinInsightParts(ups.map(fmt))}`);
-  if (downs.length) parts.push(`duidelijke dalingen: ${joinInsightParts(downs.map(fmt))}`);
-  return parts.length ? `In de detailtakken vallen vooral ${parts.join('; ')} op.` : `In de detailtakken zijn er geen zeer uitgesproken uitschieters.`;
-}
-function categoryFindings(items, opts = {}) {
-  const threshold = opts.threshold ?? (opts.valueType === 'pct' ? 3 : 5);
-  const valueType = opts.valueType || 'money';
-  const metric = opts.metric || '';
-  const ups = items.filter(x => x.d >= threshold).sort((a,b) => b.d - a.d).slice(0,3);
-  const downs = items.filter(x => x.d <= -threshold).sort((a,b) => a.d - b.d).slice(0,3);
-  const fmt = x => `<span class="insightStrong">${esc(x.label)}</span> (${valueType === 'pct' ? insightValueFmt(x) : signedPct(x.d)})`;
-  if (currentLang === 'fr') {
-    const parts = [];
-    if (ups.length) parts.push(`Nous observons une hausse ${metric ? 'du ' + metric + ' ' : ''}dans les branches suivantes : ${joinInsightParts(ups.map(fmt))}.`);
-    if (downs.length) parts.push(`Nous observons une baisse ${metric ? 'du ' + metric + ' ' : ''}dans les branches suivantes : ${joinInsightParts(downs.map(fmt))}.`);
-    return parts.length ? parts.join(' ') : `Par branche, les évolutions restent limitées.`;
-  }
-  const parts = [];
-  if (ups.length) parts.push(`We zien een stijging in ${metric} bij ${joinInsightParts(ups.map(fmt))}.`);
-  if (downs.length) parts.push(`Er is een daling in ${metric} in volgende takken: ${joinInsightParts(downs.map(fmt))}.`);
-  return parts.length ? parts.join(' ') : `Per tak blijven de bewegingen eerder beperkt.`;
-}
-function topMovementItems(items, opts = {}) {
-  const lowerBetter = !!opts.lowerBetter;
-  const threshold = opts.threshold ?? (opts.valueType === 'pct' ? 3 : 5);
-  const mode = opts.mode || 'up';
-  const filtered = materialItems(items, opts).filter(x => {
-    const movement = movementMagnitude(x, opts);
-    if (mode === 'good') return lowerBetter ? movement <= -threshold : movement >= threshold;
-    if (mode === 'bad') return lowerBetter ? movement >= threshold : movement <= -threshold;
-    return mode === 'down' ? movement <= -threshold : movement >= threshold;
-  });
-  const hasEarnedPremium = items.some(x => (x.earnedPremium || 0) > 0);
-  return filtered
-    .sort((a, b) => {
-      const score = x => Math.abs(x.absChange ?? (x.newVal - x.oldVal)) * (hasEarnedPremium ? Math.max(x.earnedShare || 0, 0.01) : 1);
-      return score(b) - score(a);
-    })
-    .slice(0, opts.limit ?? 2);
-}
-function movementMagnitude(x, opts = {}) {
-  return opts.diffMode === 'pp' ? (x.ppChange ?? (x.newVal - x.oldVal)) : x.d;
-}
-function materialItems(items, opts = {}) {
-  const withoutOther = opts.excludeOther === false ? items : items.filter(x => !isOtherCategory(x.key) && !isOtherCategory(x.label));
-  if (opts.disableMaterial) return withoutOther;
-  const hasEarnedPremium = items.some(x => (x.earnedPremium || 0) > 0);
-  const minShare = opts.minShare ?? 0.02;
-  const topEarned = new Set(items
-    .filter(x => (x.earnedPremium || 0) > 0)
-    .sort((a, b) => (b.earnedPremium || 0) - (a.earnedPremium || 0))
-    .slice(0, opts.materialLimit ?? 6)
-    .map(x => x.key));
-  return withoutOther.filter(x => !hasEarnedPremium || (x.earnedShare || 0) >= minShare || topEarned.has(x.key));
-}
-function isOtherCategory(value) {
-  const k = String(value || '').toLowerCase();
-  return k.includes('overige') || k.includes('autres') || k.includes('other');
-}
-function movementText(x, valueType = 'money') {
-  if (valueType === 'pct') {
-    return `<span class="insightStrong">${esc(x.label)}</span> (${pct.format(x.oldVal)}% > ${pct.format(x.newVal)}%)`;
-  }
-  return `<span class="insightStrong">${esc(x.label)}</span> (${signedPct(x.d)})`;
-}
-function movementNames(items, valueType = 'money') {
-  return joinInsightParts(items.map(x => movementText(x, valueType)));
-}
-function executiveMoneyText(label, prev, curr, d, items, opts = {}) {
-  const lowerBetter = !!opts.lowerBetter;
-  const metric = opts.metric || (lowerBetter ? 'verval' : 'productie');
-  const positive = lowerBetter ? d < 0 : d > 0;
-  const neutral = Math.abs(d) < 0.05;
-  const good = topMovementItems(items, { mode:'good', lowerBetter, valueType:'money', threshold:10, limit:99, disableMaterial:true });
-  const bad = topMovementItems(items, { mode:'bad', lowerBetter, valueType:'money', threshold:10, limit:99, disableMaterial:true });
-  if (currentLang === 'fr') {
-    const verb = neutral ? 'reste stable' : lowerBetter ? (d < 0 ? 'diminue' : 'augmente') : (d > 0 ? 'progresse' : 'recule');
-    const driver = good.length
-      ? `Nous observons des resultats positifs pour ${movementNames(good, 'money')}.`
-      : `Aucun mouvement clairement positif ne ressort par branche.`;
-    const watch = bad.length
-      ? `Moins positif: ${lowerBetter ? 'la hausse' : 'la baisse'} chez ${movementNames(bad, 'money')}.`
-      : `Aucun mouvement moins positif marque ne ressort par branche.`;
-    return `${label} ${verb} a <span class="insightStrong">${euro.format(curr)}</span> (<span class="${cls(d, lowerBetter)}">${signedPct(d)}</span> vs ${euro.format(prev)} en ${opts.prevP || 'periode precedente'}). ${driver} ${watch}`;
-  }
-  const verb = neutral ? 'blijft stabiel' : lowerBetter ? (d < 0 ? 'daalt' : 'stijgt') : (d > 0 ? 'groeit' : 'daalt');
-  const driver = good.length
-    ? `We zien positieve resultaten bij ${movementNames(good, 'money')}.`
-    : `Er zijn geen duidelijke positieve bewegingen per tak.`;
-  const watch = bad.length
-    ? `Minder positief is ${lowerBetter ? 'de stijging' : 'de daling'} bij ${movementNames(bad, 'money')}.`
-    : `Er is geen uitgesproken minder positieve beweging per tak.`;
-  return `${label} ${verb} naar <span class="insightStrong">${euro.format(curr)}</span> (<span class="${cls(d, lowerBetter)}">${signedPct(d)}</span> vs ${euro.format(prev)} in ${opts.prevP || 'vorige periode'}). ${driver} ${watch}`;
-}
-function executivePctText(label, prev, curr, d, items, opts = {}) {
-  const lowerBetter = opts.lowerBetter ?? true;
-  const positive = lowerBetter ? d < 0 : d > 0;
-  const neutral = Math.abs(d) < 0.05;
-  const good = topMovementItems(items, { mode:'good', lowerBetter, valueType:'pct', threshold:opts.threshold ?? 10, diffMode:'pp', limit:99, disableMaterial:true });
-  const bad = topMovementItems(items, { mode:'bad', lowerBetter, valueType:'pct', threshold:opts.threshold ?? 10, diffMode:'pp', limit:99, disableMaterial:true });
-  if (currentLang === 'fr') {
-    const verb = neutral ? 'reste stable' : positive ? 's ameliore' : 'se deteriore';
-    const driver = good.length
-      ? `L amelioration vient surtout de ${movementNames(good, 'pct')}.`
-      : `Aucune amelioration claire ne ressort par branche.`;
-    const watch = bad.length
-      ? `Le S/P evolue moins positivement chez ${movementNames(bad, 'pct')}.`
-      : `Aucune evolution S/P moins positive marquee ne ressort par branche.`;
-    return `${label.replace(' total', '')} ${verb} globalement de <span class="${cls(d, lowerBetter)}">${pct.format(prev)}% -> ${pct.format(curr)}%</span>. ${driver} ${watch}`;
-  }
-  const verb = neutral ? 'blijft stabiel' : positive ? 'verbetert' : 'verslechtert';
-  const driver = good.length
-    ? `De verbetering komt vooral uit ${movementNames(good, 'pct')}.`
-    : `Er is geen duidelijke verbetering per tak.`;
-  const watch = bad.length
-    ? `De S/P evolueert minder positief bij ${movementNames(bad, 'pct')}.`
-    : `Er is geen uitgesproken minder positieve S/P-evolutie per tak.`;
-  return `${label.replace(' totaal', '')} ${verb} globaal van <span class="${cls(d, lowerBetter)}">${pct.format(prev)}% -> ${pct.format(curr)}%</span>. ${driver} ${watch}`;
-}
-function categoryIcon(key) {
-  const k = String(key || '');
-  let iconKey = '';
-  if (k.startsWith('Auto')) iconKey = 'auto';
-  else if (k.startsWith('Particulieren') || k.startsWith('Particuliers')) iconKey = 'particulieren';
-  else if (k.startsWith('Ondernemingen') || k.startsWith('Entreprises')) iconKey = 'ondernemingen';
-  else if (k.startsWith('Arbeidsongevallen') || k.startsWith('Accidents de travail')) iconKey = 'arbeidsongevallen';
-  else if (k.startsWith('Rechtsbijstand') || k.startsWith('Protection juridique')) iconKey = 'rechtsbijstand';
-  return iconKey && CATEGORY_ICONS[iconKey] ? `<img class="catMiniIconImg" src="${CATEGORY_ICONS[iconKey]}" alt="" />` : '';
-}
-function trendBoxesHtml(items, opts = {}) {
-  const threshold = opts.threshold ?? 5;
-  const lowerBetter = !!opts.lowerBetter;
-  const riseTitle = opts.riseTitle || (currentLang === 'fr' ? 'Hausses' : 'Stijgingen');
-  const fallTitle = opts.fallTitle || (currentLang === 'fr' ? 'Baisses' : 'Dalingen');
-  const hideDelta = !!opts.hideDelta;
-  const noText = opts.noText || (currentLang === 'fr' ? 'Pas de mouvements marqués par branche.' : 'Geen uitgesproken bewegingen per tak.');
-  const relevantItems = materialItems(items, opts);
-  const ups = relevantItems.filter(x => movementMagnitude(x, opts) >= threshold).sort((a,b) => movementMagnitude(b, opts) - movementMagnitude(a, opts));
-  const downs = relevantItems.filter(x => movementMagnitude(x, opts) <= -threshold).sort((a,b) => movementMagnitude(a, opts) - movementMagnitude(b, opts));
-  const fmtItem = x => x.valueType === 'pct'
-    ? `<li><span class="trendCatName"><span class="catMiniIcon">${categoryIcon(x.key)}</span>${esc(x.label)}</span>: <span class="${cls(movementMagnitude(x, opts), lowerBetter)}">${pct.format(x.oldVal)}% &gt; ${pct.format(x.newVal)}%</span></li>`
-    : (hideDelta
-      ? `<li><span class="trendCatName"><span class="catMiniIcon">${categoryIcon(x.key)}</span>${esc(x.label)}</span>: <span class="${cls(x.d, lowerBetter)}">${insightValueFmt(x)}</span> (${signedPct(x.d)})</li>`
-      : `<li><span class="trendCatName"><span class="catMiniIcon">${categoryIcon(x.key)}</span>${esc(x.label)}</span>: <span class="${cls(x.d, lowerBetter)}">${signedPct(x.d)}</span> (${insightValueFmt(x)})</li>`);
-
-  if (!ups.length && !downs.length) {
-    return `<div class="insightTrendBoxes"><div class="insightTrendBox neutral"><h4>• ${currentLang === 'fr' ? 'Stable' : 'Stabiel'}</h4><ul><li>${noText}</li></ul></div></div>`;
-  }
-
-  const riseIcon = opts.riseIcon || '↗';
-  const fallIcon = opts.fallIcon || '↘';
-
-  // Bepaal volgorde: dalingen eerst of stijgingen eerst
-  const firstGroup  = opts.downsFirst ? downs : ups;
-  const secondGroup = opts.downsFirst ? ups   : downs;
-  const firstTitle  = opts.downsFirst ? fallTitle  : riseTitle;
-  const secondTitle = opts.downsFirst ? riseTitle  : fallTitle;
-  const firstIcon   = opts.downsFirst ? fallIcon   : riseIcon;
-  const secondIcon  = opts.downsFirst ? riseIcon   : fallIcon;
-  const firstClass  = opts.downsFirst
-    ? (opts.invertColors ? 'up'   : 'down')
-    : (opts.invertColors ? 'down' : 'up');
-  const secondClass = opts.downsFirst
-    ? (opts.invertColors ? 'down' : 'up')
-    : (opts.invertColors ? 'up'   : 'down');
-
-  const firstHtml = firstGroup.length
-    ? `<div class="trendSubTitle ${firstClass}">${firstIcon} ${firstTitle}</div><ul>${firstGroup.map(fmtItem).join('')}</ul>`
-    : '';
-  const secondHtml = secondGroup.length
-    ? `<div class="trendSubTitle ${secondClass}">${secondIcon} ${secondTitle}</div><ul>${secondGroup.map(fmtItem).join('')}</ul>`
-    : '';
-
-  const title = currentLang === 'fr' ? 'Mouvements par branche' : 'Bewegingen per tak';
-  return `<div class="insightTrendBoxes"><div class="insightTrendBox combined"><h4>${title}</h4>${firstHtml}${secondHtml}</div></div>`;
-}
-function trendListCombinedSp(data, prevP, currP, keys) {
-  const out = [];
-  keys.forEach(key => {
-    const spOld = getCategoryValue(data, 'SCHADE', key, prevP, cols.sp, 18);
-    const spNew = getCategoryValue(data, 'SCHADE', key, currP, cols.sp, 18);
-    if (spOld !== 0 || spNew !== 0) out.push({ key, label: `${portfolioCategoryLabel(key)} · S/P`, oldVal: spOld, newVal: spNew, d: ppDelta(spOld, spNew), valueType: 'pct' });
-    const capOld = getCategoryValue(data, 'SCHADE', key, prevP, cols.spCap, 20);
-    const capNew = getCategoryValue(data, 'SCHADE', key, currP, cols.spCap, 20);
-    if (capOld !== 0 || capNew !== 0) out.push({ key, label: `${portfolioCategoryLabel(key)} · ${currentLang === 'fr' ? 'S/P écrêté' : 'S/P afgetopt'}`, oldVal: capOld, newVal: capNew, d: ppDelta(capOld, capNew), valueType: 'pct' });
-  });
-  return out;
-}
-// ─── Productie-staafdiagram voor samenvatting ─────────────────────────────────
-// Toont per categorie twee overlappende horizontale balken:
-//   – vorig jaar: Vivium blauw (#003b71)
-//   – dit jaar:   Vivium oranje (#f58220)
-// Hover op een balk toont het exacte bedrag als tooltip.
-function compactCategoryLabelParts(label) {
-  const value = String(label || '').trim();
-  const normalized = value.toLowerCase()
-    .replace(/[\u2013\u2014\u00ad-]/g, ' ')
-    .replace(/[()]/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
-  const isFr = currentLang === 'fr';
-
-  if (normalized.includes('auto') && (normalized.includes('vloten') || normalized.includes('flottes')) && !(normalized.includes('niet') || normalized.includes('non'))) {
-    return ['Auto', isFr ? '(flottes)' : '(vloten)'];
-  }
-  if (normalized.includes('auto') && (normalized.includes('niet') || normalized.includes('non'))) {
-    return ['Auto', isFr ? '(non-flottes)' : '(niet-vloten)'];
-  }
-  if ((normalized.includes('particulieren') || normalized.includes('particuliers')) && (normalized.includes('brand') || normalized.includes('incendie'))) {
-    return ['Particul.', isFr ? '(incendie)' : '(brand)'];
-  }
-  if ((normalized.includes('particulieren') || normalized.includes('particuliers')) && (normalized.includes('ba') || normalized.includes('rc'))) {
-    return ['Particul.', isFr ? '(RC)' : '(BA)'];
-  }
-  if (normalized === 'particulieren' || normalized === 'particuliers') {
-    return ['Particul.'];
-  }
-  if ((normalized.includes('ondernemingen') || normalized.includes('entreprises')) && (normalized.includes('brand') || normalized.includes('incendie'))) {
-    return [isFr ? 'Entrep.' : 'Ondernem.', isFr ? '(incendie)' : '(brand)'];
-  }
-  if ((normalized.includes('ondernemingen') || normalized.includes('entreprises')) && (normalized.includes('ba') || normalized.includes('rc'))) {
-    return [isFr ? 'Entrep.' : 'Ondernem.', isFr ? '(RC)' : '(BA)'];
-  }
-  if (normalized === 'ondernemingen' || normalized === 'entreprises') {
-    return [isFr ? 'Entrep.' : 'Ondernem.'];
-  }
-  if (normalized.includes('arbeidsongevallen') || normalized.includes('accidents de travail')) {
-    return [isFr ? 'AT' : 'AO'];
-  }
-  if (normalized.includes('rechtsbijstand') || (normalized.includes('rechts') && normalized.includes('bijstand')) || normalized.includes('protection juridique') || (normalized.includes('protect') && normalized.includes('jur'))) {
-    return isFr ? ['Protect.', 'juridique'] : ['Rechts-', 'bijstand'];
-  }
-  return [value];
-}
-function compactCategoryLabelText(label) {
-  return compactCategoryLabelParts(label).join(' ');
-}
-function compactProdBarLabelHtml(label) {
-  return compactCategoryLabelParts(label).map(part => `<span>${esc(part)}</span>`).join('');
-}
-function renderProdBarChart(data, prevP, currP) {
-  const VIVIUM_BLUE   = '#003b71';
-  const VIVIUM_ORANGE = '#f58220';
-  const cats = [
-    'Auto Vloten','Auto Niet Vloten',
-    'Particulieren Brand','Particulieren BA',
-    'Ondernemingen Brand','Ondernemingen BA',
-    'Arbeidsongevallen','Rechtsbijstand'
-  ];
-
-  const normV = v => String(v || '').trim().toUpperCase();
-  const getVal = key => {
-    const aliases = portfolioCategoryAliases(key).map(normKey);
-    const get = period => {
-      const src = rowsOf(data, 'PRODUCTIE').filter(r => String(r[cols.periode] || '').trim() === String(period).trim());
-      const candidates = src.filter(r => aliases.includes(normV(r[cols.sub])) || aliases.includes(normV(r[cols.hoofd])));
-      const withData = candidates.slice().reverse().find(r => n(r[cols.prodPremie]) !== 0);
-      return n((withData || candidates[candidates.length - 1] || {})[cols.prodPremie]);
-    };
-    return { prev: get(prevP), curr: get(currP) };
-  };
-
-  const items = cats.map(key => {
-    const { prev, curr } = getVal(key);
-    const d = yoy(prev, curr);
-    return { key, label: portfolioCategoryLabel(key), prev, curr, d };
-  }).filter(x => x.prev !== 0 || x.curr !== 0);
-
-  if (!items.length) return '';
-
-  const max = Math.max(1, ...items.flatMap(x => [Math.abs(x.prev), Math.abs(x.curr)]));
-
-  const CHART_H = 120; // px hoogte van de grafiekzone
-  const barHtml   = [];
-  const deltaHtml = [];
-  const labelHtml = [];
-
-  items.forEach(x => {
-    const hPrev  = Math.max(2, Math.round(Math.abs(x.prev) / max * CHART_H));
-    const hCurr  = Math.max(2, Math.round(Math.abs(x.curr) / max * CHART_H));
-    const dClass = x.d > 0 ? 'pos' : x.d < 0 ? 'neg' : 'neu';
-    const dSign  = x.d >= 0 ? '+' : '';
-
-    barHtml.push(`<div class="prodBarCol">
-      <div class="prodBarPair">
-        <div class="prodBarStick prevPeriod"
-             style="height:${hPrev}px"
-             data-amount="${euro.format(x.prev)}"
-             data-period="${esc(prevP)}"
-             onmouseenter="showProdBarTip(event,this)"
-             onmouseleave="hideProdBarTip()"></div>
-        <div class="prodBarStick currPeriod"
-             style="height:${hCurr}px"
-             data-amount="${euro.format(x.curr)}"
-             data-period="${esc(currP)}"
-             onmouseenter="showProdBarTip(event,this)"
-             onmouseleave="hideProdBarTip()"></div>
-      </div>
-    </div>`);
-
-    deltaHtml.push(`<div class="prodBarDeltaCol ${dClass}">${dSign}${pct.format(x.d)}%</div>`);
-    labelHtml.push(`<div class="prodBarLabelCol" title="${esc(x.label)}">${compactProdBarLabelHtml(x.label)}</div>`);
-  });
-
-  const swatch = (color, op) => `<span class="prodBarSwatch" style="background:${color};opacity:${op}"></span>`;
-  const legendPrev = `${swatch(VIVIUM_BLUE, '.85')}${esc(prevP)}`;
-  const legendCurr = `${swatch(VIVIUM_ORANGE, '1')}${esc(currP)}`;
-
-  return `<div class="prodBarChart">
-    <div class="prodBarLegend"><span>${legendPrev}</span><span>${legendCurr}</span></div>
-    <div class="prodBarGrid">${barHtml.join('')}</div>
-    <div class="prodBarDeltaRow">${deltaHtml.join('')}</div>
-    <div class="prodBarLabelRow">${labelHtml.join('')}</div>
-  </div>`;
-}
-
-
-// ─── Verval-staafdiagram voor samenvatting ───────────────────────────────────
-// Zelfde categorieën en opbouw als productie, maar met omgekeerde kleurinterpretatie:
-//   – stijging verval = negatief/rood
-//   – daling verval = positief/groen
-function renderVervalBarChart(data, prevP, currP) {
-  const VIVIUM_BLUE   = '#003b71';
-  const VIVIUM_ORANGE = '#f58220';
-  const cats = [
-    'Auto Vloten','Auto Niet Vloten',
-    'Particulieren Brand','Particulieren BA',
-    'Ondernemingen Brand','Ondernemingen BA',
-    'Arbeidsongevallen','Rechtsbijstand'
-  ];
-
-  const normV = v => String(v || '').trim().toUpperCase();
-  const getVal = key => {
-    const aliases = portfolioCategoryAliases(key).map(normKey);
-    const get = period => {
-      const src = rowsOf(data, 'PRODUCTIE').filter(r => String(r[cols.periode] || '').trim() === String(period).trim());
-      const candidates = src.filter(r => aliases.includes(normV(r[cols.sub])) || aliases.includes(normV(r[cols.hoofd])));
-      const withData = candidates.slice().reverse().find(r => n(r[cols.vervalPremie]) !== 0);
-      return n((withData || candidates[candidates.length - 1] || {})[cols.vervalPremie]);
-    };
-    return { prev: get(prevP), curr: get(currP) };
-  };
-
-  const items = cats.map(key => {
-    const { prev, curr } = getVal(key);
-    const d = yoy(prev, curr);
-    return { key, label: portfolioCategoryLabel(key), prev, curr, d };
-  }).filter(x => x.prev !== 0 || x.curr !== 0);
-
-  if (!items.length) return '';
-
-  const max = Math.max(1, ...items.flatMap(x => [Math.abs(x.prev), Math.abs(x.curr)]));
-  const CHART_H = 120;
-  const barHtml   = [];
-  const deltaHtml = [];
-  const labelHtml = [];
-
-  items.forEach(x => {
-    const hPrev = Math.max(2, Math.round(Math.abs(x.prev) / max * CHART_H));
-    const hCurr = Math.max(2, Math.round(Math.abs(x.curr) / max * CHART_H));
-    const dClass = x.d > 0 ? 'neg' : x.d < 0 ? 'pos' : 'neu';
-    const dSign = x.d >= 0 ? '+' : '';
-
-    barHtml.push(`<div class="prodBarCol">
-      <div class="prodBarPair">
-        <div class="prodBarStick prevPeriod"
-             style="height:${hPrev}px"
-             data-amount="${euro.format(x.prev)}"
-             data-period="${esc(prevP)}"
-             onmouseenter="showProdBarTip(event,this)"
-             onmouseleave="hideProdBarTip()"></div>
-        <div class="prodBarStick currPeriod"
-             style="height:${hCurr}px"
-             data-amount="${euro.format(x.curr)}"
-             data-period="${esc(currP)}"
-             onmouseenter="showProdBarTip(event,this)"
-             onmouseleave="hideProdBarTip()"></div>
-      </div>
-    </div>`);
-
-    deltaHtml.push(`<div class="prodBarDeltaCol ${dClass}">${dSign}${pct.format(x.d)}%</div>`);
-    labelHtml.push(`<div class="prodBarLabelCol" title="${esc(x.label)}">${compactProdBarLabelHtml(x.label)}</div>`);
-  });
-
-  const swatch = (color, op) => `<span class="prodBarSwatch" style="background:${color};opacity:${op}"></span>`;
-  const legendPrev = `${swatch(VIVIUM_BLUE, '.85')}${esc(prevP)}`;
-  const legendCurr = `${swatch(VIVIUM_ORANGE, '1')}${esc(currP)}`;
-
-  return `<div class="prodBarChart">
-    <div class="prodBarLegend"><span>${legendPrev}</span><span>${legendCurr}</span></div>
-    <div class="prodBarGrid">${barHtml.join('')}</div>
-    <div class="prodBarDeltaRow">${deltaHtml.join('')}</div>
-    <div class="prodBarLabelRow">${labelHtml.join('')}</div>
-  </div>`;
-}
-
-
-// ─── S/P-staafdiagrammen voor samenvatting ───────────────────────────────────
-// Zelfde categorieën en opbouw als productie/verval, maar tooltip en as tonen percentages.
-// Bij S/P is een daling positief en een stijging negatief.
-function renderSpBarChart(data, prevP, currP, field, cellIndex) {
-  const VIVIUM_BLUE   = '#003b71';
-  const VIVIUM_ORANGE = '#f58220';
-  const cats = [
-    'Auto Vloten','Auto Niet Vloten',
-    'Particulieren Brand','Particulieren BA',
-    'Ondernemingen Brand','Ondernemingen BA',
-    'Arbeidsongevallen','Rechtsbijstand'
-  ];
-
-  const normV = v => String(v || '').trim().toUpperCase();
-  const getVal = key => {
-    const aliases = portfolioCategoryAliases(key).map(normKey);
-    const get = period => {
-      const src = rowsOf(data, 'SCHADE').filter(r => String(r[cols.periode] || '').trim() === String(period).trim());
-      const candidates = src.filter(r => aliases.includes(normV(r[cols.sub])) || aliases.includes(normV(r[cols.hoofd])));
-      const withData = candidates.slice().reverse().find(r => totalNumber(r, field, cellIndex) !== 0);
-      return totalNumber(withData || candidates[candidates.length - 1] || {}, field, cellIndex);
-    };
-    return { prev: get(prevP), curr: get(currP) };
-  };
-
-  const items = cats.map(key => {
-    const { prev, curr } = getVal(key);
-    const d = ppDelta(prev, curr);
-    return { key, label: portfolioCategoryLabel(key), prev, curr, d };
-  }).filter(x => x.prev !== 0 || x.curr !== 0);
-
-  if (!items.length) return '';
-
-  const max = Math.max(1, ...items.flatMap(x => [Math.abs(x.prev), Math.abs(x.curr)]));
-  const CHART_H = 120;
-  const barHtml = [];
-  const deltaHtml = [];
-  const labelHtml = [];
-
-  items.forEach(x => {
-    const hPrev = Math.max(2, Math.round(Math.abs(x.prev) / max * CHART_H));
-    const hCurr = Math.max(2, Math.round(Math.abs(x.curr) / max * CHART_H));
-    const dClass = x.d > 0 ? 'neg' : x.d < 0 ? 'pos' : 'neu';
-    const dSign = x.d >= 0 ? '+' : '';
-
-    barHtml.push(`<div class="prodBarCol">
-      <div class="prodBarPair">
-        <div class="prodBarStick prevPeriod"
-             style="height:${hPrev}px"
-             data-amount="${pct.format(x.prev)}%"
-             data-period="${esc(prevP)}"
-             onmouseenter="showProdBarTip(event,this)"
-             onmouseleave="hideProdBarTip()"></div>
-        <div class="prodBarStick currPeriod"
-             style="height:${hCurr}px"
-             data-amount="${pct.format(x.curr)}%"
-             data-period="${esc(currP)}"
-             onmouseenter="showProdBarTip(event,this)"
-             onmouseleave="hideProdBarTip()"></div>
-      </div>
-    </div>`);
-
-    deltaHtml.push(`<div class="prodBarDeltaCol ${dClass}">${dSign}${pct.format(x.d)}%</div>`);
-    labelHtml.push(`<div class="prodBarLabelCol" title="${esc(x.label)}">${compactProdBarLabelHtml(x.label)}</div>`);
-  });
-
-  const swatch = (color, op) => `<span class="prodBarSwatch" style="background:${color};opacity:${op}"></span>`;
-  const legendPrev = `${swatch(VIVIUM_BLUE, '.85')}${esc(prevP)}`;
-  const legendCurr = `${swatch(VIVIUM_ORANGE, '1')}${esc(currP)}`;
-
-  return `<div class="prodBarChart">
-    <div class="prodBarLegend"><span>${legendPrev}</span><span>${legendCurr}</span></div>
-    <div class="prodBarGrid">${barHtml.join('')}</div>
-    <div class="prodBarDeltaRow">${deltaHtml.join('')}</div>
-    <div class="prodBarLabelRow">${labelHtml.join('')}</div>
-  </div>`;
-}
-
-function showProdBarTip(e, el) {
-  const tip = document.getElementById('prodBarTooltip');
-  if (!tip) return;
-  if (tip.parentElement !== document.body) document.body.appendChild(tip);
-  tip.textContent = fmtPeriod(el.dataset.period || '') + ': ' + (el.dataset.amount || '');
-  tip.style.position = 'fixed';
-  tip.style.transform = 'translate(12px,12px)';
-  tip.style.display = 'block';
-  tip.style.left = e.clientX + 'px';
-  tip.style.top  = e.clientY + 'px';
-}
-function hideProdBarTip() {
-  const tip = document.getElementById('prodBarTooltip');
-  if (tip) tip.style.display = 'none';
-}
-
-const ICON_SP_CAPPED = `<svg class="insightIconSvg" width="30" height="30" viewBox="0 0 40 40" fill="none" aria-hidden="true"><path d="M20 9.5L28.5 12.7V18.8C28.5 24.8 25 30 20 32C15 30 11.5 24.8 11.5 18.8V12.7L20 9.5Z" fill="#fff" stroke="#003b71" stroke-width="2.2"/><path d="M14.8 15.8H25.2" stroke="#f58220" stroke-width="2.8" stroke-linecap="round"/><path d="M16.8 22.4C17.7 23.4 18.8 23.9 20 23.9C21.2 23.9 22.3 23.4 23.2 22.4" stroke="#003b71" stroke-width="2" stroke-linecap="round"/><path d="M17 19.3H17.1M23 19.3H23.1" stroke="#003b71" stroke-width="2.4" stroke-linecap="round"/></svg>`;
-
-function renderInsightSummary(data, prevP, currP) {
-  const box = $('insightSummary');
-  if (!box) return;
-  const keys = ['Auto Vloten','Auto Niet Vloten','Particulieren Brand','Particulieren BA','Particulieren Overige','Ondernemingen Brand','Ondernemingen BA','Ondernemingen Overige','Arbeidsongevallen','Rechtsbijstand'];
-  const prodPrev = getCategoryValue(data, 'PRODUCTIE', 'TOTAAL NON LIFE', prevP, cols.prodPremie, 5);
-  const prodCurr = getCategoryValue(data, 'PRODUCTIE', 'TOTAAL NON LIFE', currP, cols.prodPremie, 5);
-  const prodD = yoy(prodPrev, prodCurr);
-  const prodItems = addEarnedPremiumContext(data, trendList(data, 'PRODUCTIE', cols.prodPremie, 5, prevP, currP, keys, 'money'), currP);
-  const spPrev = getCategoryValue(data, 'SCHADE', 'TOTAAL NON LIFE', prevP, cols.sp, 18);
-  const spCurr = getCategoryValue(data, 'SCHADE', 'TOTAAL NON LIFE', currP, cols.sp, 18);
-  const spD = ppDelta(spPrev, spCurr);
-  const spCapPrev = getCategoryValue(data, 'SCHADE', 'TOTAAL NON LIFE', prevP, cols.spCap, 20);
-  const spCapCurr = getCategoryValue(data, 'SCHADE', 'TOTAAL NON LIFE', currP, cols.spCap, 20);
-  const spCapD = ppDelta(spCapPrev, spCapCurr);
-  const spItems = addEarnedPremiumContext(data, trendList(data, 'SCHADE', cols.sp, 18, prevP, currP, keys, 'pct'), currP);
-  const spCapItems = addEarnedPremiumContext(data, trendList(data, 'SCHADE', cols.spCap, 20, prevP, currP, keys, 'pct'), currP);
-  const vervalPrev = getCategoryValue(data, 'PRODUCTIE', 'TOTAAL NON LIFE', prevP, cols.vervalPremie, 7);
-  const vervalCurr = getCategoryValue(data, 'PRODUCTIE', 'TOTAAL NON LIFE', currP, cols.vervalPremie, 7);
-  const vervalD = yoy(vervalPrev, vervalCurr);
-  const vervalItems = addEarnedPremiumContext(data, trendList(data, 'PRODUCTIE', cols.vervalPremie, 7, prevP, currP, keys, 'money'), currP);
-  const title = currentLang === 'fr' ? 'Résumé' : 'Samenvatting';
-  const header = exportActionsHtml({
-    classes: 'summaryExportActions summaryAllExportActions',
-    target: 'summaryAll',
-    label: 'Volledige samenvatting exporteren',
-    downloadTitle: 'Download samenvatting als PNG',
-    copyTitle: 'Kopieer samenvatting als afbeelding'
-  });
-  const summaryBlockExportActions = exportActionsHtml({
-    classes: 'summaryExportActions',
-    label: 'Samenvattingblok exporteren'
-  });
-  // Staafdiagram: gedeeld voor beide talen
-  const prodBarChart = renderProdBarChart(data, prevP, currP);
-  const vervalBarChart = renderVervalBarChart(data, prevP, currP);
-  const spBarChart = renderSpBarChart(data, prevP, currP, cols.sp, 18);
-  const spCapBarChart = renderSpBarChart(data, prevP, currP, cols.spCap, 20);
-
-  if (currentLang === 'fr') {
-    const prodText = executiveMoneyText('La production', prodPrev, prodCurr, prodD, prodItems, {metric:'production', prevP});
-    const vervalText = executiveMoneyText('La chute', vervalPrev, vervalCurr, vervalD, vervalItems, {lowerBetter:true, metric:'chute', prevP});
-    const spText = executivePctText('Le S/P total', spPrev, spCurr, spD, spItems, {threshold:10, prevP});
-    const spCapText = executivePctText('Le S/P ecrete total', spCapPrev, spCapCurr, spCapD, spCapItems, {threshold:10, prevP});
-    box.innerHTML = `${header}<div id="insightSummaryExport" class="insightSummaryExport"><div class="insightGrid">
-      <div class="insightItem">
-        ${summaryBlockExportActions}
-        <div class="insightItemHeader"><div class="insightItemIcon">📈</div><h3>Production</h3></div>
-        <p>${prodText}</p>
-        ${trendBoxesHtml(prodItems, {riseTitle:'Hausses', fallTitle:'Baisses', riseIcon:'↗', fallIcon:'↘', threshold:10, disableMaterial:true})}
-        ${prodBarChart}
-      </div>
-      <div class="insightItem">
-        ${summaryBlockExportActions}
-        <div class="insightItemHeader"><div class="insightItemIcon">📉</div><h3>Chute</h3></div>
-        <p>${vervalText}</p>
-        ${trendBoxesHtml(vervalItems, {riseTitle:'Chute en hausse', fallTitle:'Chute en baisse', riseIcon:'↗', fallIcon:'↘', downsFirst:true, invertColors:true, lowerBetter:true, threshold:10, disableMaterial:true})}
-        ${vervalBarChart}
-      </div>
-      <div class="insightItem">
-        ${summaryBlockExportActions}
-        <div class="insightItemHeader"><div class="insightItemIcon">🛡️</div><h3>S/P</h3></div>
-        <p>${spText}</p>
-        ${trendBoxesHtml(spItems, {lowerBetter:true, riseTitle:'S/P en hausse', fallTitle:'S/P en baisse', threshold:10, diffMode:'pp', hideDelta:true, downsFirst:true, invertColors:true, riseIcon:'↗', fallIcon:'↘', disableMaterial:true})}
-        ${spBarChart}
-      </div>
-      <div class="insightItem">
-        ${summaryBlockExportActions}
-        <div class="insightItemHeader"><div class="insightItemIcon">${ICON_SP_CAPPED}</div><h3>S/P &eacute;cr&ecirc;t&eacute;</h3></div>
-        <p>${spCapText}</p>
-        ${trendBoxesHtml(spCapItems, {lowerBetter:true, riseTitle:'S/P écrêté en hausse', fallTitle:'S/P écrêté en baisse', threshold:10, diffMode:'pp', hideDelta:true, downsFirst:true, invertColors:true, riseIcon:'↗', fallIcon:'↘', disableMaterial:true})}
-        ${spCapBarChart}
-      </div>
-    </div></div>`;
-  } else {
-    const prodText = executiveMoneyText('Productie', prodPrev, prodCurr, prodD, prodItems, {metric:'productie', prevP});
-    const vervalText = executiveMoneyText('Verval', vervalPrev, vervalCurr, vervalD, vervalItems, {lowerBetter:true, metric:'verval', prevP});
-    const spText = executivePctText('S/P totaal', spPrev, spCurr, spD, spItems, {threshold:10, prevP});
-    const spCapText = executivePctText('Afgetopte S/P', spCapPrev, spCapCurr, spCapD, spCapItems, {threshold:10, prevP});
-    box.innerHTML = `${header}<div id="insightSummaryExport" class="insightSummaryExport"><div class="insightGrid">
-      <div class="insightItem">
-        ${summaryBlockExportActions}
-        <div class="insightItemHeader"><div class="insightItemIcon">📈</div><h3>Productie</h3></div>
-        <p>${prodText}</p>
-        ${trendBoxesHtml(prodItems, {riseTitle:'Stijgingen', fallTitle:'Dalingen', riseIcon:'↗', fallIcon:'↘', threshold:10, disableMaterial:true})}
-        ${prodBarChart}
-      </div>
-      <div class="insightItem">
-        ${summaryBlockExportActions}
-        <div class="insightItemHeader"><div class="insightItemIcon">📉</div><h3>Verval</h3></div>
-        <p>${vervalText}</p>
-        ${trendBoxesHtml(vervalItems, {riseTitle:'Verval stijgt', fallTitle:'Verval daalt', riseIcon:'↗', fallIcon:'↘', downsFirst:true, invertColors:true, lowerBetter:true, threshold:10, disableMaterial:true})}
-        ${vervalBarChart}
-      </div>
-      <div class="insightItem">
-        ${summaryBlockExportActions}
-        <div class="insightItemHeader"><div class="insightItemIcon">🛡️</div><h3>S/P</h3></div>
-        <p>${spText}</p>
-        ${trendBoxesHtml(spItems, {lowerBetter:true, riseTitle:'S/P stijgt', fallTitle:'S/P daalt', threshold:10, diffMode:'pp', hideDelta:true, downsFirst:true, invertColors:true, riseIcon:'↗', fallIcon:'↘', disableMaterial:true})}
-        ${spBarChart}
-      </div>
-      <div class="insightItem">
-        ${summaryBlockExportActions}
-        <div class="insightItemHeader"><div class="insightItemIcon">${ICON_SP_CAPPED}</div><h3>Afgetopte S/P</h3></div>
-        <p>${spCapText}</p>
-        ${trendBoxesHtml(spCapItems, {lowerBetter:true, riseTitle:'S/P afgetopt stijgt', fallTitle:'S/P afgetopt daalt', threshold:10, diffMode:'pp', hideDelta:true, downsFirst:true, invertColors:true, riseIcon:'↗', fallIcon:'↘', disableMaterial:true})}
-        ${spCapBarChart}
-      </div>
-    </div></div>`;
-  }
-  box.classList.remove('hidden');
-  requestAnimationFrame(() => requestAnimationFrame(equalizeSummaryRows));
-}
-
+// ─── Uitlijning van de samenvattingsblokken ──────────────────────────────────
 function equalizeSummaryRows() {
   const grid = document.querySelector('#insightSummary .insightGrid');
   if (!grid) return;
@@ -3527,17 +2301,6 @@ function scrollToKpiStart() {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-
-function summaryKpiItems(totalProdPrev, totalProdCurr, totalSchadePrev, totalSchadeCurr) {
-  return [
-    { l: msg('productie'), v: n(totalProdCurr[cols.prodPremie]), o: n(totalProdPrev[cols.prodPremie]), type: 'money' },
-    { l: msg('verval'), v: n(totalProdCurr[cols.vervalPremie]), o: n(totalProdPrev[cols.vervalPremie]), type: 'money', invert: true },
-    { l: msg('progressie'), v: n(totalProdCurr[cols.progPremie]), o: n(totalProdPrev[cols.progPremie]), type: 'money' },
-    { l: 'S/P', v: totalNumber(totalSchadeCurr, cols.sp, 18), o: totalNumber(totalSchadePrev, cols.sp, 18), type: 'pct', invert: true },
-    { l: msg('spAfgetopt'), v: totalNumber(totalSchadeCurr, cols.spCap, 20), o: totalNumber(totalSchadePrev, cols.spCap, 20), type: 'pct', invert: true }
-  ];
-}
-
 function activeTabId() {
   return document.querySelector('.tab.active')?.dataset?.tab || 'samenvatting';
 }
@@ -3548,82 +2311,6 @@ function findMainCategoryRow(data, type, cat, period) {
   return mainRows(data, type).find(r => String(r[cols.periode] || '').trim() === p && normKey(r[cols.hoofd]) === target) || {};
 }
 
-function mainCategoryNamesForPeriod(data, type, period) {
-  const p = String(period || '').trim();
-  const names = [];
-  mainRows(data, type).forEach(r => {
-    const name = String(r[cols.hoofd] || '').trim();
-    if (!name || isTotalNonLife(r) || String(r[cols.periode] || '').trim() !== p) return;
-    if (!names.some(x => normKey(x) === normKey(name))) names.push(name);
-  });
-  const preferred = ['AUTO', 'PARTICULIEREN', 'ONDERNEMINGEN', 'ARBEIDSONGEVALLEN', 'RECHTSBIJSTAND STAND ALONE', 'RECHTSBIJSTAND'];
-  names.sort((a, b) => {
-    const ia = preferred.findIndex(x => normKey(a).includes(normKey(x)) || normKey(x).includes(normKey(a)));
-    const ib = preferred.findIndex(x => normKey(b).includes(normKey(x)) || normKey(x).includes(normKey(b)));
-    return (ia < 0 ? 999 : ia) - (ib < 0 ? 999 : ib);
-  });
-  return names.slice(0, 5);
-}
-
-function categoryKpiItems(data, tab, prevP, currP) {
-  const fieldByTab = {
-    productie: { sourceType: 'PRODUCTIE', field: cols.prodPremie, type: 'money', invert: false, compareAmountMode: 'previous', metricLabel: msg('productie') },
-    verval: { sourceType: 'PRODUCTIE', field: cols.vervalPremie, type: 'money', invert: true, compareAmountMode: 'previous', metricLabel: msg('verval') },
-    progressie: { sourceType: 'PRODUCTIE', field: cols.progPremie, type: 'money', invert: false, compareAmountMode: 'previous', metricLabel: msg('progressie') },
-    portefeuille: { sourceType: 'SCHADE', field: cols.verdiend, type: 'money', invert: false, compareAmountMode: 'previous', metricLabel: currentLang === 'fr' ? 'PRIME.ACQ' : 'VERD.PREMIE' }
-  };
-
-  if (tab === 'schade') {
-    const cats = [
-      'TOTAAL NON LIFE',
-      ...mainCategoryNamesForPeriod(data, 'SCHADE', currP)
-        .filter(cat => !normKey(cat).includes('RECHTSBIJSTAND'))
-        .slice(0, 4)
-    ];
-    return cats.map(cat => {
-      const isTotal = normKey(cat) === 'TOTAAL NON LIFE';
-      const curr = isTotal ? totalRow(data, 'SCHADE', currP) : findMainCategoryRow(data, 'SCHADE', cat, currP);
-      const prev = isTotal ? totalRow(data, 'SCHADE', prevP) : findMainCategoryRow(data, 'SCHADE', cat, prevP);
-      return {
-        l: cat,
-        metricLabel: 'S/P',
-        v: totalNumber(curr, cols.sp, 18),
-        o: totalNumber(prev, cols.sp, 18),
-        type: 'sp-category',
-        invert: true,
-        dynamicCategory: true,
-        showPeriodInLabel: false,
-        compareAmountMode: 'previous'
-      };
-    });
-  }
-
-  if (tab === 'detail') {
-    const cats = mainCategoryNamesForPeriod(data, 'PRODUCTIE', currP);
-    return cats.map(cat => {
-      const prodCurr = findMainCategoryRow(data, 'PRODUCTIE', cat, currP);
-      const schadeCurr = findMainCategoryRow(data, 'SCHADE', cat, currP);
-      return {
-        l: cat,
-        metricLabel: msg('productie'),
-        v: n(prodCurr[cols.prodPremie]),
-        sp: totalNumber(schadeCurr, cols.sp, 18),
-        spCap: totalNumber(schadeCurr, cols.spCap, 20),
-        type: 'detail-combo',
-        dynamicCategory: true,
-        showPeriodInLabel: false
-      };
-    });
-  }
-
-  const cfg = fieldByTab[tab];
-  if (!cfg) return null;
-  return mainCategoryNamesForPeriod(data, cfg.sourceType, currP).map(cat => {
-    const curr = findMainCategoryRow(data, cfg.sourceType, cat, currP);
-    const prev = findMainCategoryRow(data, cfg.sourceType, cat, prevP);
-    return { l: cat, metricLabel: cfg.metricLabel, v: n(curr[cfg.field]), o: n(prev[cfg.field]), type: cfg.type, invert: cfg.invert, dynamicCategory: true, showPeriodInLabel: false, compareAmountMode: cfg.compareAmountMode };
-  });
-}
 function updateTopKpisForActiveTab() {
   if (!lastKpiContext || !lastData || !dashboardPreviousPeriod || !dashboardCurrentPeriod) return;
   const tab = activeTabId();
@@ -3690,11 +2377,11 @@ function lifeKpiComparisonHtml(item, prevP, currP) {
 }
 function renderKpis(items, prevP, currP) {
   const kpiBox = $('kpis');
-  const pillarOrdinals = { tweede: '2e', derde: '3e', vierde: '4e' };
+  const pillarOrdinals = { tweede: '2e', derde: '3e', vierde: '4e', 'deuxième':'2e', 'troisième':'3e', 'quatrième':'4e' };
   if (kpiBox) kpiBox.classList.toggle('summaryPremiumGroup', !!(items && items[0] && items[0].kpiRole === 'summary-total'));
   $('kpis').innerHTML = items.map((x, i) => {
-    const title = x.showPeriodInLabel === false ? `${x.metricLabel || x.l} ${x.l}` : `${x.l}`;
-    const titleLabel = title.replace(/\b(tweede|derde|vierde)(?=\s+pijler\b)/gi, ordinal => pillarOrdinals[ordinal.toLowerCase()]);
+    const title = x.showPeriodInLabel === false ? `${displayLabel(x.metricLabel || x.l)} ${displayLabel(x.l)}` : displayLabel(x.l);
+    const titleLabel = title.replace(/\b(tweede|derde|vierde|deuxième|troisième|quatrième)(?=\s+(?:pijler|pilier)\b)/gi, ordinal => pillarOrdinals[ordinal.toLowerCase()]);
     const label = `<span>${esc(titleLabel)}</span><span class="kpi-period">ULT. ${esc(currP)}</span>`;
     const cardClass = 'kpi' + (x.dynamicCategory ? ' dynamicCategoryKpi' : '') + (x.kpiRole === 'summary-total' ? ' summaryTotalKpi' : '') + (x.kpiRole === 'summary-component' ? ' summaryComponentKpi' : '');
     const kpiAttrs = x.dynamicCategory ? ` data-kpi-cat="${esc(x.l)}" role="button" tabindex="0"` : '';
@@ -3819,396 +2506,10 @@ function barCompareHtml(labels, a, b, la, lb, type, color, parentCategory = '', 
   }).join('') + `</div>`;
 }
 
+// ─── Categorienamen en gedeelde grafiekhulpen ───────────────────────────────
 
-
-// ─── Generieke wrapper voor gegroepeerde renders ──────────────────────────────
-// Vervangt de identieke boilerplate in renderProductieGrouped, renderVervalGrouped
-// en renderProgressieGrouped (alle drie werken op PRODUCTIE-rijen).
-function renderGroupedSection(containerId, data, prevP, currP, renderGroupFn, emptyMsgKey) {
-  const rows = nonTotalRows(data, 'PRODUCTIE').filter(r => [prevP, currP].includes(r[cols.periode]));
-  const totalRows = totalRowsFor(data, 'PRODUCTIE', prevP, currP);
-  const cats = groupedCats(data, 'PRODUCTIE', currP);
-  const catHtml = cats.map(cat => renderGroupFn(cat, rows, prevP, currP, data)).join('');
-  const totalHtml = totalRows.length ? totalBlock(renderGroupFn('TOTAAL NON LIFE', totalRows, prevP, currP, data)) : '';
-  if (!catHtml && !totalHtml) { $(containerId).innerHTML = `<div class="note">${msg(emptyMsgKey)}</div>`; return; }
-  $(containerId).innerHTML = totalHtml + catHtml;
-}
-
-function renderProductieGrouped(data, prevP, currP) {
-  renderGroupedSection('prodGrouped', data, prevP, currP, renderProductionGroup, 'noProd');
-}
-function renderVervalGrouped(data, prevP, currP) {
-  renderGroupedSection('vervalGrouped', data, prevP, currP, renderVervalGroup, 'noVerval');
-}
-function renderProgressieGrouped(data, prevP, currP) {
-  renderGroupedSection('progGrouped', data, prevP, currP, renderProgressieGroup, 'noProg');
-}
-function renderProductionGroup(cat, rows, prevP, currP) {
-  const catRows = rows.filter(r => r[cols.hoofd] === cat);
-  const ordered = orderedSubs(catRows, cat);
-  const labels = labelHtmlFor(ordered, cat);
-  const prevRow = s => catRows.find(r => r[cols.sub] === s && r[cols.periode] === prevP) || {};
-  const currRow = s => catRows.find(r => r[cols.sub] === s && r[cols.periode] === currP) || {};
-  const vals = (field, period) => ordered.map(s => n((period === prevP ? prevRow(s) : currRow(s))[field]));
-  const head = currRow(cat), prevHead = prevRow(cat);
-  const dProd = yoy(n(prevHead[cols.prodPremie]), n(head[cols.prodPremie]));
-  const dCnt = yoy(n(prevHead[cols.prodAantal]), n(head[cols.prodAantal]));
-  return `<div class="cat"><div class="catHead exportableBlockHeader"><div class="catTitle">${catTitleHtml(cat)}</div><div class="small">${prevP} → ${currP}</div>${productBlockExportActionsHtml()}</div><div class="p-18"><div class="split split-2"><div class="metric"><b>${msg('productiepremie')} ${currP}</b><span class="metric-val">${euro.format(n(head[cols.prodPremie]))}</span>${deltaHtml(dProd, n(prevHead[cols.prodPremie]), prevP, 'money')}</div><div class="metric"><b>${msg('aantalZaken')}</b><span class="metric-val">${num.format(n(head[cols.prodAantal]))}</span>${deltaHtml(dCnt, n(prevHead[cols.prodAantal]), prevP, 'num')}</div></div><div class="miniGrid"><div class="miniCard"><h3>${msg('productiepremie')}</h3>${barCompareHtml(labels, vals(cols.prodPremie, prevP), vals(cols.prodPremie, currP), prevP, currP, 'money', 'blue', '', { showDelta: true })}</div><div class="miniCard"><h3>${msg('aantalProductiezaken')}</h3>${barCompareHtml(labels, vals(cols.prodAantal, prevP), vals(cols.prodAantal, currP), prevP, currP, 'num', 'blue', '', { showDelta: true })}</div></div></div></div>`;
-}
-
-function earnedPremiumForVervalRatio(data, key, period) {
-  if (!data || !key || !period) return 0;
-  if (String(key).trim().toUpperCase() === 'TOTAAL NON LIFE') return getTotalNonLifeValue(data, 'SCHADE', period, cols.verdiend, 15);
-  const aliases = portfolioCategoryAliases(key).map(normKey);
-  const sourceRows = rowsOf(data, 'SCHADE').filter(r => String(r[cols.periode] || '').trim() === String(period).trim());
-  const valueFromRow = row => {
-    if (!row) return 0;
-    const byName = n(row[cols.verdiend]);
-    if (byName !== 0) return byName;
-    if (row._cells && row._cells[15] !== undefined) return n(row._cells[15]);
-    return 0;
-  };
-  // Belangrijk: voor de vervalratio moet de verdiende premie van exact dezelfde tak gebruikt worden.
-  // Dus voor 'Auto' mag niet per ongeluk 'Auto Vloten' of 'Auto Niet Vloten' genomen worden.
-  const exactSub = sourceRows.find(r => aliases.includes(normKey(r[cols.sub])));
-  const exactHeadAndSub = sourceRows.find(r => aliases.includes(normKey(r[cols.hoofd])) && aliases.includes(normKey(r[cols.sub])));
-  const row = exactSub || exactHeadAndSub || null;
-  return valueFromRow(row);
-}
-function vervalRatioText(vervalPremie, verdiendePremie, period) {
-  const earned = n(verdiendePremie);
-  if (!earned) return '';
-  const ratio = n(vervalPremie) / earned * 100;
-  if (currentLang === 'fr') return `<span class="claimAvgNote">(ratio chute ${pct.format(ratio)}% vs prime acquise ultimo ${esc(period)})</span>`;
-  return `<span class="claimAvgNote">(vervalratio ${pct.format(ratio)}% tov verd.premie ${euro.format(earned)} - ult. ${esc(period)})</span>`;
-}
-function vervalRatioFullPeriods(data, currentPeriod) {
-  const currentKey = pkey(currentPeriod);
-  const prodPeriods = new Set(rowsOf(data, 'PRODUCTIE').map(r => String(r[cols.periode] || '').trim()).filter(Boolean));
-  return getPortfolioPeriods(data)
-    .filter(p => String(p).trim().startsWith('12 '))
-    .filter(p => prodPeriods.has(p))
-    .filter(p => !currentKey || pkey(p) <= currentKey)
-    .slice(-3);
-}
-function vervalPremiumForVervalRatio(data, key, period) {
-  if (!data || !key || !period) return 0;
-  if (String(key).trim().toUpperCase() === 'TOTAAL NON LIFE') return totalNumber(totalRow(data, 'PRODUCTIE', period), cols.vervalPremie, 7);
-  const aliases = portfolioCategoryAliases(key).map(normKey);
-  const sourceRows = rowsOf(data, 'PRODUCTIE').filter(r => String(r[cols.periode] || '').trim() === String(period).trim());
-  const valueFromRow = row => {
-    if (!row) return 0;
-    const byName = n(row[cols.vervalPremie]);
-    if (byName !== 0) return byName;
-    if (row._cells && row._cells[7] !== undefined) return n(row._cells[7]);
-    return 0;
-  };
-  const exactHeadAndSub = sourceRows.find(r => aliases.includes(normKey(r[cols.hoofd])) && aliases.includes(normKey(r[cols.sub])));
-  const exactSub = sourceRows.find(r => aliases.includes(normKey(r[cols.sub])));
-  return valueFromRow(exactHeadAndSub || exactSub || null);
-}
-function vervalRatioForPeriod(data, key, period) {
-  const vervalPremie = vervalPremiumForVervalRatio(data, key, period);
-  const verdiendePremie = earnedPremiumForVervalRatio(data, key, period);
-  return { period, vervalPremie, verdiendePremie, ratio: verdiendePremie ? vervalPremie / verdiendePremie * 100 : 0 };
-}
-function vervalRatioBarsHtml(data, key, currentPeriod) {
-  const items = vervalRatioFullPeriods(data, currentPeriod)
-    .map(period => vervalRatioForPeriod(data, key, period))
-    .filter(x => x.verdiendePremie || x.vervalPremie);
-  if (!items.length) return `<div class="portfolioNoData">${msg('portefeuilleEmpty')}</div>`;
-  return `<div class="vervalRatioBars">` + items.map(x => {
-    const width = Math.max(2, Math.min(100, Math.abs(x.ratio)));
-    return `<div class="vervalRatioLine"><div class="vervalRatioPeriod">${esc(x.period)}</div><div class="vervalRatioTrack"><div class="vervalRatioFill" style="width:${width}%"></div><div class="vervalRatioValue">${pct.format(x.ratio)}% <span class="ratioAmounts">(${euro.format(x.vervalPremie)} vs ${euro.format(x.verdiendePremie)})</span></div></div></div>`;
-  }).join('') + `</div>`;
-}
-function vervalRatioGroupHtml(data, ordered, cat, currentPeriod) {
-  if (!data) return `<div class="portfolioNoData">${msg('portefeuilleEmpty')}</div>`;
-  const hasSubs = ordered.some(s => s !== cat);
-  return `<div class="vervalRatioGroup">` + ordered.map(key => {
-    const isMain = key === cat;
-    const sectionClass = `${isMain ? 'mainRatioSection' : 'subRatioSection'}${hasSubs ? ' hasSubs' : ''}`;
-    const title = categoryRowLabelHtml(key, cat, hasSubs);
-    return `<div class="vervalRatioSection ${sectionClass}"><div class="vervalRatioSectionTitle">${title}</div>${vervalRatioBarsHtml(data, key, currentPeriod)}</div>`;
-  }).join('') + `</div>`;
-}
-function renderVervalGroup(cat, rows, prevP, currP, data) {
-  const catRows = rows.filter(r => r[cols.hoofd] === cat);
-  const ordered = orderedSubs(catRows, cat);
-  const labels = labelHtmlFor(ordered, cat);
-  const prevRow = s => catRows.find(r => r[cols.sub] === s && r[cols.periode] === prevP) || {};
-  const currRow = s => catRows.find(r => r[cols.sub] === s && r[cols.periode] === currP) || {};
-  const vals = (field, period) => ordered.map(s => n((period === prevP ? prevRow(s) : currRow(s))[field]));
-  const head = currRow(cat), prevHead = prevRow(cat);
-  const dVerval = yoy(n(prevHead[cols.vervalPremie]), n(head[cols.vervalPremie]));
-  const dCnt = yoy(n(prevHead[cols.vervalAantal]), n(head[cols.vervalAantal]));
-  const verdiendePremie = data ? earnedPremiumForVervalRatio(data, cat, currP) : 0;
-  const vervalRatioNote = vervalRatioText(head[cols.vervalPremie], verdiendePremie, currP);
-  const ratioTitle = currentLang === 'fr' ? 'Chute vs prime acquise' : 'Verval vs verdiende premie';
-  const extraTitle = currentLang === 'fr' ? 'Afficher chute client / compagnie' : 'Toon verval door klant / maatschappij';
-  return `<div class="cat"><div class="catHead exportableBlockHeader"><div class="catTitle">${catTitleHtml(cat)}</div><div class="small">${prevP} → ${currP}</div>${productBlockExportActionsHtml()}</div><div class="p-18"><div class="split"><div class="metric"><b>${msg('vervalpremie')} ${currP}</b><span class="metric-val">${euro.format(n(head[cols.vervalPremie]))}</span>${deltaHtml(dVerval, n(prevHead[cols.vervalPremie]), prevP, 'money', true)}</div><div class="metric"><b>${msg('aantalVerval')}</b><span class="metric-val">${num.format(n(head[cols.vervalAantal]))}</span>${deltaHtml(dCnt, n(prevHead[cols.vervalAantal]), prevP, 'num', true)}</div><div class="metric"><b>${msg('klantMaatschappij')}</b><span class="metric-val">${euro.format(n(head[cols.vervalKlant]))} / ${euro.format(n(head[cols.vervalMij]))}</span></div></div><div class="miniGrid vervalMiniGrid"><div class="miniCard"><h3>${msg('vervalpremie')} ${vervalRatioNote}</h3>${barCompareHtml(labels, vals(cols.vervalPremie, prevP), vals(cols.vervalPremie, currP), prevP, currP, 'money', 'orange', '', { showDelta: true, invertDelta: true })}</div><div class="miniCard vervalRatioCard"><h3>${ratioTitle}</h3>${vervalRatioGroupHtml(data, ordered, cat, currP)}</div><div class="miniCard"><h3>${msg('aantalVervallenZaken')}</h3>${barCompareHtml(labels, vals(cols.vervalAantal, prevP), vals(cols.vervalAantal, currP), prevP, currP, 'num', 'orange', '', { showDelta: true, invertDelta: true })}</div><details class="vervalExtraDetails"><summary>${extraTitle}</summary><div class="vervalExtraGrid"><div class="miniCard"><h3>${msg('vervalKlant')}</h3>${barCompareHtml(labels, vals(cols.vervalKlant, prevP), vals(cols.vervalKlant, currP), prevP, currP, 'money', 'orange')}</div><div class="miniCard"><h3>${msg('vervalMaatschappij')}</h3>${barCompareHtml(labels, vals(cols.vervalMij, prevP), vals(cols.vervalMij, currP), prevP, currP, 'money', 'orange')}</div></div></details></div></div></div>`;
-}
-
-function renderProgressieGroup(cat, rows, prevP, currP) {
-  const catRows = rows.filter(r => r[cols.hoofd] === cat);
-  const ordered = orderedSubs(catRows, cat);
-  const labels = labelHtmlFor(ordered, cat);
-  const prevRow = s => catRows.find(r => r[cols.sub] === s && r[cols.periode] === prevP) || {};
-  const currRow = s => catRows.find(r => r[cols.sub] === s && r[cols.periode] === currP) || {};
-  const vals = (field, period) => ordered.map(s => n((period === prevP ? prevRow(s) : currRow(s))[field]));
-  const valsProgPct = (period) => ordered.map(s => { const r = period === prevP ? prevRow(s) : currRow(s); return n(r[cols.portefeuille]) ? n(r[cols.progPremie]) / n(r[cols.portefeuille]) * 100 : 0 });
-  const head = currRow(cat), prevHead = prevRow(cat);
-  const dProg = yoy(n(prevHead[cols.progPremie]), n(head[cols.progPremie]));
-  const pctPort = n(head[cols.portefeuille]) ? n(head[cols.progPremie]) / n(head[cols.portefeuille]) * 100 : 0;
-  return `<div class="cat"><div class="catHead exportableBlockHeader"><div class="catTitle">${catTitleHtml(cat)}</div><div class="small">${prevP} → ${currP}</div>${productBlockExportActionsHtml()}</div><div class="p-18"><div class="split split-2"><div class="metric"><b>${msg('progressiepremie')} ${currP}</b><span class="metric-val ${cls(n(head[cols.progPremie]))}">${euro.format(n(head[cols.progPremie]))}</span>${deltaHtml(dProg, n(prevHead[cols.progPremie]), prevP, 'money')}</div><div class="metric"><b>${msg('transformatie')}</b><span class="metric-val ${cls(n(head[cols.trans]))}">${euro.format(n(head[cols.trans]))}</span></div></div><div class="miniGrid"><div class="miniCard"><h3>${msg('progressiepremie')}</h3>${progressBarCompareHtml(labels, vals(cols.progPremie, prevP), vals(cols.progPremie, currP), prevP, currP, 'money', { showDelta: true })}</div><div class="miniCard"><h3>${msg('aantalProgressiezaken')}</h3>${progressBarCompareHtml(labels, vals(cols.progAantal, prevP), vals(cols.progAantal, currP), prevP, currP, 'num', { showDelta: true })}</div><div class="miniCard"><h3>${msg('transformatie')}</h3>${progressBarCompareHtml(labels, vals(cols.trans, prevP), vals(cols.trans, currP), prevP, currP, 'money', { showDelta: true })}</div></div></div></div>`;
-}
-
-function renderSchadeGrouped(data, prevP, currP) {
-  const rows = nonTotalRows(data, 'SCHADE').filter(r => [prevP, currP].includes(r[cols.periode]));
-  const totalRows = totalRowsFor(data, 'SCHADE', prevP, currP);
-  const cats = [...new Set(rows.filter(r => r[cols.periode] === currP).map(r => r[cols.hoofd]).filter(Boolean))];
-  const catHtml = cats.map(cat => renderSchadeGroup(cat, rows, prevP, currP)).join('');
-  const totalHtml = totalRows.length ? totalBlock(renderSchadeGroup('TOTAAL NON LIFE', totalRows, prevP, currP)) : '';
-  if (!catHtml && !totalHtml) { $('schadeGrouped').innerHTML = `<div class="note">${msg('noSchade')}</div>`; return }
-  $('schadeGrouped').innerHTML = totalHtml + catHtml;
-}
-function claimAverageText(amount, claimCount) {
-  const cnt = n(claimCount);
-  if (!cnt) return '';
-  const avg = n(amount) / cnt;
-  const label = currentLang === 'fr' ? 'moyenne' : 'gemiddeld';
-  const suffix = currentLang === 'fr' ? '/sinistre' : '/schade';
-  return `<span class="claimAvgNote">(${label} ${euro.format(avg)}${suffix})</span>`;
-}
-function renderSchadeGroup(cat, rows, prevP, currP) {
-  const catRows = rows.filter(r => r[cols.hoofd] === cat);
-  const subAll = [...new Set(catRows.map(r => r[cols.sub]).filter(Boolean))];
-  const ordered = [...subAll.filter(s => s === cat), ...subAll.filter(s => s !== cat)];
-  const hasSubs = ordered.some(s => s !== cat);
-  const labelHtml = ordered.map(s => categoryRowLabelHtml(s, cat, hasSubs));
-  const prevRow = s => catRows.find(r => r[cols.sub] === s && r[cols.periode] === prevP) || {};
-  const currRow = s => catRows.find(r => r[cols.sub] === s && r[cols.periode] === currP) || {};
-  const vals = (field, period) => ordered.map(s => n((period === prevP ? prevRow(s) : currRow(s))[field]));
-  const head = currRow(cat);
-  const prevHead = prevRow(cat);
-  const dLast  = yoy(n(prevHead[cols.schadelast]), n(head[cols.schadelast]));
-  const dSp    = ppDelta(n(prevHead[cols.sp]),      n(head[cols.sp]));
-  const dSpCap = ppDelta(n(prevHead[cols.spCap]),   n(head[cols.spCap]));
-  const dAantal = yoy(n(prevHead[cols.schadeAantal]), n(head[cols.schadeAantal]));
-  const headRight = `${prevP} &rarr; ${currP}`;
-  const schadelastTitle = `${msg('schadelast')} ${claimAverageText(head[cols.schadelast], head[cols.schadeAantal])}`;
-  const afgetopteSchadelastTitle = `${msg('afgetopteSchadelast')} ${claimAverageText(head[cols.schadeCap], head[cols.schadeAantal])}`;
-  return `<div class="cat"><div class="catHead exportableBlockHeader"><div class="catTitle">${catTitleHtml(cat)}</div><div class="small">${headRight}</div>${productBlockExportActionsHtml()}</div><div class="p-18">` +
-    `<div class="split" style="grid-template-columns:repeat(4,1fr)">` +
-      `<div class="metric"><b>${msg('schadelast')} ${currP}</b><span class="metric-val">${euro.format(n(head[cols.schadelast]))}</span>${deltaHtml(dLast, n(prevHead[cols.schadelast]), prevP, 'money', true)}</div>` +
-      `<div class="metric"><b>S/P ${currP}</b><span class="metric-val ${spValueClass(n(head[cols.sp]), spThresholdForLabel(cat, cat))}">${pct.format(n(head[cols.sp]))}%</span>${deltaHtml(dSp, n(prevHead[cols.sp]), prevP, 'pct', true)}</div>` +
-      `<div class="metric"><b>${msg('spAfgetopt')} ${currP}</b><span class="metric-val ${spValueClass(n(head[cols.spCap]), spThresholdForLabel(cat, cat))}">${pct.format(n(head[cols.spCap]))}%</span>${deltaHtml(dSpCap, n(prevHead[cols.spCap]), prevP, 'pct', true)}</div>` +
-      `<div class="metric"><b>${msg('aantalSchadegevallen')}</b><span class="metric-val">${num.format(n(head[cols.schadeAantal]))}</span>${deltaHtml(dAantal, n(prevHead[cols.schadeAantal]), prevP, 'num', true)}</div>` +
-    `</div>` +
-    `<div class="miniGrid">` +
-      `<div class="miniCard"><h3>${schadelastTitle}</h3>${barCompareHtml(labelHtml, vals(cols.schadelast, prevP), vals(cols.schadelast, currP), prevP, currP, 'money', 'red', '', { showDelta: true, invertDelta: true })}</div>` +
-      `<div class="miniCard"><h3>${msg('spNietAfgetopt')}</h3>${barCompareHtml(labelHtml, vals(cols.sp, prevP), vals(cols.sp, currP), prevP, currP, 'pct', 'purple', cat, { showDelta: true, invertDelta: true, absolutePctDelta: true })}</div>` +
-      `<div class="miniCard"><h3>${afgetopteSchadelastTitle}</h3>${barCompareHtml(labelHtml, vals(cols.schadeCap, prevP), vals(cols.schadeCap, currP), prevP, currP, 'money', 'red', '', { showDelta: true, invertDelta: true })}</div>` +
-      `<div class="miniCard"><h3>${msg('spAfgetopt')}</h3>${barCompareHtml(labelHtml, vals(cols.spCap, prevP), vals(cols.spCap, currP), prevP, currP, 'pct', 'purple', cat, { showDelta: true, invertDelta: true, absolutePctDelta: true })}</div>` +
-      `<div class="miniCard"><h3>${msg('aantalSchadegevallen')}</h3>${barCompareHtml(labelHtml, vals(cols.schadeAantal, prevP), vals(cols.schadeAantal, currP), prevP, currP, 'num', 'red', '', { showDelta: true, invertDelta: true })}</div>` +
-      `<div class="miniCard"><h3>${msg('verdiendePremie')}</h3>${barCompareHtml(labelHtml, vals(cols.verdiend, prevP), vals(cols.verdiend, currP), prevP, currP, 'money', 'blue', '', { showDelta: true })}</div>` +
-    `</div></div></div>`;
-}
-
-
-function getTotalNonLifeValue(data, type, period, field, cellIndex) {
-  return totalNumber(totalRow(data, type, period), field, cellIndex);
-}
 function normKey(v) { return String(v || '').trim().toUpperCase().replace(/\s+/g, ' '); }
-function portfolioCategoryAliases(key) {
-  return {
-    'TOTAAL NON LIFE': ['TOTAAL NON LIFE', 'TOTAL NON VIE'],
-    'Auto': ['Auto'],
-    'Particulieren': ['Particulieren', 'Particuliers'],
-    'Ondernemingen': ['Ondernemingen', 'Entreprises'],
-    'Auto Vloten': ['Auto Vloten', 'Auto Flottes'],
-    'Auto Niet Vloten': ['Auto Niet Vloten', 'Auto Niet-Vloten', 'Auto Non Flottes', 'Auto Non-Flottes'],
-    'Particulieren Brand': ['Particulieren Brand', 'Particuliers Incendie'],
-    'Particulieren BA': ['Particulieren BA', 'Particuliers BA', 'Particuliers RC'],
-    'Particulieren Overige': ['Particulieren Overige', 'Particuliers Overige', 'Particuliers Autres'],
-    'Ondernemingen Brand': ['Ondernemingen Brand', 'Entreprises Brand', 'Entreprises Incendie'],
-    'Ondernemingen BA': ['Ondernemingen BA', 'Entreprises BA', 'Entreprises RC'],
-    'Ondernemingen Overige': ['Ondernemingen Overige', 'Entreprises Overige', 'Entreprises Autres'],
-    'Arbeidsongevallen': ['Arbeidsongevallen', 'Accidents de Travail'],
-    'Rechtsbijstand': ['Rechtsbijstand', 'Rechtsbijstand Stand Alone', 'Protection Juridique', 'Protection Juridique Stand Alone']
-  }[key] || [key];
-}
-function portfolioCategoryLabel(key) {
-  const nl = {
-    'TOTAAL NON LIFE':'Totaal non life','Auto Vloten':'Auto vloten','Auto Niet Vloten':'Auto niet-vloten','Particulieren Brand':'Particulieren · Brand','Particulieren BA':'Particulieren · BA','Particulieren Overige':'Particulieren · Overige','Ondernemingen Brand':'Ondernemingen · Brand','Ondernemingen BA':'Ondernemingen · BA','Ondernemingen Overige':'Ondernemingen · Overige','Arbeidsongevallen':'Arbeidsongevallen','Rechtsbijstand':'Rechtsbijstand'
-  };
-  const fr = {
-    'TOTAAL NON LIFE':'Total non vie','Auto Vloten':'Auto flottes','Auto Niet Vloten':'Auto non flottes','Particulieren Brand':'Particuliers · Incendie','Particulieren BA':'Particuliers · RC','Particulieren Overige':'Particuliers · Autres','Ondernemingen Brand':'Entreprises · Incendie','Ondernemingen BA':'Entreprises · RC','Ondernemingen Overige':'Entreprises · Autres','Arbeidsongevallen':'Accidents de travail','Rechtsbijstand':'Protection juridique'
-  };
-  return (currentLang === 'fr' ? fr : nl)[key] || displayLabel(key);
-}
-function portfolioCategoryTitleHtml(key, isTotal = false) {
-  const title = isTotal ? 'TOTAAL NON LIFE' : portfolioCategoryLabel(key);
-  if (isTotal) return esc(title);
-  let iconKey = '';
-  if (String(key).startsWith('Auto')) iconKey = 'auto';
-  else if (String(key).startsWith('Particulieren')) iconKey = 'particulieren';
-  else if (String(key).startsWith('Ondernemingen')) iconKey = 'ondernemingen';
-  else if (String(key).startsWith('Arbeidsongevallen')) iconKey = 'arbeidsongevallen';
-  else if (String(key).startsWith('Rechtsbijstand')) iconKey = 'rechtsbijstand';
-  const icon = iconKey && CATEGORY_ICONS[iconKey] ? `<img class="catIcon" src="${CATEGORY_ICONS[iconKey]}" alt="" />` : '';
-  return `${icon}<span>${esc(title)}</span>`;
-}
 
-function getPortfolioPeriods(data) {
-  return [...new Set(rowsOf(data, 'SCHADE').map(r => String(r[cols.periode] || '').trim()).filter(Boolean))].sort((a,b) => pkey(a) - pkey(b));
-}
-function getPortfolioValue(data, key, period) {
-  if (key === 'TOTAAL NON LIFE') return getTotalNonLifeValue(data, 'SCHADE', period, cols.verdiend, 15);
-  const aliases = portfolioCategoryAliases(key).map(normKey);
-  const sourceRows = rowsOfPeriod(data, 'SCHADE', period);
-  const candidates = sourceRows.filter(r => aliases.includes(normKey(r[cols.sub])) || aliases.includes(normKey(r[cols.hoofd])));
-  const withData = candidates.slice().reverse().find(r => n(r[cols.verdiend]) !== 0 || (r._cells && n(r._cells[15]) !== 0));
-  const row = withData || candidates[candidates.length - 1] || {};
-  const byName = n(row[cols.verdiend]);
-  if (byName !== 0) return byName;
-  if (row && row._cells && row._cells[15] !== undefined) return n(row._cells[15]);
-  return 0;
-}
-function getPortfolioYearItems(data, key = 'TOTAAL NON LIFE', currentPeriod = '') {
-  // Portefeuillegrafiek: toon de drie volledige jaren die vóór de laatste periode liggen.
-  // Voor een totaalrapport 12 2025 betekent dit dus 12 2022, 12 2023 en 12 2024
-  // als blauwe jaarbalken, met 12 2025 als aparte oranje periodebalk.
-  const currentKey = pkey(currentPeriod);
-  const yearPeriods = getPortfolioPeriods(data)
-    .filter(p => String(p).trim().startsWith('12 '))
-    .filter(p => !currentKey || pkey(p) < currentKey)
-    .slice(-3);
-  return yearPeriods.map(p => ({ period: p, value: getPortfolioValue(data, key, p) }));
-}
-function portfolioYearBars(items) {
-  // Oude functie behouden als fallback; de portefeuille-tab gebruikt nu portfolioPeriodComparisonBars().
-  const hasData = items.some(x => x.value !== 0);
-  if (!items.length || !hasData) return `<div class="portfolioNoData">${msg('portefeuilleEmpty')}</div>`;
-  const max = Math.max(1, ...items.map(x => Math.abs(x.value)));
-  return `<div class="portfolioBars">` + items.map((x, i) => {
-    const h = Math.max(2, Math.abs(x.value) / max * 100);
-    const bar = `<div class="portfolioBarCol"><div class="portfolioBarValue">${euro.format(x.value)}</div><div class="portfolioBarFill" style="height:${h}%"></div><div class="portfolioBarLabel">${esc(x.period)}</div></div>`;
-    if (i === items.length - 1) return bar;
-    const d = yoy(x.value, items[i + 1].value);
-    const change = `<div class="portfolioYearChange ${cls(d)}">${d >= 0 ? '+' : ''}${pct.format(d)}%</div>`;
-    return bar + change;
-  }).join('') + `</div>`;
-}
-function portfolioPeriodComparisonBars(data, key, prevP, currP) {
-  const yearItems = getPortfolioYearItems(data, key, currP).filter(x => x.value !== 0 || String(x.period || '').trim());
-  const prevVal = getPortfolioValue(data, key, prevP);
-  const currVal = getPortfolioValue(data, key, currP);
-  const hasData = yearItems.some(x => x.value !== 0) || prevVal !== 0 || currVal !== 0;
-  if (!hasData) return `<div class="portfolioNoData">${msg('portefeuilleEmpty')}</div>`;
-
-  const max = Math.max(1, ...yearItems.map(x => Math.abs(x.value)), Math.abs(prevVal), Math.abs(currVal));
-  const lastFullPeriod = yearItems.length ? yearItems[yearItems.length - 1].period : '';
-  const lastFullValue = yearItems.length ? yearItems[yearItems.length - 1].value : 0;
-
-  const yearBarHtml = yearItems.map((x, i) => {
-    const h = Math.max(2, Math.abs(x.value) / max * 100);
-    const isLastFull = i === yearItems.length - 1;
-    const overlayH = isLastFull && x.value ? Math.min(100, Math.max(0, Math.abs(prevVal) / Math.abs(x.value) * 100)) : 0;
-    const overlayTitle = isLastFull ? ` · ${esc(prevP)}: ${euro.format(prevVal)}` : '';
-    const small = '';
-    return `<div class="portfolioCompareBarCol">
-      <div class="portfolioBarValue">${euro.format(x.value)}<small>${esc(x.period || '')}</small></div>
-      <div class="portfolioBarStack">
-        <div class="portfolioBarShell fullYear" style="--bar-h:${h}%" data-tip-label="${esc(x.period || '')}" data-tip-value="${euro.format(x.value)}" data-tip-extra="${overlayTitle}">
-          ${isLastFull ? `<div class="portfolioPeriodOverlay" style="--overlay-h:${overlayH}%" data-tip-label="${esc(prevP)}" data-tip-value="${euro.format(prevVal)}"></div>` : ''}
-        </div>
-      </div>
-      <div class="portfolioBarLabel">${esc(x.period || '')}</div>
-    </div>`;
-  });
-
-  const barsWithDeltas = [];
-  yearBarHtml.forEach((bar, i) => {
-    barsWithDeltas.push(bar);
-    if (i < yearItems.length - 1) {
-      const d = yoy(yearItems[i].value, yearItems[i + 1].value);
-      barsWithDeltas.push(`<div class="portfolioCompareDelta ${cls(d)}">${d >= 0 ? '+' : ''}${pct.format(d)}%</div>`);
-    }
-  });
-
-  const periodDelta = yoy(prevVal, currVal);
-  const currH = Math.max(2, Math.abs(currVal) / max * 100);
-  if (yearItems.length) {
-    barsWithDeltas.push(`<div class="portfolioCompareDelta ${cls(periodDelta)}">${periodDelta >= 0 ? '+' : ''}${pct.format(periodDelta)}%</div>`);
-  }
-  barsWithDeltas.push(`<div class="portfolioCompareBarCol">
-    <div class="portfolioBarValue">${euro.format(currVal)}<small>${esc(currP)}</small></div>
-    <div class="portfolioBarStack">
-      <div class="portfolioBarShell currentPeriod" style="--bar-h:${currH}%" data-tip-label="${esc(currP)}" data-tip-value="${euro.format(currVal)}"></div>
-    </div>
-    <div class="portfolioBarLabel">${esc(currP)}</div>
-  </div>`);
-
-  return `<div class="portfolioPeriodBars">${barsWithDeltas.join('')}</div>`;
-}
-function signedEuroValue(value) {
-  const sign = value >= 0 ? '+' : '-';
-  return sign + euro.format(Math.abs(value));
-}
-function portfolioAmountSummary(prevP, currP, prevVal, currVal) {
-  const delta = currVal - prevVal;
-  const d = yoy(prevVal, currVal);
-  const bubbleClass = delta > 0 ? 'positive' : (delta < 0 ? 'negative' : 'neutral');
-  return `<div class="portfolioAmounts">
-    <div class="portfolioAmountItem"><b>${msg('vorigJaar')} · ${esc(prevP)}</b><span>${euro.format(prevVal)}</span></div>
-    <div class="portfolioAmountItem"><b>${msg('huidigJaar')} · ${esc(currP)}</b><span>${euro.format(currVal)}</span></div>
-    <div class="portfolioDeltaBubble ${bubbleClass}"><b>Delta</b><span>${signedEuroValue(delta)} (${d >= 0 ? '+' : ''}${pct.format(d)}%)</span></div>
-  </div>`;
-}
-function portfolioOverlap(prevP, currP, prevVal, currVal) {
-  // Oude horizontale overlap vervangen door een bedragensamenvatting.
-  return portfolioAmountSummary(prevP, currP, prevVal, currVal);
-}
-function attachPortfolioBarHover(root = $('portefeuilleCharts')) {
-  if (!root || root._portfolioBarHoverAttached) return;
-  root._portfolioBarHoverAttached = true;
-  const hide = () => {
-    const tooltip = $('portfolioPieTooltip');
-    if (tooltip) tooltip.style.display = 'none';
-  };
-  root.addEventListener('mousemove', e => {
-    const target = e.target.closest('.portfolioBarShell,.portfolioPeriodOverlay');
-    const tooltip = $('portfolioPieTooltip');
-    if (!target || !root.contains(target) || !tooltip) {
-      hide();
-      return;
-    }
-    const label = target.dataset.tipLabel || '';
-    const value = target.dataset.tipValue || '';
-    const extra = target.dataset.tipExtra || '';
-    if (tooltip.parentElement !== document.body) document.body.appendChild(tooltip);
-    tooltip.innerHTML = `<strong>${esc(label)}</strong><span class="muted">${esc(value)}${extra ? esc(extra) : ''}</span>`;
-    tooltip.style.transform = 'none';
-    positionPieTooltip(tooltip, e.clientX, e.clientY);
-  });
-  root.addEventListener('mouseleave', hide);
-}
-function renderPortfolioBlock(data, key, prevP, currP, isTotal = false) {
-  const prevVal = getPortfolioValue(data, key, prevP);
-  const currVal = getPortfolioValue(data, key, currP);
-  const hasCompare = prevVal !== 0 || currVal !== 0;
-  const title = portfolioCategoryTitleHtml(key, isTotal);
-  const leftTitle = currentLang === 'fr' ? 'Année complète + période' : 'Vorig volledig jaar + periode';
-  return `<div class="portfolioCategoryBlock ${isTotal ? 'portfolioTotalBlock' : ''}"><div class="portfolioCategoryHead exportableBlockHeader"><div class="catTitle">${title}</div><div class="small">${esc(prevP)} &rarr; ${esc(currP)}</div>${productBlockExportActionsHtml()}</div><div class="portfolioGrid"><div class="portfolioChartCard"><h3>${leftTitle}</h3>${portfolioPeriodComparisonBars(data, key, prevP, currP)}</div><div class="portfolioChartCard"><h3>${msg('portefeuilleComparison')}</h3>${hasCompare ? portfolioAmountSummary(prevP, currP, prevVal, currVal) : `<div class="portfolioNoData">${msg('portefeuilleEmpty')}</div>`}</div></div></div>`;
-}
-function getPortfolioPieItems(data, period) {
-  const keys = ['Auto Vloten','Auto Niet Vloten','Particulieren Brand','Particulieren BA','Particulieren Overige','Ondernemingen Brand','Ondernemingen BA','Ondernemingen Overige','Arbeidsongevallen','Rechtsbijstand'];
-  return keys.map((key, index) => {
-    const value = getPortfolioValue(data, key, period);
-    return { key, label: portfolioCategoryLabel(key), value, color: pieSegmentColor(key, index) };
-  }).filter(x => x.value > 0);
-}
 function drawPortfolioPie(canvas, period, items, hoverIndex = -1, centerText = null) {
   if (!canvas) return;
   const ctx = canvas.getContext('2d');
@@ -4363,64 +2664,7 @@ function attachPortfolioPieHover(canvas) {
     if (state && state.hoverIndex !== -1) drawPortfolioPie(canvas, state.period, sourceItems(state), -1, state.centerText);
   });
 }
-function renderPortfolioPies(data, currP) {
-  const card = $('portfolioPieCard');
-  if (!card) return;
-  const yearItems = getPortfolioYearItems(data, 'TOTAAL NON LIFE', currP);
-  const prevFullPeriod = yearItems.length ? yearItems[yearItems.length - 1].period : '';
-  if (!prevFullPeriod || !currP) { card.classList.add('hidden'); return; }
-  const prevItems = getPortfolioPieItems(data, prevFullPeriod);
-  const currItems = getPortfolioPieItems(data, currP);
-  card.classList.remove('hidden');
-  setText('portfolioPieTitle', currentLang === 'fr' ? 'Répartition prime acquise' : 'Verdeling verdiende premie');
-  setText('portfolioPieSub', '');
-  setText('portfolioPiePrevTitle', (currentLang === 'fr' ? 'Année complète précédente · ' : 'Volledig voorgaand jaar · ') + prevFullPeriod);
-  setText('portfolioPieCurrTitle', (currentLang === 'fr' ? 'Dernière période · ' : 'Laatste periode · ') + currP);
-  const prevTotal = prevItems.reduce((sum, x) => sum + x.value, 0);
-  const currTotal = currItems.reduce((sum, x) => sum + x.value, 0);
-  const totalLabel = currentLang === 'fr' ? 'Total prime acquise' : 'Totale verdiende premie';
-  const prevTotalEl = $('portfolioPiePrevTotal');
-  const currTotalEl = $('portfolioPieCurrTotal');
-  if (prevTotalEl) prevTotalEl.innerHTML = `${totalLabel}: <b>${euro.format(prevTotal)}</b>`;
-  if (currTotalEl) currTotalEl.innerHTML = `${totalLabel}: <b>${euro.format(currTotal)}</b>`;
-  renderPortfolioPieLegend($('portfolioPiePrevLegend'), prevItems);
-  renderPortfolioPieLegend($('portfolioPieCurrLegend'), currItems);
-  const prevCanvas = $('portfolioPiePrevCanvas'), currCanvas = $('portfolioPieCurrCanvas');
-  drawPortfolioPie(prevCanvas, prevFullPeriod, prevItems, -1, msg('verdiendePremie'));
-  drawPortfolioPie(currCanvas, currP, currItems, -1, msg('verdiendePremie'));
-  if (prevCanvas) prevCanvas.dataset.tooltipId = 'portfolioPieTooltip';
-  if (currCanvas) currCanvas.dataset.tooltipId = 'portfolioPieTooltip';
-  attachPortfolioPieHover(prevCanvas);
-  attachPortfolioPieHover(currCanvas);
-  attachPieLegendHover($('portfolioPiePrevLegend'), prevCanvas, 'portfolioPieTooltip');
-  attachPieLegendHover($('portfolioPieCurrLegend'), currCanvas, 'portfolioPieTooltip');
-}
-function renderPortefeuille(data, prevP, currP) {
-  const keys = ['Auto Vloten','Auto Niet Vloten','Particulieren Brand','Particulieren BA','Particulieren Overige','Ondernemingen Brand','Ondernemingen BA','Ondernemingen Overige','Arbeidsongevallen','Rechtsbijstand'];
-  $('portefeuilleCharts').innerHTML = renderPortfolioBlock(data, 'TOTAAL NON LIFE', prevP, currP, true) + keys.map(key => renderPortfolioBlock(data, key, prevP, currP)).join('');
-  attachPortfolioBarHover();
-  renderPortfolioPies(data, currP);
-}
 
-function pieCategoryLabel(canonical) {
-  const nlPieLabels = {
-    'Particulieren Brand': 'Particulieren brand',
-    'Particulieren BA': 'Particulieren BA',
-    'Ondernemingen Brand': 'Ondernemingen brand',
-    'Ondernemingen BA': 'Ondernemingen BA',
-    'Overige': 'Overige'
-  };
-  const frPieLabels = {
-    'Particulieren Brand': 'Particuliers incendie',
-    'Particulieren BA': 'Particuliers RC',
-    'Ondernemingen Brand': 'Entreprises incendie',
-    'Ondernemingen BA': 'Entreprises RC',
-    'Overige': 'Autres'
-  };
-  if (currentLang === 'fr' && frPieLabels[canonical]) return frPieLabels[canonical];
-  if (currentLang !== 'fr' && nlPieLabels[canonical]) return nlPieLabels[canonical];
-  return displayLabel(canonical) || canonical;
-}
 function pieSegmentColor(key, index = 0) {
   const palette = {
     'Auto': '#f58220',
@@ -4474,580 +2718,6 @@ function drawPieCenter(ctx, cx, cy, radius, mainText, subText, fontScale = 1) {
   ctx.font = `900 ${Math.round(18 * fontScale)}px Lato,Arial`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(mainText || '', cx, cy - 9 * fontScale);
   ctx.font = `800 ${Math.round(18 * fontScale)}px Lato,Arial`; ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--muted').trim() || '#62748a'; ctx.fillText(subText || '', cx, cy + 13 * fontScale);
 }
-function drawProductionPieCanvas(canvas, pieState, hoverIndex = -1) {
-  if (!canvas || !pieState || !pieState.segments) return;
-  const ctx = canvas.getContext('2d');
-  const { cx, cy, radius, segments, centerText, period } = pieState;
-  ctx.clearRect(0, 0, canvas.width, canvas.height); ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, canvas.width, canvas.height);
-  segments.forEach((seg, i) => { if (i !== hoverIndex) drawGradientPieSegment(ctx, cx, cy, radius, seg.start, seg.end, seg.color, { strokeWidth: 3 }); });
-  if (hoverIndex >= 0 && segments[hoverIndex]) { const seg = segments[hoverIndex]; drawGradientPieSegment(ctx, cx, cy, radius, seg.start, seg.end, seg.color, { offset: 9, strokeWidth: 4 }); }
-  drawPieCenter(ctx, cx, cy, radius, centerText, period, 1);
-}
-
-
-function getProgressionContributionItems(data, period) {
-  const wanted = ['Auto Vloten','Auto Niet Vloten','Particulieren','Ondernemingen Brand','Ondernemingen BA','Arbeidsongevallen','Rechtsbijstand'];
-  const sourceRows = rowsOf(data, 'PRODUCTIE').filter(r => String(r[cols.periode] || '').trim() === String(period).trim());
-  const aliases = {
-    'Rechtsbijstand': ['Rechtsbijstand', 'Rechtsbijstand Stand Alone', 'Protection Juridique', 'Protection Juridique Stand Alone'],
-    'Auto Vloten': ['Auto Vloten', 'Auto Flottes'],
-    'Auto Niet Vloten': ['Auto Niet Vloten', 'Auto Non Flottes'],
-    'Particulieren': ['Particulieren', 'Particuliers'],
-    'Ondernemingen Brand': ['Ondernemingen Brand', 'Entreprises Incendie'],
-    'Ondernemingen BA': ['Ondernemingen BA', 'Entreprises BA', 'Entreprises RC'],
-    'Arbeidsongevallen': ['Arbeidsongevallen', 'Accidents de Travail']
-  };
-  const norm = v => String(v || '').trim().toUpperCase();
-  return wanted.map(key => {
-    const keys = (aliases[key] || [key]).map(norm);
-    const row = sourceRows.find(r => keys.includes(norm(r[cols.sub]))) ||
-      sourceRows.find(r => keys.includes(norm(r[cols.hoofd])) && keys.includes(norm(r[cols.sub]))) ||
-      {};
-    return { key, label: pieCategoryLabel(key), value: n(row[cols.progPremie]) };
-  }).filter(x => x.value !== 0);
-}
-
-function drawProgressionContributionCanvas(canvas, items, period, hoverId = null) {
-  const ctx = canvas.getContext('2d');
-  const w = canvas.width, h = canvas.height;
-  const positives = items.filter(x => x.value > 0).sort((a, b) => b.value - a.value);
-  const negatives = items.filter(x => x.value < 0).sort((a, b) => b.value - a.value);
-  const posTotal = positives.reduce((s, x) => s + x.value, 0);
-  const negTotal = negatives.reduce((s, x) => s + Math.abs(x.value), 0);
-  const net = items.reduce((s, x) => s + x.value, 0);
-  ctx.clearRect(0, 0, w, h);
-  ctx.fillStyle = '#ffffff';
-  ctx.fillRect(0, 0, w, h);
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'alphabetic';
-
-  const drawEmptyDonut = (cx, cy, r, title, accent) => {
-    ctx.fillStyle = accent;
-    ctx.font = '900 16px Inter, Segoe UI, Arial';
-    ctx.fillText(title, cx, 31);
-    ctx.beginPath();
-    ctx.arc(cx, cy, r, 0, Math.PI * 2);
-    ctx.strokeStyle = '#e6eef7';
-    ctx.lineWidth = 24;
-    ctx.stroke();
-    ctx.fillStyle = '#8fa3ba';
-    ctx.font = '800 13px Inter, Segoe UI, Arial';
-    ctx.fillText('Geen waarde', cx, cy + 5);
-  };
-
-  const drawDonut = (list, total, cx, cy, r, title, totalText, accent) => {
-    if (!list.length || !total) {
-      drawEmptyDonut(cx, cy, r, title, accent);
-      return [];
-    }
-    ctx.fillStyle = accent;
-    ctx.font = '900 16px Inter, Segoe UI, Arial';
-    ctx.fillText(title, cx, 31);
-    let start = -Math.PI / 2;
-    const segments = [];
-    list.forEach((item, i) => {
-      const value = Math.abs(item.value);
-      const angle = value / total * Math.PI * 2;
-      const color = pieSegmentColor(item.key, i);
-      const id = title + '|' + item.key;
-      item._contributionColor = color;
-      const isHover = hoverId === id;
-      drawGradientPieSegment(ctx, cx, cy, r, start, start + angle, color, { offset: isHover ? 8 : 0, strokeWidth: isHover ? 4 : 3 });
-      segments.push({ id, startAngle: start, endAngle: start + angle, label: item.label, value, total, cx, cy, r });
-      start += angle;
-    });
-    ctx.beginPath();
-    ctx.arc(cx, cy, r * .54, 0, Math.PI * 2);
-    ctx.fillStyle = '#ffffff';
-    ctx.fill();
-    ctx.strokeStyle = '#d6e4f2';
-    ctx.lineWidth = 1.5;
-    ctx.stroke();
-    ctx.fillStyle = '#5f7288';
-    ctx.font = '800 12px Inter, Segoe UI, Arial';
-    ctx.fillText(period, cx, cy - 6);
-    ctx.fillStyle = '#003b71';
-    ctx.font = '950 15px Inter, Segoe UI, Arial';
-    ctx.fillText(totalText, cx, cy + 14);
-    return segments;
-  };
-
-  const posSegments = drawDonut(positives, posTotal, Math.round(w * .27), Math.round(h * .55), 88, 'Positieve progressie', euro.format(posTotal), '#003b71');
-  const negSegments = drawDonut(negatives, negTotal, Math.round(w * .73), Math.round(h * .55), 88, 'Negatieve progressie', '-' + euro.format(negTotal), '#d85f2a');
-  canvas._pieSegments = [...posSegments, ...negSegments];
-  return { posTotal, negTotal, net, positives, negatives };
-}
-function renderProgressionContributionChart(data, currP, canvas, legend) {
-  const items = getProgressionContributionItems(data, currP);
-  if (!items.length) {
-    legend.innerHTML = `<div class="pieEmpty">${msg('progressiePieEmpty')}</div>`;
-    const ctx = canvas.getContext('2d'); ctx.clearRect(0, 0, canvas.width, canvas.height);
-    productionPieState = { segments: [], total: 0 };
-    return;
-  }
-  canvas._progressPieItems = items;
-  canvas._progressPiePeriod = currP;
-  canvas._progressHoverId = null;
-  const totals = drawProgressionContributionCanvas(canvas, items, currP);
-
-  // ── Hover-tooltip op taartgrafieken ──────────────────────────────────────
-  if (!canvas._pieTooltipAttached) {
-    canvas._pieTooltipAttached = true;
-    const tip = document.createElement('div');
-    tip.style.cssText = 'position:fixed;pointer-events:none;background:#10243c;color:#fff;border-radius:12px;padding:8px 13px;font-size:13px;font-weight:800;z-index:9999;display:none;white-space:nowrap;box-shadow:0 14px 34px rgba(15,23,42,.32);transform:translate(12px,-55%)';
-    document.body.appendChild(tip);
-    canvas.addEventListener('mousemove', e => {
-      if (canvas.dataset.pieMode !== 'progressie') return;
-      const segs = canvas._pieSegments || [];
-      const rect = canvas.getBoundingClientRect();
-      const scaleX = canvas.width / rect.width;
-      const scaleY = canvas.height / rect.height;
-      const mx = (e.clientX - rect.left) * scaleX;
-      const my = (e.clientY - rect.top) * scaleY;
-      let found = null;
-      for (const seg of segs) {
-        const dx = mx - seg.cx, dy = my - seg.cy;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        if (dist > seg.r * .54 && dist <= seg.r) {
-          let angle = Math.atan2(dy, dx);
-          // Normaliseer hoek tov starthoek (-π/2)
-          if (angle < -Math.PI / 2) angle += Math.PI * 2;
-          let sa = seg.startAngle, ea = seg.endAngle;
-          if (sa < -Math.PI / 2) { sa += Math.PI * 2; ea += Math.PI * 2; }
-          if (angle >= sa && angle <= ea) { found = seg; break; }
-        }
-      }
-      if (found) {
-        if (canvas._progressHoverId !== found.id) {
-          canvas._progressHoverId = found.id;
-          drawProgressionContributionCanvas(canvas, canvas._progressPieItems || [], canvas._progressPiePeriod || '', found.id);
-        }
-        const pctVal = found.total ? (found.value / found.total * 100) : 0;
-        tip.textContent = `${found.label}  ${pct.format(pctVal)}%`;
-        positionPieTooltip(tip, e.clientX, e.clientY);
-        canvas.style.cursor = 'pointer';
-      } else {
-        tip.style.display = 'none';
-        canvas.style.cursor = '';
-        if (canvas._progressHoverId) {
-          canvas._progressHoverId = null;
-          drawProgressionContributionCanvas(canvas, canvas._progressPieItems || [], canvas._progressPiePeriod || '');
-        }
-      }
-    });
-    canvas.addEventListener('mouseleave', () => { if (canvas.dataset.pieMode !== 'progressie') return; tip.style.display = 'none'; canvas.style.cursor = ''; if (canvas._progressHoverId) { canvas._progressHoverId = null; drawProgressionContributionCanvas(canvas, canvas._progressPieItems || [], canvas._progressPiePeriod || ''); } });
-  }
-  const { posTotal, negTotal, net, positives, negatives } = totals;
-  const totalAbs = Math.max(1, posTotal + negTotal);
-  const posWidth = posTotal / totalAbs * 100;
-  const negWidth = negTotal / totalAbs * 100;
-  const itemHtml = item => {
-    const isPos = item.value >= 0;
-    const base = isPos ? posTotal : negTotal;
-    const share = base ? Math.abs(item.value) / base * 100 : 0;
-    const color = item._contributionColor || pieSegmentColor(item.key, 0);
-    const clsName = isPos ? 'positive' : 'negative';
-    const pool = isPos ? 'van positief totaal' : 'van negatief totaal';
-    return `<div class="pieLegendItem contributionItem ${clsName}" style="--share:${Math.min(100, share)}%;--share-bg:${isPos ? 'rgba(0,59,113,.10)' : 'rgba(216,95,42,.12)'}"><span class="pieSwatch" style="background:${color}"></span><div class="pieLegendName">${esc(item.label)}<span class="pieLegendPct">${pct.format(share)}% ${pool}</span></div><div class="pieLegendValue">${euro.format(item.value)}</div></div>`;
-  };
-  const posLabel = posWidth > 13 ? `+${pct.format(posWidth)}%` : '';
-  const negLabel = negWidth > 13 ? `-${pct.format(negWidth)}%` : '';
-  const netClass = net >= 0 ? 'pos' : 'neg';
-  productionPieState = { segments: [], total: 0 };
-  legend.innerHTML = `<div class="netProgressBlock"><div class="netProgressHead"><div>Netto Progressie <span>${esc(currP)}</span></div><div class="netProgressValue ${netClass}">${euro.format(net)}</div></div><div class="netProgressStack"><div class="netProgressSegment pos" style="width:${posWidth}%">${posLabel}</div><div class="netProgressSegment neg" style="width:${negWidth}%">${negLabel}</div></div><div class="netProgressMeta"><div>Positieve progressie<b>${euro.format(posTotal)}</b></div><div>Negatieve progressie<b>-${euro.format(negTotal)}</b></div></div></div>` +
-    (positives.length ? `<div class="contributionGroupTitle">Positieve bijdragen</div>` + positives.map(itemHtml).join('') : '') +
-    (negatives.length ? `<div class="contributionGroupTitle">Negatieve bijdragen</div>` + negatives.map(itemHtml).join('') : '');
-}
-function getProductionPieItems(data, period, mode = 'productie') {
-  // Taartgrafieken tonen bewust de commerciële takken i.p.v. louter hoofdcategorieën.
-  // Particulieren wordt opgesplitst in Brand en BA; de kleinere restcategorieën van
-  // Particulieren en Ondernemingen worden samengeteld als één grijze categorie "Overige".
-  const wanted = [
-    { key: 'Auto Vloten' },
-    { key: 'Auto Niet Vloten' },
-    { key: 'Particulieren Brand' },
-    { key: 'Particulieren BA' },
-    { key: 'Ondernemingen Brand' },
-    { key: 'Ondernemingen BA' },
-    { key: 'Overige', sum: ['Particulieren Overige', 'Ondernemingen Overige'] },
-    { key: 'Arbeidsongevallen' },
-    { key: 'Rechtsbijstand' }
-  ];
-  const fieldByMode = { productie: cols.prodPremie, verval: cols.vervalPremie, progressie: cols.progPremie, schade: cols.schadelast };
-  const typeByMode = { productie: 'PRODUCTIE', verval: 'PRODUCTIE', progressie: 'PRODUCTIE', schade: 'SCHADE' };
-  const field = fieldByMode[mode] || cols.prodPremie;
-  const sourceType = typeByMode[mode] || 'PRODUCTIE';
-  const sourceRows = rowsOf(data, sourceType).filter(r => String(r[cols.periode] || '').trim() === String(period).trim());
-  const aliases = {
-    'Rechtsbijstand': ['Rechtsbijstand', 'Rechtsbijstand Stand Alone', 'Protection Juridique', 'Protection Juridique Stand Alone'],
-    'Auto Vloten': ['Auto Vloten', 'Auto Flottes'],
-    'Auto Niet Vloten': ['Auto Niet Vloten', 'Auto Non Flottes'],
-    'Particulieren Brand': ['Particulieren Brand', 'Particuliers Incendie'],
-    'Particulieren BA': ['Particulieren BA', 'Particuliers BA', 'Particuliers RC'],
-    'Particulieren Overige': ['Particulieren Overige', 'Particuliers Autres'],
-    'Ondernemingen Brand': ['Ondernemingen Brand', 'Entreprises Incendie'],
-    'Ondernemingen BA': ['Ondernemingen BA', 'Entreprises BA', 'Entreprises RC'],
-    'Ondernemingen Overige': ['Ondernemingen Overige', 'Entreprises Autres'],
-    'Arbeidsongevallen': ['Arbeidsongevallen', 'Accidents de Travail']
-  };
-  const norm = v => String(v || '').trim().toUpperCase();
-  const findValue = key => {
-    const keys = (aliases[key] || [key]).map(norm);
-    const row = sourceRows.find(r => keys.includes(norm(r[cols.sub]))) ||
-      sourceRows.find(r => keys.includes(norm(r[cols.hoofd])) && keys.includes(norm(r[cols.sub]))) ||
-      {};
-    return n(row[field]);
-  };
-  return wanted.map(item => {
-    const value = item.sum ? item.sum.reduce((sum, key) => sum + findValue(key), 0) : findValue(item.key);
-    return { key: item.key, label: pieCategoryLabel(item.key), value };
-  }).filter(x => x.value > 0);
-}
-
-function renderActivePie(data, currP) {
-  const active = document.querySelector('.tab.active');
-  const mode = active ? active.dataset.tab : 'productie';
-  const card = $('productionPieCard');
-  if (!card) return;
-  if (['productie', 'verval', 'progressie', 'schade'].includes(mode)) {
-    card.classList.remove('hidden');
-    renderProductionPie(data, currP, mode);
-  } else {
-    card.classList.add('hidden');
-    const tooltip = $('productionPieTooltip');
-    if (tooltip) tooltip.style.display = 'none';
-  }
-}
-function pieComparisonTotalLabel(mode) {
-  if (mode === 'schade') return currentLang === 'fr' ? 'Charge sinistre totale' : 'Totale schadelast';
-  if (mode === 'verval') return currentLang === 'fr' ? 'Chute totale' : 'Totaal verval';
-  return currentLang === 'fr' ? 'Production totale' : 'Totale productie';
-}
-function getPreviousFullYearPeriodForPie(data, currP, mode = 'productie') {
-  // Zelfde logica als bij portefeuille: vergelijk de laatste periode van het huidige jaar
-  // met het volledige voorgaande jaar (de laatste beschikbare 12/YYYY vóór currP).
-  const sourceType = mode === 'schade' ? 'SCHADE' : 'PRODUCTIE';
-  const currentKey = pkey(currP);
-  const periods = [...new Set(rowsOf(data, sourceType)
-    .map(r => String(r[cols.periode] || '').trim())
-    .filter(Boolean))]
-    .filter(p => String(p).trim().startsWith('12 '))
-    .filter(p => !currentKey || pkey(p) < currentKey)
-    .sort((a, b) => pkey(a) - pkey(b));
-  return periods.length ? periods[periods.length - 1] : (dashboardPreviousPeriod || latestMonthPair(mainRows(data, sourceType))[0]);
-}
-function pieComparisonPanelTitle(kind, period) {
-  if (!period) return '';
-  if (kind === 'prevFull') return (currentLang === 'fr' ? 'Année complète précédente · ' : 'Volledig voorgaand jaar · ') + period;
-  return (currentLang === 'fr' ? 'Dernière période · ' : 'Laatste periode · ') + period;
-}
-function ensureProductionPieLayout(mode, prevP, currP) {
-  const card = $('productionPieCard');
-  if (!card) return;
-  const grid = card.querySelector('.productionPieGrid');
-  if (!grid) return;
-  if (mode === 'progressie') {
-    grid.classList.remove('portfolioPieGrid');
-    grid.innerHTML = `<div class="pieWrap progressWaterfallDuo"><div class="progressWaterfallPanel"><canvas id="productionPieCanvas" width="980" height="900"></canvas></div></div><div id="productionPieLegend" class="pieLegend"></div>`;
-    return;
-  }
-  grid.classList.add('portfolioPieGrid');
-  grid.innerHTML = `<div class="portfolioPiePair productionComparePiePair">
-    <div class="portfolioPiePanel"><h3>${esc(pieComparisonPanelTitle('prevFull', prevP))}</h3><div class="productionPieGrid portfolioPieGrid"><div class="pieWrap"><canvas id="productionPiePrevCanvas" width="990" height="645"></canvas><div id="productionPiePrevTotal" class="portfolioPieTotal"></div></div><div id="productionPiePrevLegend" class="pieLegend"></div></div></div>
-    <div class="portfolioPiePanel"><h3>${esc(pieComparisonPanelTitle('curr', currP))}</h3><div class="productionPieGrid portfolioPieGrid"><div class="pieWrap"><canvas id="productionPieCurrCanvas" width="990" height="645"></canvas><div id="productionPieCurrTotal" class="portfolioPieTotal"></div></div><div id="productionPieCurrLegend" class="pieLegend"></div></div></div>
-  </div><div id="productionPieTooltip" class="pieTooltip portfolioPieTooltip"></div>`;
-}
-function drawStaticPie(canvas, period, items, centerText) {
-  if (!canvas) return;
-  const ctx = canvas.getContext('2d');
-  const w = canvas.width, h = canvas.height;
-  ctx.clearRect(0,0,w,h); ctx.fillStyle = '#fff'; ctx.fillRect(0,0,w,h);
-  const total = items.reduce((s,x) => s + x.value, 0);
-  const cx = Math.round(w * .5), cy = Math.round(h * .52), radius = Math.min(w,h) * .44;
-  if (!total) {
-    ctx.beginPath(); ctx.arc(cx, cy, radius, 0, Math.PI*2); ctx.strokeStyle = '#e6eef7'; ctx.lineWidth = 26; ctx.stroke();
-    ctx.fillStyle = '#8fa3ba'; ctx.font = '800 15px Inter, Segoe UI, Arial'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(currentLang === 'fr' ? 'Aucune donnée' : 'Geen gegevens', cx, cy);
-    return;
-  }
-  let start = -Math.PI / 2;
-  items.forEach((item, i) => {
-    const color = item.color || pieSegmentColor(item.key, i);
-    const angle = item.value / total * Math.PI * 2;
-    drawGradientPieSegment(ctx, cx, cy, radius, start, start + angle, color, { strokeWidth: 3 });
-    start += angle;
-  });
-  drawPieCenter(ctx, cx, cy, radius, centerText, period, .92);
-}
-function renderStaticPieLegend(el, items, emptyText) {
-  if (!el) return;
-  const total = items.reduce((s,x) => s + x.value, 0);
-  if (!items.length || !total) { el.innerHTML = `<div class="pieEmpty">${esc(emptyText || '')}</div>`; return; }
-  el.innerHTML = items.map((item, i) => {
-    const share = item.value / total * 100;
-    const color = item.color || pieSegmentColor(item.key, i);
-    return `<div class="pieLegendItem" data-pie-index="${i}"><span class="pieSwatch" style="background:${color}"></span><div class="pieLegendName">${esc(item.label)}<span class="pieLegendPct">${pct.format(share)}%</span></div><div class="pieLegendValue">${euro.format(item.value)}</div></div>`;
-  }).join('');
-}
-function renderComparisonPies(data, prevP, currP, mode) {
-  const centerTextByMode = { productie: msg('productie'), verval: msg('verval'), schade: msg('schadelast') };
-  const emptyKeyByMode = { productie: 'productionPieEmpty', verval: 'vervalPieEmpty', schade: 'schadePieEmpty' };
-  const prevItems = getProductionPieItems(data, prevP, mode).map((x,i)=>({ ...x, color: pieSegmentColor(x.key, i) }));
-  const currItems = getProductionPieItems(data, currP, mode).map((x,i)=>({ ...x, color: pieSegmentColor(x.key, i) }));
-  renderStaticPieLegend($('productionPiePrevLegend'), prevItems, msg(emptyKeyByMode[mode] || 'productionPieEmpty'));
-  renderStaticPieLegend($('productionPieCurrLegend'), currItems, msg(emptyKeyByMode[mode] || 'productionPieEmpty'));
-  const centerText = centerTextByMode[mode] || msg('productie');
-  const prevCanvas = $('productionPiePrevCanvas'), currCanvas = $('productionPieCurrCanvas');
-  if (prevCanvas) prevCanvas.dataset.tooltipId = 'productionPieTooltip';
-  if (currCanvas) currCanvas.dataset.tooltipId = 'productionPieTooltip';
-  drawPortfolioPie(prevCanvas, prevP, prevItems, -1, centerText);
-  drawPortfolioPie(currCanvas, currP, currItems, -1, centerText);
-  attachPortfolioPieHover(prevCanvas);
-  attachPortfolioPieHover(currCanvas);
-  attachPieLegendHover($('productionPiePrevLegend'), prevCanvas, 'productionPieTooltip');
-  attachPieLegendHover($('productionPieCurrLegend'), currCanvas, 'productionPieTooltip');
-  const totalLabel = pieComparisonTotalLabel(mode);
-  const prevTotal = prevItems.reduce((sum, x) => sum + x.value, 0);
-  const currTotal = currItems.reduce((sum, x) => sum + x.value, 0);
-  const prevTotalEl = $('productionPiePrevTotal'), currTotalEl = $('productionPieCurrTotal');
-  if (prevTotalEl) prevTotalEl.innerHTML = `${totalLabel}: <b>${euro.format(prevTotal)}</b>`;
-  if (currTotalEl) currTotalEl.innerHTML = `${totalLabel}: <b>${euro.format(currTotal)}</b>`;
-}
-function getProgressWaterfallValues(data, period) {
-  const row = totalRow(data, 'PRODUCTIE', period) || {};
-  const productie = n(row[cols.prodPremie]);
-  const verval = n(row[cols.vervalPremie]);
-  const transformatie = n(row[cols.trans]);
-  const progressie = productie - verval + transformatie;
-  const pdfProgressie = n(row[cols.progPremie]);
-  return { productie, verval, transformatie, progressie: pdfProgressie || progressie };
-}
-function drawProgressWaterfallCanvas(canvas, values, period, prevValues = null, prevPeriod = '', fixedScale = null) {
-  if (!canvas) return;
-  const ctx = canvas.getContext('2d');
-  const w = canvas.width, h = canvas.height;
-  ctx.clearRect(0,0,w,h); ctx.fillStyle = '#fff'; ctx.fillRect(0,0,w,h);
-  const makeBars = vals => [
-    { key:'productie', label: msg('productie'), value: vals.productie },
-    { key:'verval', label: msg('verval'), value: -vals.verval },
-    { key:'trans', label: currentLang === 'fr' ? 'Transformation' : 'Transformatie', value: vals.transformatie },
-    { key:'progressie', label: msg('progressie'), value: vals.progressie }
-  ];
-  const bars = makeBars(values);
-  const prevBars = prevValues ? makeBars(prevValues) : [];
-  const allAmounts = [...bars, ...prevBars].map(s => Math.abs(s.value)).filter(Number.isFinite);
-  const maxAbsRaw = Math.max(1, ...allAmounts);
-  const niceStep = max => {
-    const target = max / 4;
-    const pow = Math.pow(10, Math.floor(Math.log10(target)));
-    const norm = target / pow;
-    const mult = norm <= 1 ? 1 : norm <= 2 ? 2 : norm <= 5 ? 5 : 10;
-    return mult * pow;
-  };
-  const step = niceStep(maxAbsRaw);
-  const maxAbs = Math.ceil(maxAbsRaw / step) * step;
-  const lo = -maxAbs, hi = maxAbs;
-  const x0 = 104, x1 = w - 54, y0 = 90, y1 = h - 218;
-  const y = v => y1 - ((v - lo) / (hi - lo)) * (y1 - y0);
-  const axisLabel = value => {
-    const abs = Math.abs(value);
-    const sign = value < 0 ? '-' : '';
-    if (abs >= 1000000) {
-      const v = abs / 1000000;
-      return sign + (Number.isInteger(v) ? v.toFixed(0) : v.toFixed(1).replace('.', ',')) + ' Mio';
-    }
-    if (abs >= 1000) return sign + Math.round(abs / 1000) + 'K';
-    return sign + Math.round(abs);
-  };
-  ctx.strokeStyle = '#d6e4f2'; ctx.lineWidth = 1;
-  ctx.font = '850 14px Inter, Segoe UI, Arial'; ctx.fillStyle = '#5f7288'; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
-  for (let v = -maxAbs; v <= maxAbs + step / 2; v += step) {
-    const yy = y(v);
-    ctx.strokeStyle = v === 0 ? '#003b71' : (Math.abs(v) === maxAbs ? '#d6e4f2' : '#e3edf7');
-    ctx.lineWidth = v === 0 ? 2.2 : 1;
-    ctx.setLineDash(v === 0 ? [] : [4,7]);
-    ctx.beginPath(); ctx.moveTo(x0-6, yy); ctx.lineTo(x1, yy); ctx.stroke();
-    ctx.setLineDash([]);
-    ctx.fillStyle = v === 0 ? '#003b71' : '#5f7288';
-    ctx.font = v === 0 ? '950 14px Inter, Segoe UI, Arial' : '850 14px Inter, Segoe UI, Arial';
-    ctx.fillText(axisLabel(v), x0-14, yy);
-  }
-  const zeroY = y(0);
-  const barW = Math.min(116, (x1 - x0) / bars.length * .42);
-  const gap = ((x1 - x0) - bars.length * barW) / Math.max(1, bars.length - 1);
-  const xs = bars.map((_,i)=>x0+i*(barW+gap));
-  const bottomRoundedRect = (x, top, width, height, radius = 7) => {
-    const r = Math.min(radius, width / 2, height);
-    ctx.beginPath();
-    ctx.moveTo(x + r, top);
-    ctx.lineTo(x + width - r, top);
-    ctx.quadraticCurveTo(x + width, top, x + width, top + r);
-    ctx.lineTo(x + width, top + height - r);
-    ctx.quadraticCurveTo(x + width, top + height, x + width - r, top + height);
-    ctx.lineTo(x + r, top + height);
-    ctx.quadraticCurveTo(x, top + height, x, top + height - r);
-    ctx.lineTo(x, top + r);
-    ctx.quadraticCurveTo(x, top, x + r, top);
-    ctx.closePath();
-  };
-
-  const drawBar = (s, i, mode) => {
-    const top = y(Math.max(0, s.value)), bottom = y(Math.min(0, s.value));
-    const bh = Math.max(4, bottom - top);
-    const baseX = xs[i];
-    if (mode === 'prev') {
-      const x = baseX + barW * .07;
-      ctx.save();
-      ctx.globalAlpha = .48;
-      const prevW = Math.min(76, barW * .86);
-      ctx.fillStyle = 'rgba(143,180,220,.26)';
-      bottomRoundedRect(x + (barW * .86 - prevW) / 2, top, prevW, bh, 7); ctx.fill();
-      ctx.globalAlpha = 1;
-      ctx.strokeStyle = '#003b71'; ctx.lineWidth = 1.4; ctx.setLineDash([6,4]); bottomRoundedRect(x + (barW * .86 - prevW) / 2, top, prevW, bh, 7); ctx.stroke(); ctx.setLineDash([]);
-      ctx.restore();
-      return;
-    }
-    const currW = Math.min(68, barW * .76);
-    const x = baseX + (barW - currW) / 2;
-    const grad = ctx.createLinearGradient(x, top, x, bottom);
-    if (s.key === 'verval') { grad.addColorStop(0,'#d85f2a'); grad.addColorStop(.54,'#ff9861'); grad.addColorStop(1,'#ffe2d4'); }
-    else if (s.key === 'trans') { grad.addColorStop(0,'#f58220'); grad.addColorStop(.54,'#ffab66'); grad.addColorStop(1,'#ffe0c2'); }
-    else if (s.key === 'progressie') { grad.addColorStop(0,'#007e97'); grad.addColorStop(.54,'#41a9bc'); grad.addColorStop(1,'#d9eef4'); }
-    else { grad.addColorStop(0,'#003b71'); grad.addColorStop(.54,'#2d84c7'); grad.addColorStop(1,'#9ec0e4'); }
-    ctx.fillStyle = grad;
-    ctx.save();
-    ctx.shadowColor = s.key === 'trans' ? 'rgba(245,130,32,.16)' : 'rgba(0,59,113,.13)';
-    ctx.shadowBlur = 22;
-    ctx.shadowOffsetY = 10;
-    bottomRoundedRect(x, top, currW, bh, 7); ctx.fill();
-    ctx.restore();
-    ctx.save();
-    bottomRoundedRect(x, top, currW, bh, 7);
-    ctx.clip();
-    const gloss = ctx.createLinearGradient(x, top, x + currW, top);
-    gloss.addColorStop(0, 'rgba(255,255,255,.20)');
-    gloss.addColorStop(.38, 'rgba(255,255,255,0)');
-    gloss.addColorStop(1, 'rgba(0,59,113,.12)');
-    ctx.fillStyle = gloss;
-    ctx.fillRect(x, top, currW, bh);
-    ctx.restore();
-    ctx.strokeStyle = s.key === 'trans' ? 'rgba(245,130,32,.22)' : 'rgba(0,59,113,.16)';
-    bottomRoundedRect(x, top, currW, bh, 7); ctx.stroke();
-    ctx.fillStyle = '#003b71'; ctx.font = '500 18px Inter, Segoe UI, Arial'; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
-    const labelVal = s.key === 'verval'
-      ? '-' + euro.format(Math.abs(s.value))
-      : (s.key === 'productie' || s.key === 'progressie'
-          ? (s.value < 0 ? '-' : '') + euro.format(Math.abs(s.value))
-          : (s.value > 0 ? '+' : (s.value < 0 ? '-' : '')) + euro.format(Math.abs(s.value)));
-    const labelY = s.value >= 0 ? top - 34 : bottom + 38;
-    ctx.fillStyle = s.value < 0 ? '#d85f2a' : '#003b71';
-    ctx.fillText(labelVal, x + currW/2, labelY);
-    if (prevValues) {
-      const prevBar = prevBars[i] || { value: 0 };
-      const delta = s.value - prevBar.value;
-      ctx.font = '500 18px Inter, Segoe UI, Arial';
-      ctx.fillStyle = delta > 0 ? '#007e97' : (delta < 0 ? '#d85f2a' : '#5f7288');
-      ctx.fillText('(Δ ' + (delta > 0 ? '+' : delta < 0 ? '-' : '') + euro.format(Math.abs(delta)) + ')', x + currW/2, s.value >= 0 ? top - 10 : bottom + 62);
-    }
-    ctx.fillStyle = '#405775'; ctx.font = '950 18px Inter, Segoe UI, Arial'; ctx.textBaseline = 'top';
-    ctx.fillText(s.label, baseX + barW/2, h - 96);
-  };
-  if (prevBars.length) prevBars.forEach((s,i) => drawBar(s, i, 'prev'));
-  bars.forEach((s,i) => drawBar(s, i, 'curr'));
-
-  if (prevPeriod) {
-    ctx.font = '850 13px Inter, Segoe UI, Arial'; ctx.fillStyle = '#5f7288'; ctx.textAlign = 'right'; ctx.textBaseline = 'top';
-    ctx.fillText(currentLang === 'fr' ? 'Pointillé bleu = période précédente' : 'Blauw gestippeld = vorige periode', x1, 18);
-  }
-}
-function renderProgressWaterfall(data, currP, prevP = '') {
-  const canvas = $('productionPieCanvas'), legend = $('productionPieLegend');
-  const values = getProgressWaterfallValues(data, currP);
-  const prevValues = prevP ? getProgressWaterfallValues(data, prevP) : null;
-  const scaleVals = [values, prevValues].filter(Boolean).flatMap(v => {
-    const p = v.productie, afterVerval = v.productie - v.verval, afterTrans = afterVerval + v.transformatie;
-    return [0, p, afterVerval, afterTrans, v.progressie];
-  });
-  const minV = Math.min(...scaleVals), maxV = Math.max(...scaleVals);
-  const pad = Math.max(1, (maxV - minV) * .14);
-  const fixedScale = { lo: minV - pad, hi: maxV + pad };
-  drawProgressWaterfallCanvas(canvas, values, currP, prevValues, prevP, fixedScale);
-  const calc = `${euro.format(values.productie)} − ${euro.format(values.verval)} + ${euro.format(values.transformatie)} = ${euro.format(values.progressie)}`;
-  const signedEuro = value => `${value < 0 ? '-' : ''}${euro.format(Math.abs(value))}`;
-  const currentItem = (label, color, currDisplay, prevRaw, currRaw, invert=false) => {
-    const d = yoy(prevRaw, currRaw);
-    const diff = currRaw - prevRaw;
-    const c = invert ? cls(-diff) : cls(diff);
-    return `<div class="pieLegendItem"><span class="pieSwatch" style="background:${color}"></span><div class="pieLegendName">${esc(label)}<span class="pieLegendPct">${esc(prevP)} → ${esc(currP)} · ${d >= 0 ? '+' : ''}${pct.format(d)}%</span></div><div class="pieLegendValue"><span>${signedEuro(currDisplay)}</span><br><span class="${c}">${diff >= 0 ? '+' : '-'}${euro.format(Math.abs(diff))}</span></div></div>`;
-  };
-  const periodItem = (label, color, periodLabel, value) => {
-    return `<div class="pieLegendItem"><span class="pieSwatch" style="background:${color}"></span><div class="pieLegendName">${esc(label)}<span class="pieLegendPct">${esc(periodLabel)}</span></div><div class="pieLegendValue">${signedEuro(value)}</div></div>`;
-  };
-  if (legend) legend.innerHTML = `<div class="netProgressBlock"><div class="netProgressHead"><div>${currentLang === 'fr' ? 'Calcul progression' : 'Berekening progressie'} <span>${esc(currP)}</span></div><div class="netProgressValue ${values.progressie >= 0 ? 'pos' : 'neg'}">${euro.format(values.progressie)}</div></div><div class="note" style="margin:0">${calc}</div></div>` +
-    (prevValues
-      ? currentItem(msg('productie'), '#003b71', values.productie, prevValues.productie, values.productie) +
-        currentItem(msg('verval'), '#d85f2a', -values.verval, prevValues.verval, values.verval, true) +
-        currentItem(currentLang === 'fr' ? 'Transformation' : 'Transformatie', '#f58220', values.transformatie, prevValues.transformatie, values.transformatie) +
-        currentItem(msg('progressie'), '#007e97', values.progressie, prevValues.progressie, values.progressie)
-      : periodItem(msg('productie'), '#003b71', currP, values.productie) +
-        periodItem(msg('verval'), '#d85f2a', currP, -values.verval) +
-        periodItem(currentLang === 'fr' ? 'Transformation' : 'Transformatie', '#f58220', currP, values.transformatie) +
-        periodItem(msg('progressie'), '#007e97', currP, values.progressie)) +
-    (prevValues ? `<div class="contributionGroupTitle">${currentLang === 'fr' ? 'Période précédente' : 'Vorige periode'}</div>` +
-      periodItem(msg('productie'), '#8fb4dc', prevP, prevValues.productie) +
-      periodItem(msg('verval'), '#8fb4dc', prevP, -prevValues.verval) +
-      periodItem(currentLang === 'fr' ? 'Transformation' : 'Transformatie', '#8fb4dc', prevP, prevValues.transformatie) +
-      periodItem(msg('progressie'), '#8fb4dc', prevP, prevValues.progressie) : '');
-}
-function renderProductionPie(data, currP, mode = 'productie') {
-  const titleKeyByMode = { productie: 'productionPieTitle', verval: 'vervalPieTitle', progressie: 'progressiePieTitle', schade: 'schadePieTitle' };
-  const subKeyByMode = { productie: 'productionPieSub', verval: 'vervalPieSub', progressie: 'progressiePieSub', schade: 'schadePieSub' };
-  const prevP = mode === 'progressie'
-    ? (dashboardPreviousPeriod || latestMonthPair(mainRows(data, 'PRODUCTIE'))[0])
-    : getPreviousFullYearPeriodForPie(data, currP, mode);
-  setText('productionPieTitle', mode === 'progressie' ? (currentLang === 'fr' ? 'Waterfall progression' : 'Waterfall progressie') : msg(titleKeyByMode[mode] || 'productionPieTitle'));
-  setText('productionPieSub', mode === 'progressie' ? (currentLang === 'fr' ? 'Production − chute + transformation = progression.' : 'Productie − verval + transformatie = progressie.') : '');
-  const card = $('productionPieCard');
-  if (card) card.classList.toggle('progressContributionCard', mode === 'progressie');
-  ensureProductionPieLayout(mode, prevP, currP);
-  if (mode === 'progressie') renderProgressWaterfall(data, currP, prevP);
-  else renderComparisonPies(data, prevP, currP, mode);
-}
-
-function renderLifeDetails(data, prodCats, prevP, currP) {
-  const prodRows = rowsOf(data, 'PRODUCTIE').filter(r => [prevP, currP].includes(r[cols.periode]));
-  const portRows = rowsOf(data, 'PORTEFEUILLE').filter(r => [prevP, currP].includes(r[cols.periode]));
-  const cats = prodCats.length ? prodCats : [...new Set(prodRows.filter(r => r[cols.hoofd] === r[cols.sub] && !isTotalNonLife(r)).map(r => r[cols.hoofd]))];
-  const detailHtml = cats.map(cat => renderLifeCat(cat, prodRows, portRows, prevP, currP)).join('');
-  const totalRows = prodRows.some(isTotalNonLife) ? renderLifeCat('TOTAAL LEVEN', prodRows, portRows, prevP, currP) : '';
-  $('categoryDetails').innerHTML = [
-    `<div id="detailProductieBlock" class="detailSectionBlock productionDetail">`,
-      `<div class="detailSectionTitleRow"><h3 class="detailSectionTitle"><span class="detailSectionIcon">L</span>Detail life per categorie</h3>${exportActionsHtml({target:'detailProductie', label:'Detail life exporteren'})}</div>`,
-      detailHtml,
-      totalRows,
-    `</div>`
-  ].join('');
-}
-
-function renderDetails(data, prodCats, schadeCats, prevP, currP) {
-  if (rowsOf(data, 'PORTEFEUILLE').length) {
-    renderLifeDetails(data, prodCats, prevP, currP);
-    return;
-  }
-  const prodRows = rowsOf(data, 'PRODUCTIE').filter(r => [prevP, currP].includes(r[cols.periode]));
-  const schadeRows = rowsOf(data, 'SCHADE').filter(r => [prevP, currP].includes(r[cols.periode]));
-  const prodHtml = prodCats.map(cat => renderProdCat(cat, prodRows, prevP, currP)).join('');
-  const schadeHtml = schadeCats.map(cat => renderSchadeCat(cat, schadeRows, prevP, currP)).join('');
-  $('categoryDetails').innerHTML = [
-    `<div id="detailProductieBlock" class="detailSectionBlock productionDetail">`,
-      `<div class="detailSectionTitleRow"><h3 class="detailSectionTitle"><span class="detailSectionIcon">🏭</span>${msg('detailProductie')}</h3><div class="blockExportActions" data-export-target="detailProductie" aria-label="Detail productie exporteren"><button type="button" class="blockExportBtn blockExportDownload" title="Download detail productie als PNG">↓</button><button type="button" class="blockExportBtn blockExportCopy" title="Kopieer detail productie als afbeelding">Copy</button></div></div>`,
-      prodHtml,
-    `</div>`,
-    `<div id="detailSchadeBlock" class="detailSectionBlock schadeDetail">`,
-      `<div class="detailSectionTitleRow"><h3 class="detailSectionTitle"><span class="detailSectionIcon">🛡</span>${msg('detailSchade')}</h3><div class="blockExportActions" data-export-target="detailSchade" aria-label="Detail schade exporteren"><button type="button" class="blockExportBtn blockExportDownload" title="Download detail schade als PNG">↓</button><button type="button" class="blockExportBtn blockExportCopy" title="Kopieer detail schade als afbeelding">Copy</button></div></div>`,
-      schadeHtml || `<div class="note">${msg('noSchade')}</div>`,
-    `</div>`
-  ].join('');
-}
 
 // ─── Hulpfuncties voor detail-categorieblokken ────────────────────────────────
 function catPillHtml(s, cat) {
@@ -5071,10 +2741,10 @@ function renderLifeCat(cat, prodRows, portRows, prevP, currP) {
 
   const prodHead = `<tr>
     <th>${msg('categorie')}</th>
-    <th>Aantal prod. ${prevP}</th><th>Aantal prod. ${currP}</th><th>Δ aantal</th>
-    <th>Premie prod. ${prevP}</th><th>Premie prod. ${currP}</th><th>Δ prod.</th>
-    <th>Koopsom ${prevP}</th><th>Koopsom ${currP}</th><th>Δ koopsom</th>
-    <th>Verhoging ${prevP}</th><th>Verhoging ${currP}</th><th>Δ verhoging</th>
+    <th>${escLabel('Aantal prod.')} ${prevP}</th><th>${escLabel('Aantal prod.')} ${currP}</th><th>${escLabel('Δ aantal')}</th>
+    <th>${escLabel('Premie prod.')} ${prevP}</th><th>${escLabel('Premie prod.')} ${currP}</th><th>${escLabel('Δ prod.')}</th>
+    <th>${escLabel('Koopsom')} ${prevP}</th><th>${escLabel('Koopsom')} ${currP}</th><th>${escLabel('Δ koopsom')}</th>
+    <th>${escLabel('Verhoging')} ${prevP}</th><th>${escLabel('Verhoging')} ${currP}</th><th>${escLabel('Δ verhoging')}</th>
   </tr>`;
   const prodBody = subs.map(s => {
     const a = pRows.find(r => r[cols.sub] === s && r[cols.periode] === prevP) || {};
@@ -5098,9 +2768,9 @@ function renderLifeCat(cat, prodRows, portRows, prevP, currP) {
 
   const portHead = `<tr>
     <th>${msg('categorie')}</th>
-    <th>Polissen port. ${prevP}</th><th>Polissen port. ${currP}</th><th>Δ polissen</th>
-    <th>Portefeuillepremie ${prevP}</th><th>Portefeuillepremie ${currP}</th><th>Δ port.</th>
-    <th>Reserves ${prevP}</th><th>Reserves ${currP}</th><th>Δ reserves</th>
+    <th>${escLabel('Polissen port.')} ${prevP}</th><th>${escLabel('Polissen port.')} ${currP}</th><th>${escLabel('Δ polissen')}</th>
+    <th>${escLabel('Portefeuillepremie')} ${prevP}</th><th>${escLabel('Portefeuillepremie')} ${currP}</th><th>${escLabel('Δ port.')}</th>
+    <th>${escLabel('Reserves')} ${prevP}</th><th>${escLabel('Reserves')} ${currP}</th><th>${escLabel('Δ reserves')}</th>
   </tr>`;
   const portBody = subs.map(s => {
     const a = pfRows.find(r => r[cols.sub] === s && r[cols.periode] === prevP) || {};
@@ -5129,7 +2799,7 @@ function renderLifeCat(cat, prodRows, portRows, prevP, currP) {
   return catContainer(cat, `${prevP} → ${currP}`, body);
 }
 function metricBlock(label, valueHtml) {
-  return `<div class="metric"><b>${label}</b><span class="metric-val">${valueHtml}</span></div>`;
+  return `<div class="metric"><b>${escLabel(label)}</b><span class="metric-val">${valueHtml}</span></div>`;
 }
 function catContainer(cat, headRight, bodyHtml) {
   return [
@@ -5144,101 +2814,11 @@ function catContainer(cat, headRight, bodyHtml) {
   ].join('');
 }
 
-function renderProdCat(cat, rows, prevP, currP) {
-  const catRows = rows.filter(r => r[cols.hoofd] === cat);
-  const subs = [...new Set(catRows.map(r => r[cols.sub]))];
-  const head = catRows.find(r => r[cols.sub] === cat && r[cols.periode] === currP) || {};
-
-  const summary = [
-    metricBlock(msg('productie'),   euro.format(n(head[cols.prodPremie]))),
-    metricBlock(msg('verval'),      euro.format(n(head[cols.vervalPremie]))),
-    metricBlock(msg('progressie'),  `<span class="${cls(n(head[cols.progPremie]))}">${euro.format(n(head[cols.progPremie]))}</span>`)
-  ].join('');
-
-  const thead = `<tr>
-    <th>${msg('categorie')}</th>
-    <th>PROD ${prevP}</th><th>PROD ${currP}</th><th>Δ PROD</th>
-    <th>${msg('verval')} ${prevP}</th><th>${msg('verval')} ${currP}</th><th>Δ ${msg('verval')}</th>
-    <th>PROGR ${prevP}</th><th>PROGR ${currP}</th><th>Δ PROGR</th>
-  </tr>`;
-
-  const tbody = subs.map(s => {
-    const a = catRows.find(r => r[cols.sub] === s && r[cols.periode] === prevP) || {};
-    const b = catRows.find(r => r[cols.sub] === s && r[cols.periode] === currP) || {};
-    const dProd   = yoy(n(a[cols.prodPremie]),   n(b[cols.prodPremie]));
-    const dVerval = yoy(n(a[cols.vervalPremie]), n(b[cols.vervalPremie]));
-    const dProg   = yoy(n(a[cols.progPremie]),   n(b[cols.progPremie]));
-    const pr      = n(b[cols.progPremie]);
-    return `<tr>
-      <td>${catPillHtml(s, cat)}</td>
-      <td>${euro.format(n(a[cols.prodPremie]))}</td>
-      <td>${euro.format(n(b[cols.prodPremie]))}</td>
-      <td>${pctText(dProd)}</td>
-      <td>${euro.format(n(a[cols.vervalPremie]))}</td>
-      <td>${euro.format(n(b[cols.vervalPremie]))}</td>
-      <td>${pctText(dVerval, true)}</td>
-      <td>${euro.format(n(a[cols.progPremie]))}</td>
-      <td class="${cls(pr)}">${euro.format(pr)}</td>
-      <td>${pctText(dProg)}</td>
-    </tr>`;
-  }).join('');
-
-  const body = [
-    `<div class="split">${summary}</div>`,
-    `<table class="summary-table"><thead>${thead}</thead><tbody>${tbody}</tbody></table>`
-  ].join('');
-
-  return catContainer(cat, `${prevP} → ${currP}`, body);
-}
-
-function spCompareCell(prevValue, currValue) {
-  return `<span class="spCompare"><span class="spPrev">${pct.format(prevValue)}%</span><span class="spArrow">&gt;</span><span class="spCurr">${pct.format(currValue)}%</span></span>`;
-}
-
-function renderSchadeCat(cat, rows, prevP, currP) {
-  const catRows = rows.filter(r => r[cols.hoofd] === cat);
-  const subs = [...new Set(catRows.map(r => r[cols.sub]))];
-  const head = catRows.find(r => r[cols.sub] === cat && r[cols.periode] === currP) || {};
-
-  const headSpThreshold = spThresholdForLabel(cat, cat);
-  const summary = [
-    metricBlock(msg('schadelast'), euro.format(n(head[cols.schadelast]))),
-    metricBlock('S/P',             `<span class="${spValueClass(n(head[cols.sp]), headSpThreshold, cat)}">${pct.format(n(head[cols.sp]))}%</span>`),
-    metricBlock(msg('spAfgetopt'), `<span class="${spValueClass(n(head[cols.spCap]), headSpThreshold, cat)}">${pct.format(n(head[cols.spCap]))}%</span>`)
-  ].join('');
-
-  const thead = `<tr>
-    <th>${msg('categorie')}</th>
-    <th>${msg('schadelast')} ${prevP}</th><th>${msg('schadelast')} ${currP}</th><th>Δ ${msg('schadelast')}</th>
-    <th>S/P ${prevP} &gt; ${currP}</th><th>${msg('spAftop')} ${prevP} &gt; ${currP}</th>
-  </tr>`;
-
-  const tbody = subs.map(s => {
-    const a = catRows.find(r => r[cols.sub] === s && r[cols.periode] === prevP) || {};
-    const b = catRows.find(r => r[cols.sub] === s && r[cols.periode] === currP) || {};
-    const d = yoy(n(a[cols.schadelast]), n(b[cols.schadelast]));
-    return `<tr>
-      <td>${catPillHtml(s, cat)}</td>
-      <td>${euro.format(n(a[cols.schadelast]))}</td>
-      <td>${euro.format(n(b[cols.schadelast]))}</td>
-      <td>${pctText(d, true)}</td>
-      <td class="${spValueClass(n(b[cols.sp]), spThresholdForLabel(s, cat), s)}">${spCompareCell(n(a[cols.sp]), n(b[cols.sp]))}</td>
-      <td class="${spValueClass(n(b[cols.spCap]), spThresholdForLabel(s, cat), s)}">${spCompareCell(n(a[cols.spCap]), n(b[cols.spCap]))}</td>
-    </tr>`;
-  }).join('');
-
-  const body = [
-    `<div class="split">${summary}</div>`,
-    `<table class="summary-table"><thead>${thead}</thead><tbody>${tbody}</tbody></table>`
-  ].join('');
-
-  return catContainer(cat, `${prevP} → ${currP}`, body);
-}
-// Life-only overrides: from here on the dashboard no longer relies on non-life schade/S-P logic.
+// ─── Life-tabbladen, samenvatting en verdelingen ────────────────────────────
 function lifeMainCats(data, type, period) {
   return mainRows(data, type).filter(r => String(r[cols.periode] || '').trim() === String(period).trim() && !isTotalNonLife(r)).map(r => r[cols.hoofd]).filter((v, i, a) => v && a.indexOf(v) === i);
 }
-function lifeRows(data, type, prevP, currP) { return rowsOf(data, type).filter(r => [prevP, currP].includes(r[cols.periode])); }
+
 function lifeRowHasData(r) {
   const fields = r && r[cols.type] === 'PORTEFEUILLE'
     ? [cols.polissenPortefeuille, cols.polissenPremiebetalend, cols.polissenPremievrij, cols.portefeuillepremie, cols.uitgegeven, cols.reserves]
@@ -5286,20 +2866,20 @@ function renderLifeGroupedSection(containerId, data, type, prevP, currP, renderG
   const rows = source.filter(row => periods.has(row[cols.periode]));
   const totalHtml = rows.some(isTotalNonLife) ? totalBlock(renderGroupFn('TOTAAL LEVEN', rows.filter(isTotalNonLife), prevP, currP, data)) : '';
   const catHtml = lifeMainCats(data, type, currP).map(cat => renderGroupFn(cat, rows, prevP, currP, data)).join('');
-  $(containerId).innerHTML = totalHtml + catHtml || `<div class="note">${esc(emptyText)}</div>`;
+  $(containerId).innerHTML = totalHtml + catHtml || `<div class="note">${escLabel(emptyText)}</div>`;
 }
 function applyLifeDashboardLabels() {
   const fr = currentLang === 'fr';
   setText('tabSamenvatting', fr ? 'Résumé' : 'Samenvatting');
-  setText('tabProductie', fr ? 'Production' : 'Productie');
-  setText('tabVerval', fr ? 'Primes uniques' : 'Koopsommen');
-  setText('tabTransformatie', fr ? 'Augmentations' : 'Verhogingen');
-  setText('tabPortefeuille', 'Portefeuille');
-  setText('prodTitle', 'Productie');
-  setText('vervalTitle', 'Koopsommen');
-  setText('transTitle', 'Verhogingen');
-  setText('portefeuilleTitle', 'Portefeuille');
-  setText('detailTitle', 'Hoofd- en subcategorieen');
+  setText('tabProductie', fr ? 'Production' : displayLabel('Productie'));
+  setText('tabVerval', fr ? 'Primes uniques' : displayLabel('Koopsommen'));
+  setText('tabTransformatie', fr ? 'Augmentations' : displayLabel('Verhogingen'));
+  setText('tabPortefeuille', displayLabel('Portefeuille'));
+  setText('prodTitle', displayLabel('Productie'));
+  setText('vervalTitle', displayLabel('Koopsommen'));
+  setText('transTitle', displayLabel('Verhogingen'));
+  setText('portefeuilleTitle', displayLabel('Portefeuille'));
+  setText('detailTitle', displayLabel('Hoofd- en subcategorieen'));
   updateLifePdfSectionLabels();
   $('tabProgressie')?.classList.add('hidden');
   $('progressie')?.classList.add('hidden');
@@ -5313,28 +2893,18 @@ function applyLifeDashboardLabels() {
 function renderProductieGrouped(data, prevP, currP) { renderLifeGroupedSection('prodGrouped', data, 'PRODUCTIE', prevP, currP, renderProductionGroup, msg('noProd')); }
 function renderVervalGrouped(data, prevP, currP) { renderLifeGroupedSection('vervalGrouped', data, 'PRODUCTIE', prevP, currP, renderVervalGroup, 'Geen koopsommen gevonden.'); }
 function renderTransformatieGrouped(data, prevP, currP) { renderLifeGroupedSection('transGrouped', data, 'PRODUCTIE', prevP, currP, renderTransformatieGroup, 'Geen verhogingen gevonden.'); }
-function renderProgressieGrouped(data, prevP, currP) { $('progGrouped').innerHTML = ''; }
+
 function renderPortefeuille(data, prevP, currP) { renderLifeGroupedSection('portefeuilleCharts', data, 'PORTEFEUILLE', prevP, currP, renderPortefeuilleGroup, msg('portefeuilleEmpty')); $('portfolioPieCard')?.classList.add('hidden'); }
-function renderProductionGroup(cat, rows, prevP, currP) {
-  const { bars, head, prevHead } = lifeGroupBasics(cat, rows, prevP, currP);
-  return `<div class="cat"><div class="catHead exportableBlockHeader"><div class="catTitle">${catTitleHtml(cat)}</div><div class="small">${prevP} &rarr; ${currP}</div>${productBlockExportActionsHtml()}</div><div class="p-18"><div class="split split-2"><div class="metric"><b>Aantal zaken ${currP}</b><span class="metric-val">${num.format(n(head[cols.prodAantal]))}</span>${deltaHtml(yoy(n(prevHead[cols.prodAantal]), n(head[cols.prodAantal])), n(prevHead[cols.prodAantal]), prevP, 'num')}</div><div class="metric"><b>Premie productie ${currP}</b><span class="metric-val">${euro.format(n(head[cols.prodPremie]))}</span>${deltaHtml(yoy(n(prevHead[cols.prodPremie]), n(head[cols.prodPremie])), n(prevHead[cols.prodPremie]), prevP, 'money')}</div></div><div class="miniGrid"><div class="miniCard"><h3>Aantal zaken productie</h3>${bars(cols.prodAantal, 'num')}</div><div class="miniCard"><h3>Premie productie</h3>${bars(cols.prodPremie, 'money')}</div></div></div></div>`;
-}
+
 function renderVervalGroup(cat, rows, prevP, currP) {
   const { bars, head, prevHead } = lifeGroupBasics(cat, rows, prevP, currP);
-  return `<div class="cat"><div class="catHead exportableBlockHeader"><div class="catTitle">${catTitleHtml(cat)}</div><div class="small">${prevP} &rarr; ${currP}</div>${productBlockExportActionsHtml()}</div><div class="p-18"><div class="split split-1"><div class="metric"><b>Premie koopsom ${currP}</b><span class="metric-val">${euro.format(n(head[cols.premieKoopsom]))}</span>${deltaHtml(yoy(n(prevHead[cols.premieKoopsom]), n(head[cols.premieKoopsom])), n(prevHead[cols.premieKoopsom]), prevP, 'money')}</div></div><div class="miniGrid"><div class="miniCard"><h3>Premie koopsom</h3>${bars(cols.premieKoopsom, 'money')}</div></div></div></div>`;
+  return `<div class="cat"><div class="catHead exportableBlockHeader"><div class="catTitle">${catTitleHtml(cat)}</div><div class="small">${prevP} &rarr; ${currP}</div>${productBlockExportActionsHtml()}</div><div class="p-18"><div class="split split-1"><div class="metric"><b>${escLabel('Premie koopsom')} ${currP}</b><span class="metric-val">${euro.format(n(head[cols.premieKoopsom]))}</span>${deltaHtml(yoy(n(prevHead[cols.premieKoopsom]), n(head[cols.premieKoopsom])), n(prevHead[cols.premieKoopsom]), prevP, 'money')}</div></div><div class="miniGrid"><div class="miniCard"><h3>${escLabel('Premie koopsom')}</h3>${bars(cols.premieKoopsom, 'money')}</div></div></div></div>`;
 }
 function renderTransformatieGroup(cat, rows, prevP, currP) {
   const { bars, head, prevHead } = lifeGroupBasics(cat, rows, prevP, currP);
-  return `<div class="cat"><div class="catHead exportableBlockHeader"><div class="catTitle">${catTitleHtml(cat)}</div><div class="small">${prevP} &rarr; ${currP}</div>${productBlockExportActionsHtml()}</div><div class="p-18"><div class="split split-1"><div class="metric"><b>Premie verhoging ${currP}</b><span class="metric-val">${euro.format(n(head[cols.premieVerhoging]))}</span>${deltaHtml(yoy(n(prevHead[cols.premieVerhoging]), n(head[cols.premieVerhoging])), n(prevHead[cols.premieVerhoging]), prevP, 'money')}</div></div><div class="miniGrid"><div class="miniCard"><h3>Premie verhoging</h3>${bars(cols.premieVerhoging, 'money')}</div></div></div></div>`;
+  return `<div class="cat"><div class="catHead exportableBlockHeader"><div class="catTitle">${catTitleHtml(cat)}</div><div class="small">${prevP} &rarr; ${currP}</div>${productBlockExportActionsHtml()}</div><div class="p-18"><div class="split split-1"><div class="metric"><b>${escLabel('Premie verhoging')} ${currP}</b><span class="metric-val">${euro.format(n(head[cols.premieVerhoging]))}</span>${deltaHtml(yoy(n(prevHead[cols.premieVerhoging]), n(head[cols.premieVerhoging])), n(prevHead[cols.premieVerhoging]), prevP, 'money')}</div></div><div class="miniGrid"><div class="miniCard"><h3>${escLabel('Premie verhoging')}</h3>${bars(cols.premieVerhoging, 'money')}</div></div></div></div>`;
 }
-function renderProgressieGroup(cat, rows, prevP, currP) {
-  const { labels, vals, head, prevHead } = lifeGroupBasics(cat, rows, prevP, currP);
-  return `<div class="cat"><div class="catHead exportableBlockHeader"><div class="catTitle">${catTitleHtml(cat)}</div><div class="small">${prevP} &rarr; ${currP}</div>${productBlockExportActionsHtml()}</div><div class="p-18"><div class="split split-2"><div class="metric"><b>Aantal progressie ${currP}</b><span class="metric-val">${num.format(n(head[cols.progAantal]))}</span>${deltaHtml(yoy(n(prevHead[cols.progAantal]), n(head[cols.progAantal])), n(prevHead[cols.progAantal]), prevP, 'num')}</div><div class="metric"><b>Premie progressie ${currP}</b><span class="metric-val ${cls(n(head[cols.progPremie]))}">${euro.format(n(head[cols.progPremie]))}</span>${deltaHtml(yoy(n(prevHead[cols.progPremie]), n(head[cols.progPremie])), n(prevHead[cols.progPremie]), prevP, 'money')}</div></div><div class="miniGrid"><div class="miniCard"><h3>Aantal progressie</h3>${progressBarCompareHtml(labels, vals(cols.progAantal, prevP), vals(cols.progAantal, currP), prevP, currP, 'num', {showDelta:true})}</div><div class="miniCard"><h3>Premie progressie</h3>${progressBarCompareHtml(labels, vals(cols.progPremie, prevP), vals(cols.progPremie, currP), prevP, currP, 'money', {showDelta:true})}</div></div></div></div>`;
-}
-function renderPortefeuilleGroup(cat, rows, prevP, currP) {
-  const { bars, head, prevHead } = lifeGroupBasics(cat, rows, prevP, currP);
-  return `<div class="cat"><div class="catHead exportableBlockHeader"><div class="catTitle">${catTitleHtml(cat)}</div><div class="small">${prevP} &rarr; ${currP}</div>${productBlockExportActionsHtml()}</div><div class="p-18"><div class="split"><div class="metric"><b>Polissen portefeuille ${currP}</b><span class="metric-val">${num.format(n(head[cols.polissenPortefeuille]))}</span></div><div class="metric"><b>Portefeuillepremie ${currP}</b><span class="metric-val">${euro.format(n(head[cols.portefeuillepremie]))}</span>${deltaHtml(yoy(n(prevHead[cols.portefeuillepremie]), n(head[cols.portefeuillepremie])), n(prevHead[cols.portefeuillepremie]), prevP, 'money')}</div><div class="metric"><b>Reserves ${currP}</b><span class="metric-val">${euro.format(n(head[cols.reserves]))}</span>${deltaHtml(yoy(n(prevHead[cols.reserves]), n(head[cols.reserves])), n(prevHead[cols.reserves]), prevP, 'money')}</div></div><div class="miniGrid"><div class="miniCard"><h3>Aantal polissen portefeuille</h3>${bars(cols.polissenPortefeuille, 'num')}</div><div class="miniCard"><h3>Aantal polissen premiebetalend</h3>${bars(cols.polissenPremiebetalend, 'num')}</div><div class="miniCard"><h3>Aantal polissen premievrij</h3>${bars(cols.polissenPremievrij, 'num')}</div><div class="miniCard"><h3>Portefeuillepremie</h3>${bars(cols.portefeuillepremie, 'money')}</div><div class="miniCard"><h3>Uitgegeven premie</h3>${bars(cols.uitgegeven, 'money')}</div><div class="miniCard"><h3>Reserves</h3>${bars(cols.reserves, 'money')}</div></div></div></div>`;
-}
+
 function summaryKpiItems(totalProdPrev, totalProdCurr, data, prevP, currP) {
   const portPrev = totalRow(data, 'PORTEFEUILLE', prevP), portCurr = totalRow(data, 'PORTEFEUILLE', currP);
   const prodPrev = n(totalProdPrev[cols.prodPremie]);
@@ -5353,11 +2923,7 @@ function summaryKpiItems(totalProdPrev, totalProdCurr, data, prevP, currP) {
     {l:'Reserves',v:lifeField(portCurr, cols.reserves, 21),o:lifeField(portPrev, cols.reserves, 21),type:'money'}
   ];
 }
-function categoryKpiItems(data, tab, prevP, currP) {
-  const cfg = {productie:['PRODUCTIE',cols.prodPremie,'Premie productie',false],verval:['PRODUCTIE',cols.vervalPremie,'Premie verval',true],transformatie:['PRODUCTIE',cols.trans,'Transformatie',false],progressie:['PRODUCTIE',cols.progPremie,'Premie progressie',false],portefeuille:['PORTEFEUILLE',cols.reserves,'Reserves',false],detail:['PRODUCTIE',cols.prodPremie,'Premie productie',false]}[tab];
-  if (!cfg) return null;
-  return lifeMainCats(data, cfg[0], currP).map(cat => { const curr = findMainCategoryRow(data, cfg[0], cat, currP), prev = findMainCategoryRow(data, cfg[0], cat, prevP); return {l:cat,metricLabel:cfg[2],v:n(curr[cfg[1]]),o:n(prev[cfg[1]]),type:'money',invert:cfg[3],dynamicCategory:true,showPeriodInLabel:false,compareAmountMode:'previous'}; });
-}
+
 function lifeSummaryMainCategories(data, type, currP) {
   const names = lifeMainCats(data, type, currP);
   const wanted = ['Tweede Pijler', 'Derde Pijler', 'Vierde Pijler'];
@@ -5368,11 +2934,11 @@ function annualPremiumEquivalent(row) {
 }
 function summaryTrendLine(label, prevVal, currVal, formatType, invert = false) {
   const delta = currVal - prevVal;
-  const direction = delta > 0 ? 'stijgt' : (delta < 0 ? 'daalt' : 'blijft stabiel');
+  const direction = currentLang === 'fr' ? (delta > 0 ? 'augmente de' : delta < 0 ? 'diminue de' : 'reste stable, variation de') : (delta > 0 ? 'stijgt met' : delta < 0 ? 'daalt met' : 'blijft stabiel met');
   const amount = formatType === 'num' ? num.format(Math.abs(delta)) : euro.format(Math.abs(delta));
   const pctTxt = prevVal ? ` (${delta >= 0 ? '+' : '-'}${pct.format(Math.abs(yoy(prevVal, currVal)))}%)` : '';
   const clsName = delta === 0 ? 'neu' : ((delta > 0) !== invert ? 'pos' : 'neg');
-  return `<li><b>${esc(label)}</b> ${direction} met <span class="${clsName}">${amount}${pctTxt}</span>.</li>`;
+  return `<li><b>${escLabel(label)}</b> ${direction} <span class="${clsName}">${amount}${pctTxt}</span>.</li>`;
 }
 function lifeSummaryIcon(kind) {
   const paths = {
@@ -5408,26 +2974,18 @@ function renderLifeSummaryBlock(data, cfg, prevP, currP) {
     ? barCompareHtml(labels, prevVals, currVals, prevP, currP, cfg.formatType, cfg.color, '', {
         showDelta: true, invertDelta: cfg.invert, comparisonBadges: true, previousYears, caseCount
       })
-    : `<div class="note">Geen gegevens gevonden voor de hoofdcategorieën.</div>`;
-  return `<div class="insightItem"><div class="insightItemHeader">${lifeSummaryIcon(cfg.icon)}<h3>${cfg.title}</h3>${exportActionsHtml({classes:'summaryExportActions'})}</div><p>${cfg.intro}</p><ul>${trendLines}</ul><div class="miniCard"><h3>${cfg.chartTitle}</h3>${chart}</div></div>`;
+    : `<div class="note">${escLabel('Geen gegevens gevonden voor de hoofdcategorieën.')}</div>`;
+  return `<div class="insightItem"><div class="insightItemHeader">${lifeSummaryIcon(cfg.icon)}<h3>${escLabel(cfg.title)}</h3>${exportActionsHtml({classes:'summaryExportActions'})}</div><p>${escLabel(cfg.intro)}</p><ul>${trendLines}</ul><div class="miniCard"><h3>${escLabel(cfg.chartTitle)}</h3>${chart}</div></div>`;
 }
-function renderInsightSummary(data, prevP, currP) {
-  const blocks = [
-    { icon:'📈', title:'Productie', type:'PRODUCTIE', field:cols.prodPremie, cellIndex:5, formatType:'money', color:'blue', invert:false, intro:'Vergelijking van de premie productie per hoofdcategorie.', chartTitle:'Premie productie per pijler' },
-    { icon:'📉', title:'Verval', type:'PRODUCTIE', field:cols.vervalPremie, cellIndex:8, formatType:'money', color:'orange', invert:true, intro:'Vergelijking van de premie verval per hoofdcategorie; een daling is hier positief.', chartTitle:'Premie verval per pijler' },
-    { icon:'↔', title:'Transformatie', type:'PRODUCTIE', field:cols.trans, cellIndex:11, formatType:'money', color:'blue', invert:false, intro:'Vergelijking van de premie transformatie per hoofdcategorie.', chartTitle:'Premie transformatie per pijler' },
-    { icon:'🚀', title:'Progressie', type:'PRODUCTIE', field:cols.progPremie, cellIndex:15, formatType:'money', color:'blue', invert:false, intro:'Vergelijking van de premie progressie per hoofdcategorie.', chartTitle:'Premie progressie per pijler' }
-  ];
-  $('insightSummary').classList.remove('hidden');
-  $('insightSummary').innerHTML = `<div class="insightGrid">${blocks.map(cfg => renderLifeSummaryBlock(data, cfg, prevP, currP)).join('')}</div>`;
-}
+
 function lifePillarPieConfig(mode) {
-  return {
+  const cfg = {
     productie:{ type:'PRODUCTIE', field:cols.prodPremie, cellIndex:5, title:'Verdeling premie productie', center:'Premie productie', total:'Totaal premie productie' },
     verval:{ type:'PRODUCTIE', field:cols.premieKoopsom, cellIndex:6, title:'Verdeling koopsommen', center:'Koopsommen', total:'Totaal koopsommen' },
     transformatie:{ type:'PRODUCTIE', field:cols.premieVerhoging, cellIndex:12, title:'Verdeling verhogingen', center:'Verhogingen', total:'Totaal verhogingen' },
     portefeuille:{ type:'PORTEFEUILLE', field:cols.portefeuillepremie, cellIndex:19, title:'Verdeling portefeuillepremie', center:'Portefeuille', total:'Totaal portefeuillepremie' }
   }[mode] || null;
+  return cfg ? {...cfg,title:displayLabel(cfg.title),center:displayLabel(cfg.center),total:displayLabel(cfg.total)} : null;
 }
 function lifePillarPieItems(data, period, cfg) {
   const order = [
@@ -5437,7 +2995,7 @@ function lifePillarPieItems(data, period, cfg) {
   ];
   return order.map(item => {
     const row = findMainCategoryRow(data, cfg.type, item.key, period);
-    return { ...item, value:lifeField(row, cfg.field, cfg.cellIndex) };
+    return { ...item, label:displayLabel(item.label), value:lifeField(row, cfg.field, cfg.cellIndex) };
   }).filter(item => item.value > 0);
 }
 function lifeDistributionPanel(prefix, period, current) {
@@ -5502,26 +3060,7 @@ function lifeField(row, field, cellIndex) {
   if (row && row._cells && cellIndex != null && row._cells[cellIndex] !== undefined) return n(row._cells[cellIndex]);
   return byName;
 }
-function categoryKpiItems(data, tab, prevP, currP) {
-  const cfg = {
-    productie:['PRODUCTIE', cols.prodPremie, 5, 'Premie productie', false],
-    verval:['PRODUCTIE', cols.vervalPremie, 8, 'Premie verval', true],
-    transformatie:['PRODUCTIE', cols.trans, 11, 'Transformatie', false],
-    progressie:['PRODUCTIE', cols.progPremie, 15, 'Premie progressie', false],
-    portefeuille:['PORTEFEUILLE', cols.portefeuillepremie, 19, 'Portefeuillepremie', false],
-    detail:['PRODUCTIE_TOTAL', null, null, 'Totale productie', false]
-  }[tab];
-  if (!cfg) return null;
-  const [type, field, cellIndex, label, invert] = cfg;
-  const totalCurr = totalRow(data, type, currP);
-  const totalPrev = totalRow(data, type, prevP);
-  const totalItem = { l:'TOTAAL LEVEN', metricLabel:label, v:lifeField(totalCurr, field, cellIndex), o:lifeField(totalPrev, field, cellIndex), type:'money', invert, dynamicCategory:true, showPeriodInLabel:false, compareAmountMode:'previous' };
-  const catItems = lifeMainCats(data, type, currP).map(cat => {
-    const curr = findMainCategoryRow(data, type, cat, currP), prev = findMainCategoryRow(data, type, cat, prevP);
-    return { l:cat, metricLabel:label, v:lifeField(curr, field, cellIndex), o:lifeField(prev, field, cellIndex), type:'money', invert, dynamicCategory:true, showPeriodInLabel:false, compareAmountMode:'previous' };
-  });
-  return [totalItem, ...catItems];
-}
+
 function renderPortefeuilleGroup(cat, rows, prevP, currP) {
   const { bars, head, prevHead } = lifeGroupBasics(cat, rows, prevP, currP);
   const portPremie = lifeField(head, cols.portefeuillepremie, 19);
@@ -5530,16 +3069,9 @@ function renderPortefeuilleGroup(cat, rows, prevP, currP) {
   const prevReserves = lifeField(prevHead, cols.reserves, 21);
   const polissen = lifeField(head, cols.polissenPortefeuille, 16);
   const prevPolissen = lifeField(prevHead, cols.polissenPortefeuille, 16);
-  return `<div class="cat"><div class="catHead exportableBlockHeader"><div class="catTitle">${catTitleHtml(cat)}</div><div class="small">${prevP} &rarr; ${currP}</div>${productBlockExportActionsHtml()}</div><div class="p-18"><div class="split"><div class="metric"><b>Portefeuillepremie ${currP}</b><span class="metric-val">${euro.format(portPremie)}</span>${deltaHtml(yoy(prevPortPremie, portPremie), prevPortPremie, prevP, 'money')}</div><div class="metric"><b>Polissen portefeuille ${currP}</b><span class="metric-val">${num.format(polissen)}</span>${deltaHtml(yoy(prevPolissen, polissen), prevPolissen, prevP, 'num')}</div><div class="metric"><b>Reserves ${currP}</b><span class="metric-val">${euro.format(reserves)}</span>${deltaHtml(yoy(prevReserves, reserves), prevReserves, prevP, 'money')}</div></div><div class="miniGrid"><div class="miniCard"><h3>Portefeuillepremie</h3>${bars(cols.portefeuillepremie, 'money', 19)}</div><div class="miniCard"><h3>Aantal polissen portefeuille</h3>${bars(cols.polissenPortefeuille, 'num', 16)}</div><div class="miniCard"><h3>Reserves</h3>${bars(cols.reserves, 'money', 21)}</div></div></div></div>`;
+  return `<div class="cat"><div class="catHead exportableBlockHeader"><div class="catTitle">${catTitleHtml(cat)}</div><div class="small">${prevP} &rarr; ${currP}</div>${productBlockExportActionsHtml()}</div><div class="p-18"><div class="split"><div class="metric"><b>${escLabel('Portefeuillepremie')} ${currP}</b><span class="metric-val">${euro.format(portPremie)}</span>${deltaHtml(yoy(prevPortPremie, portPremie), prevPortPremie, prevP, 'money')}</div><div class="metric"><b>${escLabel('Polissen portefeuille')} ${currP}</b><span class="metric-val">${num.format(polissen)}</span>${deltaHtml(yoy(prevPolissen, polissen), prevPolissen, prevP, 'num')}</div><div class="metric"><b>${escLabel('Reserves')} ${currP}</b><span class="metric-val">${euro.format(reserves)}</span>${deltaHtml(yoy(prevReserves, reserves), prevReserves, prevP, 'money')}</div></div><div class="miniGrid"><div class="miniCard"><h3>${escLabel('Portefeuillepremie')}</h3>${bars(cols.portefeuillepremie, 'money', 19)}</div><div class="miniCard"><h3>${escLabel('Aantal polissen portefeuille')}</h3>${bars(cols.polissenPortefeuille, 'num', 16)}</div><div class="miniCard"><h3>${escLabel('Reserves')}</h3>${bars(cols.reserves, 'money', 21)}</div></div></div></div>`;
 }
-function renderLifeDetails(data, prodCats, prevP, currP) {
-  const prodRows = rowsOf(data, 'PRODUCTIE').filter(r => [prevP, currP].includes(r[cols.periode]));
-  const portRows = rowsOf(data, 'PORTEFEUILLE').filter(r => [prevP, currP].includes(r[cols.periode]));
-  const cats = (prodCats.length ? prodCats : lifeMainCats(data, 'PRODUCTIE', currP)).filter(cat => cat !== 'TOTAAL LEVEN');
-  const totalHtml = prodRows.some(isTotalNonLife) ? totalBlock(renderLifeCat('TOTAAL LEVEN', prodRows, portRows, prevP, currP)) : '';
-  const detailHtml = cats.map(cat => renderLifeCat(cat, prodRows, portRows, prevP, currP)).join('');
-  $('categoryDetails').innerHTML = `<div id="detailProductieBlock" class="detailSectionBlock productionDetail"><div class="detailSectionTitleRow"><h3 class="detailSectionTitle"><span class="detailSectionIcon">L</span>Detail life per categorie</h3>${exportActionsHtml({target:'detailProductie', label:'Detail life exporteren'})}</div>${totalHtml}${detailHtml}</div>`;
-}
+
 function renderDetails(data, prodCats, schadeCats, prevP, currP) {
   renderLifeDetails(data, prodCats, prevP, currP);
 }
@@ -5559,15 +3091,15 @@ function renderInsightSummary(data, prevP, currP) {
     { icon:'ape', title:'APE', type:'PRODUCTIE', value:annualPremiumEquivalent, formatType:'money', color:'blue', invert:false, intro:'Productie + verhogingen + 10% van de koopsom.', chartTitle:'APE per pijler' }
   ];
   $('insightSummary').classList.remove('hidden');
-  $('insightSummary').innerHTML = `<div id="insightSummaryExport" class="insightSummaryExport"><div class="insightGrid">${blocks.map(cfg => renderLifeSummaryBlock(data, cfg, prevP, currP)).join('')}<div class="portfolioPieCard summaryProductionMixCard" style="grid-column:1/-1"><div class="titleExportRow"><h2>Verdeling totaal premies</h2>${exportActionsHtml({classes:'summaryExportActions'})}</div><div class="portfolioPiePair">${lifeDistributionPanel('summaryProductionMixPrev', prevP, false)}${lifeDistributionPanel('summaryProductionMixCurr', currP, true)}</div><div id="summaryProductionMixTooltip" class="pieTooltip portfolioPieTooltip"></div></div></div></div>`;
+  $('insightSummary').innerHTML = `<div id="insightSummaryExport" class="insightSummaryExport"><div class="insightGrid">${blocks.map(cfg => renderLifeSummaryBlock(data, cfg, prevP, currP)).join('')}<div class="portfolioPieCard summaryProductionMixCard" style="grid-column:1/-1"><div class="titleExportRow"><h2>${escLabel('Verdeling totaal premies')}</h2>${exportActionsHtml({classes:'summaryExportActions'})}</div><div class="portfolioPiePair">${lifeDistributionPanel('summaryProductionMixPrev', prevP, false)}${lifeDistributionPanel('summaryProductionMixCurr', currP, true)}</div><div id="summaryProductionMixTooltip" class="pieTooltip portfolioPieTooltip"></div></div></div></div>`;
   renderSummaryProductionMix(data, prevP, currP);
 }
 function summaryProductionMixItems(data, period) {
   const row = totalRow(data, 'PRODUCTIE', period);
   return [
-    { key:'premieProductie', label:'Premie productie', value:n(row[cols.prodPremie]), color:'#ff934c' },
-    { key:'premieKoopsom', label:'Premie koopsom', value:n(row[cols.premieKoopsom]), color:'#009b77' },
-    { key:'premieVerhoging', label:'Premie verhoging', value:n(row[cols.premieVerhoging]), color:'#0d1473' }
+    { key:'premieProductie', label:displayLabel('Premie productie'), value:n(row[cols.prodPremie]), color:'#ff934c' },
+    { key:'premieKoopsom', label:displayLabel('Premie koopsom'), value:n(row[cols.premieKoopsom]), color:'#009b77' },
+    { key:'premieVerhoging', label:displayLabel('Premie verhoging'), value:n(row[cols.premieVerhoging]), color:'#0d1473' }
   ].filter(item => item.value > 0);
 }
 function renderSummaryProductionMix(data, prevP, currP) {
@@ -5578,26 +3110,14 @@ function renderSummaryProductionMix(data, prevP, currP) {
     if (!cfg.canvas || !cfg.legend) return;
     const items = summaryProductionMixItems(data, cfg.period);
     cfg.canvas.dataset.tooltipId = 'summaryProductionMixTooltip';
-    drawPortfolioPie(cfg.canvas, cfg.period, items, -1, 'Totaal premies');
+    drawPortfolioPie(cfg.canvas, cfg.period, items, -1, displayLabel('Totaal premies'));
     renderPortfolioPieLegend(cfg.legend, items);
-    cfg.total.innerHTML = `Totaal premies: <b>${euro.format(items.reduce((sum, item) => sum + item.value, 0))}</b>`;
+    cfg.total.innerHTML = `${escLabel('Totaal premies')}: <b>${euro.format(items.reduce((sum, item) => sum + item.value, 0))}</b>`;
     attachPortfolioPieHover(cfg.canvas);
     attachPieLegendHover(cfg.legend, cfg.canvas, 'summaryProductionMixTooltip');
   });
 }
-function lifeProductionComponentValue(data, period, field, cat = 'TOTAAL LEVEN') {
-  if (cat && cat !== 'TOTAAL LEVEN') {
-    return lifeField(findMainCategoryRow(data, 'PRODUCTIE', cat, period), field);
-  }
-  const mainCats = lifeMainCats(data, 'PRODUCTIE', period).filter(name => name !== 'TOTAAL LEVEN');
-  const summedCats = mainCats.reduce((sum, name) => sum + lifeProductionComponentValue(data, period, field, name), 0);
-  return summedCats || lifeField(totalRow(data, 'PRODUCTIE', period), field);
-}
-function lifeTotalProductionValue(data, period, cat = 'TOTAAL LEVEN') {
-  return lifeProductionComponentValue(data, period, cols.prodPremie, cat) +
-    lifeProductionComponentValue(data, period, cols.premieKoopsom, cat) +
-    lifeProductionComponentValue(data, period, cols.premieVerhoging, cat);
-}
+
 function categoryKpiItems(data, tab, prevP, currP) {
   const cfg = {
     productie:['PRODUCTIE', cols.prodPremie, 5, 'Premie productie', false],
@@ -5617,7 +3137,7 @@ function categoryKpiItems(data, tab, prevP, currP) {
 }
 function renderProductionGroup(cat, rows, prevP, currP) {
   const { bars, head, prevHead } = lifeGroupBasics(cat, rows, prevP, currP);
-  return `<div class="cat"><div class="catHead exportableBlockHeader"><div class="catTitle">${catTitleHtml(cat)}</div><div class="small">${prevP} &rarr; ${currP}</div>${productBlockExportActionsHtml()}</div><div class="p-18"><div class="split split-2"><div class="metric"><b>Aantal zaken ${currP}</b><span class="metric-val">${num.format(n(head[cols.prodAantal]))}</span>${deltaHtml(yoy(n(prevHead[cols.prodAantal]), n(head[cols.prodAantal])), n(prevHead[cols.prodAantal]), prevP, 'num')}</div><div class="metric"><b>Premie productie ${currP}</b><span class="metric-val">${euro.format(n(head[cols.prodPremie]))}</span>${deltaHtml(yoy(n(prevHead[cols.prodPremie]), n(head[cols.prodPremie])), n(prevHead[cols.prodPremie]), prevP, 'money')}</div></div><div class="miniGrid"><div class="miniCard"><h3>Aantal zaken productie</h3>${bars(cols.prodAantal, 'num')}</div><div class="miniCard"><h3>Premie productie</h3>${bars(cols.prodPremie, 'money')}</div></div></div></div>`;
+  return `<div class="cat"><div class="catHead exportableBlockHeader"><div class="catTitle">${catTitleHtml(cat)}</div><div class="small">${prevP} &rarr; ${currP}</div>${productBlockExportActionsHtml()}</div><div class="p-18"><div class="split split-2"><div class="metric"><b>${escLabel('Aantal zaken')} ${currP}</b><span class="metric-val">${num.format(n(head[cols.prodAantal]))}</span>${deltaHtml(yoy(n(prevHead[cols.prodAantal]), n(head[cols.prodAantal])), n(prevHead[cols.prodAantal]), prevP, 'num')}</div><div class="metric"><b>${escLabel('Premie productie')} ${currP}</b><span class="metric-val">${euro.format(n(head[cols.prodPremie]))}</span>${deltaHtml(yoy(n(prevHead[cols.prodPremie]), n(head[cols.prodPremie])), n(prevHead[cols.prodPremie]), prevP, 'money')}</div></div><div class="miniGrid"><div class="miniCard"><h3>${escLabel('Aantal zaken productie')}</h3>${bars(cols.prodAantal, 'num')}</div><div class="miniCard"><h3>${escLabel('Premie productie')}</h3>${bars(cols.prodPremie, 'money')}</div></div></div></div>`;
 }
 
 /* === Selectieve UI helpers: drag feedback === */

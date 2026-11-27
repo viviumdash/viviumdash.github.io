@@ -6,11 +6,11 @@
 <title>Dashboard kerncijfers life</title>
 <script src="libs/pdf.min.js"></script>
 <script src="libs/html2canvas.min.js"></script>
-<link rel="stylesheet" href="dashboardlifekern.css?v=20261118-life-release-notes">
+<link rel="stylesheet" href="dashboardlifekern.css?v=20261125-own-css">
 </head>
 <body>
 <svg width="0" height="0" aria-hidden="true" style="position:absolute;pointer-events:none"><defs><filter id="viviumLogoTransparent" color-interpolation-filters="sRGB" x="0" y="0" width="100%" height="100%"><feColorMatrix in="SourceGraphic" type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  1.18605 0 0 0 -0.18605"/></filter></defs></svg>
-<button type="button" class="appVersion" id="appVersionBtn" aria-haspopup="dialog" aria-controls="releaseNotesModal" aria-expanded="false">v18.11.2026</button>
+<button type="button" class="appVersion" id="appVersionBtn" aria-haspopup="dialog" aria-controls="releaseNotesModal" aria-expanded="false">v26.11.2026</button>
 <div class="releaseNotesModal hidden" id="releaseNotesModal" role="dialog" aria-modal="true" aria-labelledby="releaseNotesTitle">
   <div class="releaseNotesDialog">
     <div class="releaseNotesHead"><h2 id="releaseNotesTitle">Release notes</h2><button type="button" class="releaseNotesClose" id="releaseNotesCloseBtn" aria-label="Sluiten">×</button></div>
@@ -232,7 +232,14 @@ Op Samenvatting is het blok Reserves vervangen door APE: productie + verhogingen
 Detailtabellen voorzien van verticale kolomlijnen en duidelijkere onderverdelingen.
 PDF-sectiekeuze gelijkgetrokken met de zes Life-tabbladen. PDF opslaan via Print to PDF; afzonderlijke Export-knop verwijderd.
 Versienummer aanklikbaar gemaakt om de release notes te openen.
+Gedeelde lettertypes, basiskleuren en tekstgroottes centraal ondergebracht in libs/dashboard-shared.css. Dubbele en ongebruikte JavaScript-code verwijderd.
+v23.11.2026
+Somkaarten en ronde rekentekens centraal gedeeld met rappelcijfers life.
+v25.11.2026
+De huisstijl staat volledig in de eigen CSS; geen gedeeld CSS-bestand meer nodig.
+v26.11.2026
+Franstalige kerncijfers life PDF’s worden herkend, inclusief de Franse pijler- en productbenamingen. Accenten en apostrofvarianten worden gelijk behandeld bij de import. De Life-KPI’s, samenvattingen, grafieken en detailtabellen volgen de gekozen dashboardtaal. De importcontrole gebruikt alleen Life-controles.
 </script>
-<script src="dashboardlifekern.js?v=20261118-life-release-notes"></script>
+<script src="dashboardlifekern.js?v=20261126-fr-import-ui"></script>
 </body>
 </html>
